@@ -1,0 +1,9 @@
+{
+  "name": "ucai",
+  "version": "0.1.0",
+  "description": "Use Claude Code As Is - native plugin leveraging built-in architecture",
+  "author": {
+    "name": "Ucai"
+  },
+  "keywords": ["workflow", "agents", "hooks", "native"]
+}

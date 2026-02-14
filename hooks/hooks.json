@@ -1,0 +1,25 @@
+{
+  "description": "Ucai hooks - session context injection and iteration control",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/handlers/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/handlers/stop-handler.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
