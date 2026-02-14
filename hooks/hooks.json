@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'exec bash \"$(echo \"$0\" | tr \"\\\\\\\\\" \"/\")\"' '${CLAUDE_PLUGIN_ROOT}/hooks/handlers/session-start.sh'"
+            "command": "bash -c 'p=\"$0\"; command -v cygpath >/dev/null && p=\"$(cygpath -u \"$p\")\"; exec bash \"$p\"' '${CLAUDE_PLUGIN_ROOT}/hooks/handlers/session-start.sh'"
           }
         ]
       }
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'exec bash \"$(echo \"$0\" | tr \"\\\\\\\\\" \"/\")\"' '${CLAUDE_PLUGIN_ROOT}/hooks/handlers/stop-handler.sh'"
+            "command": "bash -c 'p=\"$0\"; command -v cygpath >/dev/null && p=\"$(cygpath -u \"$p\")\"; exec bash \"$p\"' '${CLAUDE_PLUGIN_ROOT}/hooks/handlers/stop-handler.sh'"
           }
         ]
       }
