@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/handlers/session-start.sh"
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"Ucai plugin is active. Use /init to analyze this project, /build for feature development, /iterate for autonomous iteration, or /review for code review.\"}}'"
           }
         ]
       }
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/handlers/stop-handler.sh"
+            "command": "test -f .claude/ucai-iterate.local.md || exit 0"
           }
         ]
       }
