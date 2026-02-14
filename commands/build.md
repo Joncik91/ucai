@@ -113,7 +113,7 @@ If the user says "whatever you think is best", provide your recommendation and g
 
 ## Phase 7: Done
 
-**Goal**: Document what was accomplished.
+**Goal**: Document what was accomplished and keep project guidelines current.
 
 **Actions**:
 1. Mark all todos complete
@@ -122,3 +122,10 @@ If the user says "whatever you think is best", provide your recommendation and g
    - Key decisions made
    - Files modified/created
    - Suggested next steps
+3. **CLAUDE.md refresh**: If a CLAUDE.md exists, check whether this feature introduced changes that should be reflected:
+   - New architecture patterns or layers
+   - New development commands (build, test, lint)
+   - New key files or entry points
+   - Changed conventions or dependencies
+   - If updates are needed, present the proposed changes to the user and **wait for approval** before editing CLAUDE.md
+   - If nothing meaningful changed, skip silently — do not update for trivial additions

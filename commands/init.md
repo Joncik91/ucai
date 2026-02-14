@@ -13,25 +13,55 @@ CLAUDE.md should contain **project facts** that Claude doesn't already know: con
 
 ---
 
-## Phase 1: Analysis
+## Phase 1: Detection
 
-**Goal**: Understand the project deeply before writing anything.
+**Goal**: Determine whether this is an existing project or an empty/new one.
 
 Project path: $ARGUMENTS (default: current directory)
 
 **Actions**:
 1. Create a todo list to track progress
-2. Launch 2-3 project-scanner agents in parallel, each targeting a different aspect:
+2. Check for signs of an existing project:
+   - Source code files (*.js, *.ts, *.py, *.go, *.rs, etc.)
+   - Package manifests (package.json, pyproject.toml, Cargo.toml, go.mod, etc.)
+   - More than just config files or READMEs
+3. If this is an **existing project** → proceed to Phase 2A
+4. If this is an **empty/new project** → proceed to Phase 2B
+
+---
+
+## Phase 2A: Analysis (Existing Project)
+
+**Goal**: Understand the project deeply before writing anything.
+
+**Actions**:
+1. Launch 2-3 project-scanner agents in parallel, each targeting a different aspect:
    - Agent 1: "Analyze the tech stack, dependencies, and build/test/lint commands"
    - Agent 2: "Map the directory structure, architecture patterns, and module organization"
    - Agent 3: "Extract coding conventions, naming patterns, and formatting rules from existing code"
 
-3. After agents return, read all key files they identified
-4. Consolidate findings into a unified project understanding
+2. After agents return, read all key files they identified
+3. Consolidate findings into a unified project understanding
+4. Proceed to Phase 3
 
 ---
 
-## Phase 2: CLAUDE.md Generation
+## Phase 2B: Scaffolding (Empty/New Project)
+
+**Goal**: Gather the user's intent and create a useful starting CLAUDE.md.
+
+**Actions**:
+1. Ask the user:
+   - What are you building? (brief description)
+   - What tech stack do you plan to use? (languages, frameworks, databases)
+   - Any specific conventions you want to follow? (naming, structure, testing approach)
+   - Any known constraints? (monorepo, specific deployment target, etc.)
+2. **Wait for answers before proceeding**
+3. Proceed to Phase 3 with the user's answers as the basis (instead of scanner results)
+
+---
+
+## Phase 3: CLAUDE.md Generation
 
 **Goal**: Write a CLAUDE.md that contains only what Claude needs to know.
 
