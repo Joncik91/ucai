@@ -18,49 +18,75 @@ Ucai was built from the inside out. We read the source code. We studied how Anth
 
 ## Installation
 
-```bash
-# From your project directory
-claude /install-plugin /path/to/ucai
+Requires Claude Code **v1.0.33+** (`claude --version` to check).
+
+### From marketplace (recommended)
+
+Inside an interactive Claude Code session:
+
+```
+/plugin marketplace add Joncik91/ucai
+/plugin install ucai@ucai-marketplace
 ```
 
-Or add to your Claude Code settings manually.
+This installs Ucai globally — available in every project, every session.
+
+### For development/testing
+
+```bash
+claude --plugin-dir ./ucai
+```
+
+### Verify installation
+
+After installing, all commands are namespaced under `ucai:`:
+
+```
+/ucai:init
+/ucai:build
+/ucai:iterate
+/ucai:review
+/ucai:cancel-iterate
+```
+
+Run `/help` to see them listed.
 
 ## Commands
 
-### `/init` — Project Onboarding
+### `/ucai:init` — Project Onboarding
 Analyzes your project with parallel agents and generates a proper CLAUDE.md with actual project facts — not framework config.
 
 ```
-/init
-/init /path/to/project
+/ucai:init
+/ucai:init /path/to/project
 ```
 
-### `/build` — Feature Development
+### `/ucai:build` — Feature Development
 7-phase workflow: Understand → Explore → Clarify → Design → Build → Verify → Done.
 Uses parallel agents at explore, design, and review phases. Explicit user approval gates.
 
 ```
-/build Add user authentication with JWT
-/build Refactor the database layer to use connection pooling
+/ucai:build Add user authentication with JWT
+/ucai:build Refactor the database layer to use connection pooling
 ```
 
-### `/iterate` — Controlled Autonomous Iteration
+### `/ucai:iterate` — Controlled Autonomous Iteration
 Native Ralph-style loops using Stop hooks. No bash wrappers.
 
 ```
-/iterate Build a REST API --completion-promise 'All endpoints working and tested' --max-iterations 15
-/iterate Fix the auth bug --max-iterations 5
+/ucai:iterate Build a REST API --completion-promise 'All endpoints working and tested' --max-iterations 15
+/ucai:iterate Fix the auth bug --max-iterations 5
 ```
 
-### `/review` — Multi-Agent Code Review
+### `/ucai:review` — Multi-Agent Code Review
 Parallel agents independently review for conventions, bugs, and security. Results validated and filtered.
 
 ```
-/review
-/review src/auth/
+/ucai:review
+/ucai:review src/auth/
 ```
 
-### `/cancel-iterate` — Stop Iterate Loop
+### `/ucai:cancel-iterate` — Stop Iterate Loop
 Cancels an active iteration loop.
 
 ## Architecture
