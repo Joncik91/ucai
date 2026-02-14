@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: Reviews code for bugs, logic errors, security vulnerabilities, code quality issues, and adherence to project conventions, using confidence-based filtering to report only high-priority issues
-tools: Glob, Grep, LS, Read, NotebookRead, WebFetch, TodoWrite, WebSearch
+tools: Glob, Grep, Read, Bash, WebFetch, TodoWrite, WebSearch
 model: sonnet
 color: red
 ---

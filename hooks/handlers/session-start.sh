@@ -25,7 +25,7 @@ EOF
 fi
 
 # Escape the CLAUDE.md content for JSON
-ESCAPED=$(python3 -c "
+ESCAPED=$(python -c "
 import sys, json
 content = sys.stdin.read()
 print(json.dumps(content))
