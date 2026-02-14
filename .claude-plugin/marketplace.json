@@ -11,7 +11,7 @@
       "name": "ucai",
       "description": "Use Claude Code As Is - native plugin leveraging built-in architecture for structured workflows, parallel agents, and iteration control",
       "version": "0.1.0",
-      "source": ".",
+      "source": "./",
       "category": "development"
     }
   ]
