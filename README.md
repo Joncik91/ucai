@@ -1,6 +1,6 @@
 # Ucai — Use Claude Code As Is
 
-A Claude Code plugin that solves the same problems as community frameworks (GSD, BMAD, Ralph, Agent OS, CCPM) — but using the tool's native architecture instead of fighting it.
+A Claude Code plugin that solves the same problems as community frameworks (GSD, BMAD, Ralph, Agent OS) — but using the tool's native architecture instead of fighting it.
 
 ## Why
 
@@ -14,8 +14,7 @@ Ucai was built from the inside out. We read the source code. We studied how Anth
 | No structure | Persona prompts + ceremonies | Commands with phased workflows + parallel agents |
 | No guardrails | CLAUDE.md rules (hope-based) | PreToolUse hooks (deterministic) |
 | No iteration | External bash loops | Stop hooks (native, built-in) |
-| No planning | Manual PRD docs or skipped entirely | Spec-driven `/plan` with discovery agents + structured output |
-| No project lifecycle | 15+ commands, external state | `/plan` at two levels + files that commands auto-load |
+| No planning | Manual PRD docs or skipped entirely | `/plan` with discovery agents + structured file output |
 | No onboarding | Template CLAUDE.md dumps | Agent-powered codebase analysis |
 
 ## Installation
@@ -56,16 +55,6 @@ Run `/help` to see them listed.
 
 ## Getting Started
 
-### Existing project (brownfield)
-
-Open any project and run:
-
-```
-/ucai:init
-```
-
-This analyzes your codebase with parallel agents and generates a CLAUDE.md with real project facts — tech stack, conventions, structure, key files.
-
 ### New project (greenfield)
 
 Start with a project-level plan:
@@ -79,21 +68,35 @@ With no arguments, this enters project-level mode — it asks what you're buildi
 - `.claude/project.md` — Vision, goals, target users, constraints, tech stack
 - `.claude/requirements.md` — Full feature backlog with MoSCoW priorities
 
-### Plan a feature
+Then plan and build features from the backlog:
 
 ```
 /ucai:plan Add user authentication with OAuth
+/ucai:build Add user authentication with OAuth
 ```
 
-With arguments, this creates a feature-level PRD grounded in your project spec (if available). Each feature gets its own PRD at `.claude/prds/<slug>.md` — never overwritten.
-
-### Build a feature
+Once you have code, generate project guidelines:
 
 ```
-/ucai:build Add a health check endpoint
+/ucai:init
 ```
 
-The build command walks through 7 phases — understand, explore, clarify, design, build, verify, done — with approval gates at each boundary. It auto-loads the full spec chain: project.md, requirements.md, and the matching PRD. When done, it marks the feature complete in requirements.md.
+### Existing project (brownfield)
+
+Open any project and start with onboarding:
+
+```
+/ucai:init
+```
+
+This analyzes your codebase with parallel agents and generates a CLAUDE.md with real project facts — tech stack, conventions, structure, key files.
+
+Then plan and build features:
+
+```
+/ucai:plan Add real-time notifications
+/ucai:build Add real-time notifications
+```
 
 ### Iterate
 
@@ -103,19 +106,15 @@ The build command walks through 7 phases — understand, explore, clarify, desig
 
 Claude works autonomously, and each time it tries to stop, the Stop hook feeds the task back. It reviews its own previous work, continues, and repeats until done or the iteration limit is hit.
 
-## Spec-Driven Development
+## How Context Persists
 
-Ucai uses a spec chain — persistent files that carry context across sessions:
+Commands write files. Other commands read them. That's it — native Read/Write tools, no external memory.
 
 ```
 /plan                          → .claude/project.md + .claude/requirements.md
 /plan add auth                 → .claude/prds/auth.md
-/plan add payments             → .claude/prds/payments.md
 /build add auth                → requirements.md updated (auth ✅)
-/build add payments            → requirements.md updated (payments ✅)
 ```
-
-Every session knows what exists, what was decided, and what's next. No external memory service, no vector DB — just files that commands read and write.
 
 ```
 .claude/
@@ -125,6 +124,8 @@ Every session knows what exists, what was decided, and what's next. No external 
     ├── auth.md             # Feature PRD (preserved)
     └── payments.md         # Feature PRD (preserved)
 ```
+
+Each command auto-loads whatever exists. A new session reads the files and knows what's been planned, built, and what's next.
 
 ## Commands
 
@@ -155,7 +156,7 @@ Phases: Understand → Discovery → Requirements → Architecture → Output. P
 ### `/ucai:build` — Feature Development
 7-phase workflow: Understand → Explore → Clarify → Design → Build → Verify → Done.
 Uses parallel agents at explore, design, and review phases. Explicit user approval gates.
-Auto-loads the full spec chain (project.md, requirements.md, matching PRD). Marks features complete in requirements.md when done.
+Auto-loads project.md, requirements.md, and matching PRD if they exist. Marks features complete in requirements.md when done.
 
 ```
 /ucai:build Add user authentication with JWT
@@ -270,7 +271,7 @@ Claude Code automatically discovers project-level skills alongside plugin skills
 ## Principles
 
 1. **Use native systems** — Commands, agents, hooks, skills. Not wrappers.
-2. **Spec-driven** — Every piece of work traces back to a specification.
+2. **Files are context** — Commands write specs, other commands read them. No external memory needed.
 3. **Context is a public good** — Only add what Claude doesn't know. Progressive disclosure.
 4. **Agents are not personas** — Model assignments, tool declarations, focused missions.
 5. **Explicit approval gates** — Never proceed without user decision.
