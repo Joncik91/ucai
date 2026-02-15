@@ -83,10 +83,38 @@ function scanSkillsDir(dir, source) {
   }
 }
 
+function scanInstalledPlugins(cacheDir) {
+  if (!fs.existsSync(cacheDir)) return []
+  const skills = []
+
+  try {
+    for (const marketplace of fs.readdirSync(cacheDir, { withFileTypes: true })) {
+      if (!marketplace.isDirectory()) continue
+      const marketDir = path.join(cacheDir, marketplace.name)
+
+      for (const plugin of fs.readdirSync(marketDir, { withFileTypes: true })) {
+        if (!plugin.isDirectory()) continue
+        const pluginDir = path.join(marketDir, plugin.name)
+
+        for (const version of fs.readdirSync(pluginDir, { withFileTypes: true })) {
+          if (!version.isDirectory()) continue
+          const versionDir = path.join(pluginDir, version.name)
+          skills.push(...scanSkillsDir(versionDir, "installed"))
+        }
+      }
+    }
+  } catch {}
+
+  return skills
+}
+
 function getAvailableSkills() {
+  const homeDir = process.env.HOME || process.env.USERPROFILE || ""
   const pluginSkills = scanSkillsDir(path.join(PLUGIN_ROOT, "skills"), "plugin")
   const projectSkills = scanSkillsDir(path.join(process.cwd(), ".claude", "skills"), "project")
-  const all = pluginSkills.concat(projectSkills)
+  const userSkills = homeDir ? scanSkillsDir(path.join(homeDir, ".claude", "skills"), "user") : []
+  const installedSkills = homeDir ? scanInstalledPlugins(path.join(homeDir, ".claude", "plugins", "cache")) : []
+  const all = pluginSkills.concat(projectSkills).concat(userSkills).concat(installedSkills)
   return all.length > 0 ? all.join(", ") : null
 }
 
