@@ -22,7 +22,8 @@ ucai/
 
 ## Commands
 - `/init` — Analyze project, generate CLAUDE.md
-- `/build` — Feature development: explore → design → approve → implement → review
+- `/plan` — Generate PRD: discover → requirements → architecture → output to .claude/prd.md
+- `/build` — Feature development: explore → design → approve → implement → review (auto-loads PRD if present)
 - `/iterate` — Controlled autonomous iteration via Stop hooks
 - `/review` — Multi-agent parallel code review
 - `/cancel-iterate` — Stop an active iterate loop

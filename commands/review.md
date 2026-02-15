@@ -71,5 +71,5 @@ Each agent should return issues with:
 **Actions**:
 1. If issues found: list each with description, file:line, and fix suggestion
 2. If no issues found: "No issues found. Checked for bugs, conventions, and security."
-3. Ask user if they want to fix any issues now
+3. **DO NOT FIX ISSUES WITHOUT USER APPROVAL** — ask which issues (if any) to fix now
 4. Mark todos complete

@@ -59,7 +59,7 @@ Project path: $ARGUMENTS (default: current directory)
    - What tech stack do you plan to use? (languages, frameworks, databases)
    - Any specific conventions you want to follow? (naming, structure, testing approach)
    - Any known constraints? (monorepo, specific deployment target, etc.)
-3. **Wait for answers before proceeding**
+3. **DO NOT PROCEED WITHOUT USER ANSWERS**
 4. Proceed to Phase 3 with the user's answers as the basis (instead of scanner results)
 
 ---
@@ -103,7 +103,7 @@ Project path: $ARGUMENTS (default: current directory)
 **Actions**:
 1. Draft the CLAUDE.md content
 2. Present it to the user for review
-3. **Wait for user approval before writing the file**
+3. **DO NOT WRITE THE FILE WITHOUT USER APPROVAL**
 4. Write CLAUDE.md to the project root
 
 ---

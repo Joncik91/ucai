@@ -23,6 +23,16 @@ You are helping a developer implement a new feature. Follow a systematic approac
 
 Feature request: $ARGUMENTS
 
+**PRD context**: Check if `.claude/prd.md` exists. If it does, read it and summarize it to the user. Ask: "I found an existing PRD. Should I use it as the specification for this build?"
+
+If the user confirms:
+- Phase 2 (Explore): Use PRD's Discovery section as a starting point — focus agents on areas not already covered
+- Phase 3 (Clarify): Use PRD's Requirements as the baseline — only clarify gaps or changes since the PRD was written
+- Phase 4 (Design): Present PRD's Architecture as one option alongside architect-generated alternatives
+- Phase 6 (Verify): Use PRD's Acceptance Criteria for verification
+
+If the user declines, proceed with $ARGUMENTS only.
+
 **Actions**:
 1. Create todo list with all phases
 2. If the feature is unclear, ask:
