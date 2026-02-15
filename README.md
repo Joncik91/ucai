@@ -14,6 +14,7 @@ Ucai was built from the inside out. We read the source code. We studied how Anth
 | No structure | Persona prompts + ceremonies | Commands with phased workflows + parallel agents |
 | No guardrails | CLAUDE.md rules (hope-based) | PreToolUse hooks (deterministic) |
 | No iteration | External bash loops | Stop hooks (native, built-in) |
+| No planning | Manual PRD docs or skipped entirely | /plan command with discovery agents + structured PRD output |
 | No onboarding | Template CLAUDE.md dumps | Agent-powered codebase analysis |
 
 ## Installation
@@ -43,6 +44,7 @@ After installing, all commands are namespaced under `ucai:`:
 
 ```
 /ucai:init
+/ucai:plan
 /ucai:build
 /ucai:iterate
 /ucai:review
@@ -61,13 +63,21 @@ Once installed, open any project and run:
 
 This analyzes your codebase with parallel agents and generates a CLAUDE.md with real project facts — tech stack, conventions, structure, key files. Review the proposal and approve.
 
+For larger features, start with a plan:
+
+```
+/ucai:plan Add user authentication with OAuth
+```
+
+This runs discovery agents (codebase + web research), walks through requirements and architecture with approval gates, and outputs a structured PRD to `.claude/prd.md`.
+
 Then build a feature:
 
 ```
 /ucai:build Add a health check endpoint
 ```
 
-The build command walks through 7 phases — understand, explore, clarify, design, build, verify, done — with approval gates at each boundary. You stay in control.
+The build command walks through 7 phases — understand, explore, clarify, design, build, verify, done — with approval gates at each boundary. You stay in control. If a `.claude/prd.md` exists from `/plan`, it's automatically loaded as context.
 
 For tasks that need multiple passes:
 
@@ -87,9 +97,19 @@ Analyzes your project with parallel agents and generates a proper CLAUDE.md with
 /ucai:init /path/to/project
 ```
 
+### `/ucai:plan` — PRD Generation
+5-phase workflow: Understand → Discovery → Requirements → Architecture → Output.
+Spawns parallel agents for codebase and web research. Produces a structured PRD at `.claude/prd.md` with approval gates at requirements and architecture boundaries.
+
+```
+/ucai:plan Add real-time notifications
+/ucai:plan Migrate from REST to GraphQL
+```
+
 ### `/ucai:build` — Feature Development
 7-phase workflow: Understand → Explore → Clarify → Design → Build → Verify → Done.
 Uses parallel agents at explore, design, and review phases. Explicit user approval gates.
+Auto-loads `.claude/prd.md` as context if present.
 
 ```
 /ucai:build Add user authentication with JWT
@@ -124,6 +144,7 @@ ucai/
 ├── CLAUDE.md                     # Project guidelines
 ├── commands/                     # Slash commands
 │   ├── init.md                   # /init
+│   ├── plan.md                   # /plan
 │   ├── build.md                  # /build
 │   ├── iterate.md                # /iterate
 │   ├── review.md                 # /review
