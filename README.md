@@ -163,20 +163,37 @@ ucai/
 │       └── stop-handler.js          # Iteration control
 ├── scripts/
 │   └── setup-iterate.js          # Iterate loop setup
-└── skills/                       # Progressive disclosure
-    └── ucai-patterns/
-        ├── SKILL.md              # Best practices
-        └── references/
-            ├── context-management.md
-            ├── agent-patterns.md
-            └── hook-patterns.md
+└── skills/                       # Progressive disclosure (auto-loaded by Claude Code)
+    ├── ucai-patterns/            # Claude Code best practices
+    ├── senior-backend/           # API design, databases, auth
+    ├── senior-frontend/          # React, Next.js, Tailwind
+    ├── senior-architect/         # System design, ADRs
+    ├── code-reviewer/            # Code review automation
+    ├── senior-qa/                # Testing patterns
+    └── senior-devops/            # CI/CD, deployment
 ```
 
 Every component is a native Claude Code system. Nothing invented.
 
-## Project-Level Skills
+## Skills
 
-You can create custom skills in any project. Commands automatically detect and load relevant skills during their workflows.
+Ucai ships with 7 curated skills that Claude Code auto-loads based on context:
+
+| Skill | Activates when |
+|-------|---------------|
+| **ucai-patterns** | Working with Claude Code plugins, hooks, agents |
+| **senior-backend** | Building APIs, databases, authentication |
+| **senior-frontend** | React, Next.js, Tailwind, component design |
+| **senior-architect** | System design, architecture decisions, ADRs |
+| **code-reviewer** | Reviewing code quality, PRs, anti-patterns |
+| **senior-qa** | Testing strategies, coverage, E2E testing |
+| **senior-devops** | CI/CD pipelines, deployment, infrastructure |
+
+Engineering skills sourced from [alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills) (MIT). Browse [skillsmp.com](https://skillsmp.com) for 200,000+ community skills.
+
+### Project-Level Custom Skills
+
+You can also create custom skills in any project:
 
 ```
 your-project/
@@ -202,7 +219,7 @@ description: Use when building or modifying API endpoints in this project
 - ...
 ```
 
-At session start, the hook announces available skills (both plugin-level and project-level). Commands check whether any are relevant to the current task and load them on demand — no configuration needed.
+Claude Code automatically discovers project-level skills alongside plugin skills — no configuration needed.
 
 ## Principles
 
