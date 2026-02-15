@@ -15,15 +15,16 @@ You are helping a developer implement a new feature. Follow a systematic approac
 - **Simple and elegant**: Prioritize readable, maintainable code.
 - **Track progress**: Use TodoWrite throughout.
 
-## Skill Awareness
+## Skill Loading — MANDATORY
 
-If the SessionStart context lists available skills, check whether any are relevant to this feature. To use a skill:
-1. Review the skill names and descriptions from SessionStart context
-2. If a skill is relevant, use Read to load its SKILL.md — plugin skills at `skills/<name>/SKILL.md` (relative to plugin root), project skills at `.claude/skills/<name>/SKILL.md`
-3. Apply the skill's guidance during exploration, design, or implementation
-4. Load files from its `references/` directory only when you need deeper detail
+Before starting Phase 2, you MUST identify and load relevant skills. This is not optional.
 
-Only load skills directly relevant to the feature. Don't load speculatively.
+1. Determine the type of work: backend/API, frontend/UI, architecture, testing, DevOps, code review
+2. Load the matching skill using the Skill tool: `Skill(ucai:senior-backend)`, `Skill(ucai:senior-frontend)`, `Skill(ucai:senior-architect)`, `Skill(ucai:senior-qa)`, `Skill(ucai:senior-devops)`, `Skill(ucai:code-reviewer)`
+3. Apply the skill's guidance throughout all subsequent phases
+4. If the work spans multiple domains (e.g., full-stack), load multiple skills
+
+**You MUST load at least one skill before proceeding. State which skill(s) you loaded and why.**
 
 ---
 
