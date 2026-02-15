@@ -51,6 +51,32 @@ After installing, all commands are namespaced under `ucai:`:
 
 Run `/help` to see them listed.
 
+## Getting Started
+
+Once installed, open any project and run:
+
+```
+/ucai:init
+```
+
+This analyzes your codebase with parallel agents and generates a CLAUDE.md with real project facts — tech stack, conventions, structure, key files. Review the proposal and approve.
+
+Then build a feature:
+
+```
+/ucai:build Add a health check endpoint
+```
+
+The build command walks through 7 phases — understand, explore, clarify, design, build, verify, done — with approval gates at each boundary. You stay in control.
+
+For tasks that need multiple passes:
+
+```
+/ucai:iterate Refactor the auth module --max-iterations 5
+```
+
+Claude works autonomously, and each time it tries to stop, the Stop hook feeds the task back. It reviews its own previous work, continues, and repeats until done or the iteration limit is hit.
+
 ## Commands
 
 ### `/ucai:init` — Project Onboarding
