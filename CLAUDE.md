@@ -41,6 +41,7 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 
 ### Hook conventions
 - **SessionStart**: Inline `echo` for simple context injection
+- **PreToolUse**: External Node.js script (`pretooluse-guard.js`) guards plugin config files
 - **Stop**: External Node.js script (`stop-handler.js`) for iteration control
 - **Paths**: Always use `${CLAUDE_PLUGIN_ROOT}` with quotes for Windows compatibility
 
@@ -90,6 +91,7 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - `marketplace.json` — Marketplace listing metadata
 - `hooks/hooks.json` — Hook configuration
 - `hooks/handlers/stop-handler.js` — Iteration control logic
+- `hooks/handlers/pretooluse-guard.js` — Config file protection hook
 - `scripts/setup-iterate.js` — Iterate loop setup
 - `commands/build.md` — Most complex command (7-phase workflow)
 - `skills/ucai-patterns/SKILL.md` — Best practices skill
