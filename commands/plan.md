@@ -119,9 +119,15 @@ Use this mode when starting a new project or defining project scope for the firs
 
    Each feature should be a concise line item: `- [ ] Feature name — brief description`
 
-2. Identify cross-cutting concerns (auth, error handling, logging, testing strategy)
-3. Present the backlog to the user for validation
-4. **DO NOT PROCEED WITHOUT APPROVAL**
+2. **Build order** — This is critical. Do NOT just list features flat. You MUST:
+   - Identify dependencies between features (what requires what)
+   - Define a **vertical slice** as the first build target: the smallest set of features that proves the end-to-end flow works
+   - Sequence the remaining Must Have features in logical build order after the vertical slice
+   - Add a `## Build Order` section to requirements.md with numbered steps and dependency notes
+
+3. Identify cross-cutting concerns (auth, error handling, logging, testing strategy)
+4. Present the backlog AND the build order to the user for validation
+5. **DO NOT PROCEED WITHOUT APPROVAL**
 
 If the user says "whatever you think is best", provide your recommendation and get explicit confirmation.
 
@@ -188,6 +194,11 @@ updated: [ISO 8601 date]
 ## Won't Have (This Release)
 - [Feature] — [reason excluded]
 
+## Build Order
+1. **Vertical slice**: [smallest set of features that proves the E2E flow] — [features included]
+2. [Next logical feature/group] — depends on: [dependency]
+3. [Next] — depends on: [dependency]
+
 ## Cross-Cutting Concerns
 - [Security, performance, testing, etc.]
 ```
@@ -215,7 +226,7 @@ Feature request: $ARGUMENTS
 2. Generate a slug from the feature name: lowercase, strip leading verbs (add/implement/create/build), replace non-alphanumeric characters with hyphens, collapse consecutive hyphens, trim leading/trailing hyphens
 3. **Load project context** (if available):
    - Check `.claude/project.md` — if found, read and summarize project vision and constraints
-   - Check `.claude/requirements.md` — if found, read and confirm this feature is in the backlog
+   - Check `.claude/requirements.md` — if found, read and confirm this feature is in the backlog. Check the Build Order section to understand where this feature fits in the sequence and what it depends on.
 4. Check for existing PRD at `.claude/prds/<slug>.md`. If found, ask: "A PRD for this feature already exists. Overwrite, refine, or abort?" **Wait for user decision.**
 5. If the feature is unclear, ask:
    - What problem does this solve?
