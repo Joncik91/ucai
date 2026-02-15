@@ -88,12 +88,11 @@ jobs:
         run: |
           echo "Testing sessionstart-handler..."
           output=$(node hooks/handlers/sessionstart-handler.js)
-          echo "$output" | node -e "
-            const input = require('fs').readFileSync('/dev/stdin', 'utf8');
-            const obj = JSON.parse(input);
+          node -e "
+            const obj = JSON.parse(process.argv[1]);
             if (!obj.hookSpecificOutput || !obj.hookSpecificOutput.hookEventName) {
               console.error('Invalid SessionStart output');
               process.exit(1);
             }
             console.log('OK: sessionstart-handler.js outputs valid JSON');
-          "
+          " "$output"
