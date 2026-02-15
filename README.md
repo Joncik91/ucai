@@ -93,15 +93,16 @@ Cancels an active iteration loop.
 
 ```
 ucai/
-├── .claude-plugin/plugin.json    # Plugin manifest
-├── CLAUDE.md                     # Philosophy
+├── plugin.json                   # Plugin manifest
+├── marketplace.json              # Marketplace listing
+├── CLAUDE.md                     # Project guidelines
 ├── commands/                     # Slash commands
 │   ├── init.md                   # /init
 │   ├── build.md                  # /build
 │   ├── iterate.md                # /iterate
 │   ├── review.md                 # /review
 │   └── cancel-iterate.md        # /cancel-iterate
-├── agents/                       # Subagents
+├── agents/                       # Subagents (all read-only, sonnet)
 │   ├── project-scanner.md        # Codebase analysis
 │   ├── explorer.md               # Deep exploration
 │   ├── architect.md              # Architecture design
@@ -110,9 +111,11 @@ ucai/
 ├── hooks/                        # Lifecycle handlers
 │   ├── hooks.json                # Hook configuration
 │   └── handlers/
-│       └── stop-handler.js       # Iteration control (Node.js)
+│       ├── sessionstart-handler.js  # Context injection (git branch, iterate status)
+│       ├── pretooluse-guard.js      # Config file protection
+│       └── stop-handler.js          # Iteration control
 ├── scripts/
-│   └── setup-iterate.js          # Iterate loop setup (Node.js)
+│   └── setup-iterate.js          # Iterate loop setup
 └── skills/                       # Progressive disclosure
     └── ucai-patterns/
         ├── SKILL.md              # Best practices

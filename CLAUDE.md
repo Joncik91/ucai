@@ -40,7 +40,7 @@ ucai/
 Commands define phased workflows with approval gates. Agents are read-only workers spawned in parallel via the Task tool. Implementation (Write/Edit) happens only in commands, after user approval.
 
 ### Hook conventions
-- **SessionStart**: Inline `echo` for simple context injection
+- **SessionStart**: External Node.js script (`sessionstart-handler.js`) injects git branch, iterate status, CLAUDE.md presence
 - **PreToolUse**: External Node.js script (`pretooluse-guard.js`) guards plugin config files
 - **Stop**: External Node.js script (`stop-handler.js`) for iteration control
 - **Paths**: Always use `${CLAUDE_PLUGIN_ROOT}` with quotes for Windows compatibility
@@ -90,6 +90,7 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - `plugin.json` — Plugin manifest
 - `marketplace.json` — Marketplace listing metadata
 - `hooks/hooks.json` — Hook configuration
+- `hooks/handlers/sessionstart-handler.js` — Session context injection
 - `hooks/handlers/stop-handler.js` — Iteration control logic
 - `hooks/handlers/pretooluse-guard.js` — Config file protection hook
 - `scripts/setup-iterate.js` — Iterate loop setup

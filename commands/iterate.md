@@ -9,7 +9,9 @@ allowed-tools: Bash(echo * | node *setup-iterate.js*)
 Execute the setup script to initialize the iteration loop:
 
 ```!
-echo '$ARGUMENTS' | node "${CLAUDE_PLUGIN_ROOT}/scripts/setup-iterate.js" --stdin
+node "${CLAUDE_PLUGIN_ROOT}/scripts/setup-iterate.js" --stdin <<'UCAI_EOF'
+$ARGUMENTS
+UCAI_EOF
 ```
 
 You are now in a controlled iteration loop. Work on the task described above.

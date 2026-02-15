@@ -90,7 +90,7 @@ function run(hookInput) {
 
   // Check if max iterations reached
   if (maxIterations > 0 && iteration >= maxIterations) {
-    console.error(
+    console.log(
       "Ucai iterate: Max iterations (" + maxIterations + ") reached."
     );
     cleanup();
@@ -142,7 +142,7 @@ function run(hookInput) {
         if (promiseMatch) {
           const promiseText = promiseMatch[1].trim().replace(/\s+/g, " ");
           if (promiseText === completionPromise) {
-            console.error(
+            console.log(
               "Ucai iterate: Completion promise met - <promise>" +
                 completionPromise +
                 "</promise>"

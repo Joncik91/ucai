@@ -119,13 +119,42 @@ Your previous work is visible in files and git history.`)
   }
 }
 
+// Tokenize a string respecting single and double quotes
+// Only enters quote mode at token boundaries so mid-word apostrophes (user's) stay literal
+function tokenize(str) {
+  const tokens = []
+  let current = ""
+  let inSingle = false
+  let inDouble = false
+
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i]
+    const atBoundary = current === ""
+
+    if (ch === "'" && !inDouble && (atBoundary || inSingle)) {
+      inSingle = !inSingle
+    } else if (ch === '"' && !inSingle && (atBoundary || inDouble)) {
+      inDouble = !inDouble
+    } else if (/\s/.test(ch) && !inSingle && !inDouble) {
+      if (current) {
+        tokens.push(current)
+        current = ""
+      }
+    } else {
+      current += ch
+    }
+  }
+  if (current) tokens.push(current)
+  return tokens
+}
+
 // Support --stdin mode: read arguments from stdin as a single string
 if (process.argv.includes("--stdin")) {
   let input = ""
   process.stdin.setEncoding("utf8")
   process.stdin.on("data", (chunk) => (input += chunk))
   process.stdin.on("end", () => {
-    const args = input.trim().split(/\s+/)
+    const args = tokenize(input.trim())
     main(args)
   })
 } else {
