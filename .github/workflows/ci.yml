@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [18, 20]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Validate plugin structure
+        shell: bash
+        run: |
+          echo "Checking required files..."
+          for file in plugin.json marketplace.json hooks/hooks.json CLAUDE.md README.md; do
+            if [ ! -f "$file" ]; then
+              echo "MISSING: $file"
+              exit 1
+            fi
+            echo "OK: $file"
+          done
+
+      - name: Validate JSON files
+        shell: bash
+        run: |
+          echo "Validating JSON..."
+          for file in plugin.json marketplace.json hooks/hooks.json; do
+            node -e "JSON.parse(require('fs').readFileSync('$file', 'utf8'))" || {
+              echo "INVALID JSON: $file"
+              exit 1
+            }
+            echo "OK: $file"
+          done
+
+      - name: Validate hook handlers
+        shell: bash
+        run: |
+          echo "Checking hook handlers parse correctly..."
+          for file in hooks/handlers/*.js scripts/*.js; do
+            node -c "$file" || {
+              echo "SYNTAX ERROR: $file"
+              exit 1
+            }
+            echo "OK: $file"
+          done
+
+      - name: Validate commands have frontmatter
+        shell: bash
+        run: |
+          echo "Checking command frontmatter..."
+          for file in commands/*.md; do
+            if ! head -1 "$file" | grep -q "^---"; then
+              echo "MISSING FRONTMATTER: $file"
+              exit 1
+            fi
+            echo "OK: $file"
+          done
+
+      - name: Validate agents have frontmatter
+        shell: bash
+        run: |
+          echo "Checking agent frontmatter..."
+          for file in agents/*.md; do
+            if ! head -1 "$file" | grep -q "^---"; then
+              echo "MISSING FRONTMATTER: $file"
+              exit 1
+            fi
+            echo "OK: $file"
+          done
+
+      - name: Test hook handlers execute
+        shell: bash
+        run: |
+          echo "Testing sessionstart-handler..."
+          output=$(node hooks/handlers/sessionstart-handler.js)
+          echo "$output" | node -e "
+            const input = require('fs').readFileSync('/dev/stdin', 'utf8');
+            const obj = JSON.parse(input);
+            if (!obj.hookSpecificOutput || !obj.hookSpecificOutput.hookEventName) {
+              console.error('Invalid SessionStart output');
+              process.exit(1);
+            }
+            console.log('OK: sessionstart-handler.js outputs valid JSON');
+          "
