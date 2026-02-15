@@ -31,8 +31,9 @@ Project path: $ARGUMENTS (default: current directory)
 
 **Actions**:
 1. Create a todo list to track progress
-2. Use Glob to search for source code files: `**/*.{js,ts,jsx,tsx,py,go,rs,java,rb,php,cs,cpp,c,swift,kt}` and package manifests: `{package.json,pyproject.toml,Cargo.toml,go.mod,Gemfile,composer.json,*.csproj,pom.xml,build.gradle}`
-3. **Decision gate — you MUST follow this strictly**:
+2. Check for `.claude/project.md`. If found, read it — this provides project vision, tech stack, and constraints as context for analysis.
+3. Use Glob to search for source code files: `**/*.{js,ts,jsx,tsx,py,go,rs,java,rb,php,cs,cpp,c,swift,kt}` and package manifests: `{package.json,pyproject.toml,Cargo.toml,go.mod,Gemfile,composer.json,*.csproj,pom.xml,build.gradle}`
+4. **Decision gate — you MUST follow this strictly**:
    - If **zero source code files AND zero package manifests** are found → go to **Phase 2B** (do NOT launch scanners)
    - If source code or package manifests exist → go to **Phase 2A**
 
@@ -52,6 +53,8 @@ Project path: $ARGUMENTS (default: current directory)
    - Agent 2: "Map the directory structure, architecture patterns, and module organization"
    - Agent 3: "Extract coding conventions, naming patterns, and formatting rules from existing code"
 
+   If `.claude/project.md` was found in Phase 1, include its content (vision, tech stack, constraints) in each agent's prompt so they can cross-reference what was planned vs what was actually built.
+
 2. **Wait for all agents to complete** before proceeding
 3. After agents return, read all key files they identified
 4. Consolidate findings into a unified project understanding
@@ -66,14 +69,20 @@ Project path: $ARGUMENTS (default: current directory)
 **Do NOT launch any scanner agents.** Go straight to asking the user.
 
 **Actions**:
-1. Tell the user this is an empty project and you'll ask a few questions to scaffold a CLAUDE.md
-2. Ask the user:
-   - What are you building? (brief description)
-   - What tech stack do you plan to use? (languages, frameworks, databases)
-   - Any specific conventions you want to follow? (naming, structure, testing approach)
-   - Any known constraints? (monorepo, specific deployment target, etc.)
-3. **DO NOT PROCEED WITHOUT USER ANSWERS**
-4. Proceed to Phase 3 with the user's answers as the basis (instead of scanner results)
+1. If `.claude/project.md` was found in Phase 1:
+   - Tell the user: "I found a project spec (project.md). I'll use it as context for generating CLAUDE.md."
+   - Summarize the project vision and tech stack from the spec
+   - Ask only: "Any conventions or additional context not in the project spec?"
+   - Proceed to Phase 3 with the project spec as the basis
+2. If no project.md exists:
+   - Tell the user this is an empty project and you'll ask a few questions to scaffold a CLAUDE.md
+   - Ask the user:
+     - What are you building? (brief description)
+     - What tech stack do you plan to use? (languages, frameworks, databases)
+     - Any specific conventions you want to follow? (naming, structure, testing approach)
+     - Any known constraints? (monorepo, specific deployment target, etc.)
+   - **DO NOT PROCEED WITHOUT USER ANSWERS**
+3. Proceed to Phase 3
 
 ---
 
@@ -111,7 +120,8 @@ Project path: $ARGUMENTS (default: current directory)
 - No framework instructions or persona definitions
 - Keep it under 200 lines — concise is key
 - Every line should help Claude write better code for THIS project
-- For empty projects: document the planned stack and intended conventions so future sessions have context
+- If `.claude/project.md` exists, use its vision as the Overview and its tech stack as the Tech Stack baseline — enrich with what scanners found in actual code (don't just copy the spec)
+- For empty projects without project.md: document the planned stack and intended conventions so future sessions have context
 
 **Actions**:
 1. Draft the CLAUDE.md content

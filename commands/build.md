@@ -38,6 +38,7 @@ Feature request: $ARGUMENTS
 
 1. **Project spec**: Check if `.claude/project.md` exists. If found, read it and summarize the project vision, constraints, and tech stack to the user.
 2. **Requirements backlog**: Check if `.claude/requirements.md` exists. If found, read it and show backlog status (how many features done vs remaining). Confirm this feature is in the backlog.
+   - **Build order check**: Read the `## Build Order` section. Identify which step this build corresponds to (match by name or covered features). Note which requirement checkboxes this step covers — you will mark ALL of them in Phase 7. If prior steps have uncompleted requirements, warn the user: "Step N depends on step M, which has uncompleted requirements: [list]. Proceed anyway?" Do not block — the user may have reasons.
 3. **Feature PRD**: Generate a slug from `$ARGUMENTS` (lowercase, strip leading verbs like add/implement/create/build, replace non-alphanumeric with hyphens). Check for PRD at:
    - First: `.claude/prds/<slug>.md`
    - Fallback: `.claude/prd.md` (legacy single-file format)
@@ -155,7 +156,12 @@ If the user says "whatever you think is best", provide your recommendation and g
    - Key decisions made
    - Files modified/created
    - Suggested next steps
-3. **Requirements update**: If `.claude/requirements.md` exists, read it and find the checkbox line matching the feature just built. Change `- [ ]` to `- [x]` and append `(completed YYYY-MM-DD)`. Present the change to the user and **wait for approval** before writing. If no matching line is found, skip silently.
+3. **Requirements update**: If `.claude/requirements.md` exists:
+   - Read the Build Order section to find which requirements this step covers (the "covers:" list from Phase 1)
+   - Mark ALL matching checkboxes: change `- [ ]` to `- [x]` and append `(completed YYYY-MM-DD)`
+   - Update the `updated` field in the YAML frontmatter to today's date
+   - Present all changes to the user and **wait for approval** before writing
+   - If no matching lines are found, skip silently
 4. **CLAUDE.md refresh**: If a CLAUDE.md exists, check whether this feature introduced changes that should be reflected:
    - New architecture patterns or layers
    - New development commands (build, test, lint)

@@ -21,9 +21,9 @@ ucai/
 ```
 
 ## Commands
-- `/init` — Analyze project, generate CLAUDE.md
-- `/plan` — Project spec (no args) or feature PRD (with args). Outputs to `.claude/project.md` + `.claude/requirements.md` or `.claude/prds/<slug>.md`
-- `/build` — Feature development: explore → design → approve → implement → review. Auto-loads spec chain (project.md, requirements.md, PRD)
+- `/init` — Analyze project, generate CLAUDE.md. Uses project.md as context if available.
+- `/plan` — Project spec (no args) or feature PRD (with args). Outputs to `.claude/project.md` + `.claude/requirements.md` (with build order) or `.claude/prds/<slug>.md`
+- `/build` — Feature development: explore → design → approve → implement → review. Auto-loads project.md, requirements.md, and matching PRD. Checks build order for dependencies and marks covered requirements done.
 - `/iterate` — Controlled autonomous iteration via Stop hooks
 - `/review` — Multi-agent parallel code review (validates against project specs if available)
 - `/cancel-iterate` — Stop an active iterate loop
@@ -52,12 +52,14 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - Skills announced as `[plugin] name (desc)` or `[project] name (desc)` — Claude decides which to load
 - Project-level skills follow the same structure as plugin skills: `SKILL.md` with YAML frontmatter + optional `references/`
 
-### Spec-driven context chain
-- `/plan` (no args) produces `.claude/project.md` + `.claude/requirements.md`
-- `/plan <feature>` produces `.claude/prds/<slug>.md` (per-feature, never overwritten)
+### Context chain
+- `/plan` (no args) produces `.claude/project.md` + `.claude/requirements.md` (with build order)
+- `/plan <feature>` produces `.claude/prds/<slug>.md` (per-feature, never overwritten, optional)
 - All commands auto-load whatever spec files exist in `.claude/`
-- `/build` Phase 7 marks completed features in `requirements.md` (`- [ ]` → `- [x]`)
-- SessionStart hook announces spec status (project spec loaded, PRDs found)
+- `/build` reads build order to identify step dependencies and covered requirements
+- `/build` Phase 7 marks all covered requirements done in `requirements.md` (`- [ ]` → `- [x]`)
+- `/init` uses `project.md` as context baseline if available
+- SessionStart hook announces project name, progress (N/M done), and next build order step
 - Legacy `.claude/prd.md` still detected as fallback
 
 ### State management

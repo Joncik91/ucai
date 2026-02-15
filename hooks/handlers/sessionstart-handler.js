@@ -114,17 +114,60 @@ function getSpecStatus() {
   const hasProject = fs.existsSync(".claude/project.md")
   const hasRequirements = fs.existsSync(".claude/requirements.md")
 
-  if (hasProject || hasRequirements) {
-    const specFiles = []
-    if (hasProject) specFiles.push("project.md")
-    if (hasRequirements) specFiles.push("requirements.md")
-    parts.push("Project spec loaded (" + specFiles.join(", ") + ")")
+  // Announce project name if project.md exists
+  if (hasProject) {
+    try {
+      var projectContent = fs.readFileSync(".claude/project.md", "utf8")
+      var projFm = projectContent.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+      if (projFm) {
+        var nameMatch = projFm[1].match(/^name:\s*(.+?)[\r]?$/m)
+        if (nameMatch) {
+          parts.push("Project: " + nameMatch[1].trim())
+        }
+      }
+    } catch {}
   }
 
-  const prdsDir = ".claude/prds"
+  // Parse requirements for progress and next step
+  if (hasRequirements) {
+    try {
+      var reqContent = fs.readFileSync(".claude/requirements.md", "utf8")
+      var done = (reqContent.match(/- \[x\]/g) || []).length
+      var todo = (reqContent.match(/- \[ \]/g) || []).length
+      var total = done + todo
+      if (total > 0) {
+        parts.push(done + "/" + total + " requirements done")
+      }
+
+      // Find next build order step with uncompleted requirements
+      var buildOrderMatch = reqContent.match(/## Build Order\r?\n([\s\S]*?)(?=\r?\n## |\r?\n$|$)/)
+      if (buildOrderMatch) {
+        var lines = buildOrderMatch[1].split(/\r?\n/).filter(function (l) { return /^\d+\./.test(l.trim()) })
+        for (var i = 0; i < lines.length; i++) {
+          var coversMatch = lines[i].match(/covers:\s*(.+?)(?:\s*—|$)/)
+          if (coversMatch) {
+            var coveredFeatures = coversMatch[1].split(",").map(function (f) { return f.trim() })
+            var allDone = coveredFeatures.every(function (feat) {
+              return reqContent.indexOf("- [x] " + feat) !== -1
+            })
+            if (!allDone) {
+              var stepName = lines[i].match(/\*\*(.+?)\*\*/)
+              if (stepName) {
+                parts.push("Next: step " + (i + 1) + " — " + stepName[1])
+              }
+              break
+            }
+          }
+        }
+      }
+    } catch {}
+  }
+
+  // Announce PRDs
+  var prdsDir = ".claude/prds"
   if (fs.existsSync(prdsDir)) {
     try {
-      const prdFiles = fs.readdirSync(prdsDir)
+      var prdFiles = fs.readdirSync(prdsDir)
         .filter(function (f) { return f.endsWith(".md") })
         .map(function (f) { return f.replace(/\.md$/, "") })
       if (prdFiles.length > 0) {
@@ -133,6 +176,7 @@ function getSpecStatus() {
     } catch {}
   }
 
+  // Legacy fallback
   if (parts.length === 0 && fs.existsSync(".claude/prd.md")) {
     parts.push("Legacy PRD found (prd.md)")
   }

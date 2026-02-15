@@ -195,9 +195,9 @@ updated: [ISO 8601 date]
 - [Feature] — [reason excluded]
 
 ## Build Order
-1. **Vertical slice**: [smallest set of features that proves the E2E flow] — [features included]
-2. [Next logical feature/group] — depends on: [dependency]
-3. [Next] — depends on: [dependency]
+1. **Vertical slice**: [name] — covers: [feature A], [feature B], [feature C]
+2. **[Step name]** — covers: [feature D], [feature E] — depends on: step 1
+3. **[Step name]** — covers: [feature F] — depends on: step 2
 
 ## Cross-Cutting Concerns
 - [Security, performance, testing, etc.]
@@ -207,7 +207,7 @@ updated: [ISO 8601 date]
 4. **DO NOT WRITE FILES WITHOUT USER APPROVAL**
 5. Create `.claude/` directory if it does not exist
 6. Write `.claude/project.md` and `.claude/requirements.md`
-7. Confirm: "Project spec written. Run `/plan <feature>` to create a PRD for any feature from the backlog, or `/build <feature>` to start implementing directly."
+7. Confirm: "Project spec written. Pick the next step from the Build Order and run `/build <step>` to start implementing. For complex steps, you can optionally run `/plan <step>` first to create a detailed PRD."
 
 ---
 

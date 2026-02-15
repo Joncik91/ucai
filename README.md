@@ -63,16 +63,23 @@ Start with a project-level plan:
 /ucai:plan
 ```
 
-With no arguments, this enters project-level mode — it asks what you're building, researches the domain with parallel agents, and produces a project spec and full requirements backlog:
+With no arguments, this enters project-level mode — it asks what you're building, researches the domain with parallel agents, and produces a project spec with a full requirements backlog and build order:
 
 - `.claude/project.md` — Vision, goals, target users, constraints, tech stack
-- `.claude/requirements.md` — Full feature backlog with MoSCoW priorities
+- `.claude/requirements.md` — Feature backlog with MoSCoW priorities + sequenced build order
 
-Then plan and build features from the backlog:
+Then build features step by step from the build order:
 
 ```
-/ucai:plan Add user authentication with OAuth
-/ucai:build Add user authentication with OAuth
+/ucai:build Core scraping pipeline
+/ucai:build Endpoint system
+```
+
+For complex steps, optionally create a detailed PRD first:
+
+```
+/ucai:plan Core scraping pipeline
+/ucai:build Core scraping pipeline
 ```
 
 Once you have code, generate project guidelines:
@@ -91,10 +98,10 @@ Open any project and start with onboarding:
 
 This analyzes your codebase with parallel agents and generates a CLAUDE.md with real project facts — tech stack, conventions, structure, key files.
 
-Then plan and build features:
+To plan a roadmap, run `/plan` with no arguments to define project scope and requirements. Then build features from the build order:
 
 ```
-/ucai:plan Add real-time notifications
+/ucai:plan
 /ucai:build Add real-time notifications
 ```
 
@@ -125,12 +132,12 @@ Commands write files. Other commands read them. That's it — native Read/Write 
     └── payments.md         # Feature PRD (preserved)
 ```
 
-Each command auto-loads whatever exists. A new session reads the files and knows what's been planned, built, and what's next.
+Each command auto-loads whatever exists. A new session reads the files and knows what's been planned, built, and what's next. The SessionStart hook announces progress and the next build order step.
 
 ## Commands
 
 ### `/ucai:init` — Project Onboarding
-Analyzes your project with parallel agents and generates a proper CLAUDE.md with actual project facts — not framework config.
+Analyzes your project with parallel agents and generates a proper CLAUDE.md with actual project facts — not framework config. Uses project.md as context if available.
 
 ```
 /ucai:init
@@ -144,9 +151,9 @@ Works at two levels:
 ```
 /ucai:plan
 ```
-Phases: Understand → Discovery → Project Definition → Requirements Backlog → Output. Produces `.claude/project.md` and `.claude/requirements.md`.
+Phases: Understand → Discovery → Project Definition → Requirements Backlog → Output. Produces `.claude/project.md` and `.claude/requirements.md` (with sequenced build order).
 
-**With arguments** — Feature-level PRD generation:
+**With arguments** — Feature-level PRD generation (optional, for complex features):
 ```
 /ucai:plan Add real-time notifications
 /ucai:plan Migrate from REST to GraphQL
@@ -156,7 +163,7 @@ Phases: Understand → Discovery → Requirements → Architecture → Output. P
 ### `/ucai:build` — Feature Development
 7-phase workflow: Understand → Explore → Clarify → Design → Build → Verify → Done.
 Uses parallel agents at explore, design, and review phases. Explicit user approval gates.
-Auto-loads project.md, requirements.md, and matching PRD if they exist. Marks features complete in requirements.md when done.
+Auto-loads project.md, requirements.md, and matching PRD if they exist. Checks build order for dependencies and marks all covered requirements done when complete.
 
 ```
 /ucai:build Add user authentication with JWT
