@@ -6,7 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"Ucai plugin is active. Use /init to analyze this project, /build for feature development, /iterate for autonomous iteration, or /review for code review.\"}}'"
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/sessionstart-handler.js\"",
+            "timeout": 10
           }
         ]
       }
