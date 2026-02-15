@@ -108,6 +108,7 @@ If the user says "whatever you think is best", provide your recommendation and g
 3. Consolidate findings and identify issues worth fixing
 4. **Present findings to user**: fix now, fix later, or proceed as-is
 5. Address issues based on user decision
+6. **If fixes were applied, re-run reviewers on the changed files** — fixes can introduce new issues. Repeat steps 2-5 until clean or user approves remaining items.
 
 ---
 
