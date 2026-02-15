@@ -35,6 +35,7 @@ Before starting Phase 2, you MUST load the `ucai:code-reviewer` skill — this i
 3. If no arguments, review unstaged changes from git diff
 4. If no changes found, tell the user and stop
 5. Find any CLAUDE.md files in the project for guideline reference
+6. Check for `.claude/project.md` and `.claude/requirements.md`. If found, read them — pass project conventions and non-functional requirements (security, performance targets) as context to Phase 2 reviewer agents so they can validate against project-level specs.
 
 ---
 

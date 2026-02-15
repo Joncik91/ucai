@@ -22,10 +22,10 @@ ucai/
 
 ## Commands
 - `/init` — Analyze project, generate CLAUDE.md
-- `/plan` — Generate PRD: discover → requirements → architecture → output to .claude/prd.md
-- `/build` — Feature development: explore → design → approve → implement → review (auto-loads PRD if present)
+- `/plan` — Project spec (no args) or feature PRD (with args). Outputs to `.claude/project.md` + `.claude/requirements.md` or `.claude/prds/<slug>.md`
+- `/build` — Feature development: explore → design → approve → implement → review. Auto-loads spec chain (project.md, requirements.md, PRD)
 - `/iterate` — Controlled autonomous iteration via Stop hooks
-- `/review` — Multi-agent parallel code review
+- `/review` — Multi-agent parallel code review (validates against project specs if available)
 - `/cancel-iterate` — Stop an active iterate loop
 
 ## Development
@@ -41,7 +41,7 @@ ucai/
 Commands define phased workflows with approval gates. Agents are read-only workers spawned in parallel via the Task tool. Implementation (Write/Edit) happens only in commands, after user approval.
 
 ### Hook conventions
-- **SessionStart**: External Node.js script (`sessionstart-handler.js`) injects git branch, iterate status, CLAUDE.md presence, available skills
+- **SessionStart**: External Node.js script (`sessionstart-handler.js`) injects git branch, iterate status, CLAUDE.md presence, spec file status, available skills
 - **PreToolUse**: External Node.js script (`pretooluse-guard.js`) guards plugin config files
 - **Stop**: External Node.js script (`stop-handler.js`) for iteration control
 - **Paths**: Always use `${CLAUDE_PLUGIN_ROOT}` with quotes for Windows compatibility
@@ -52,8 +52,17 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - Skills announced as `[plugin] name (desc)` or `[project] name (desc)` — Claude decides which to load
 - Project-level skills follow the same structure as plugin skills: `SKILL.md` with YAML frontmatter + optional `references/`
 
+### Spec-driven context chain
+- `/plan` (no args) produces `.claude/project.md` + `.claude/requirements.md`
+- `/plan <feature>` produces `.claude/prds/<slug>.md` (per-feature, never overwritten)
+- All commands auto-load whatever spec files exist in `.claude/`
+- `/build` Phase 7 marks completed features in `requirements.md` (`- [ ]` → `- [x]`)
+- SessionStart hook announces spec status (project spec loaded, PRDs found)
+- Legacy `.claude/prd.md` still detected as fallback
+
 ### State management
 - Local state files: `.claude/*.local.md` (gitignored)
+- Permanent spec files: `.claude/project.md`, `.claude/requirements.md`, `.claude/prds/*.md` (tracked in git)
 - YAML frontmatter for structured fields, markdown body for content
 - Parsed with regex (`/^---\r?\n([\s\S]*?)\r?\n---/`) — use `\r?` for Windows CRLF compatibility
 

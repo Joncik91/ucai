@@ -108,6 +108,38 @@ function scanInstalledPlugins(cacheDir) {
   return skills
 }
 
+function getSpecStatus() {
+  const parts = []
+
+  const hasProject = fs.existsSync(".claude/project.md")
+  const hasRequirements = fs.existsSync(".claude/requirements.md")
+
+  if (hasProject || hasRequirements) {
+    const specFiles = []
+    if (hasProject) specFiles.push("project.md")
+    if (hasRequirements) specFiles.push("requirements.md")
+    parts.push("Project spec loaded (" + specFiles.join(", ") + ")")
+  }
+
+  const prdsDir = ".claude/prds"
+  if (fs.existsSync(prdsDir)) {
+    try {
+      const prdFiles = fs.readdirSync(prdsDir)
+        .filter(function (f) { return f.endsWith(".md") })
+        .map(function (f) { return f.replace(/\.md$/, "") })
+      if (prdFiles.length > 0) {
+        parts.push("PRDs: " + prdFiles.join(", "))
+      }
+    } catch {}
+  }
+
+  if (parts.length === 0 && fs.existsSync(".claude/prd.md")) {
+    parts.push("Legacy PRD found (prd.md)")
+  }
+
+  return parts.length > 0 ? parts.join(" | ") : null
+}
+
 function getAvailableSkills() {
   const homeDir = process.env.HOME || process.env.USERPROFILE || ""
   const pluginSkills = scanSkillsDir(path.join(PLUGIN_ROOT, "skills"), "plugin")
@@ -135,6 +167,11 @@ function main() {
 
   if (!hasClaudeMd()) {
     parts.push("No CLAUDE.md found. Run /init to generate project guidelines.")
+  }
+
+  const specStatus = getSpecStatus()
+  if (specStatus) {
+    parts.push(specStatus)
   }
 
   const skills = getAvailableSkills()

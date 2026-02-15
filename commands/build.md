@@ -34,7 +34,15 @@ Before starting Phase 2, you MUST identify and load relevant skills. This is not
 
 Feature request: $ARGUMENTS
 
-**PRD context**: Check if `.claude/prd.md` exists. If it does, read it and summarize it to the user. Ask: "I found an existing PRD. Should I use it as the specification for this build?"
+**Spec chain loading**: Load all available project context in order:
+
+1. **Project spec**: Check if `.claude/project.md` exists. If found, read it and summarize the project vision, constraints, and tech stack to the user.
+2. **Requirements backlog**: Check if `.claude/requirements.md` exists. If found, read it and show backlog status (how many features done vs remaining). Confirm this feature is in the backlog.
+3. **Feature PRD**: Generate a slug from `$ARGUMENTS` (lowercase, strip leading verbs like add/implement/create/build, replace non-alphanumeric with hyphens). Check for PRD at:
+   - First: `.claude/prds/<slug>.md`
+   - Fallback: `.claude/prd.md` (legacy single-file format)
+   - If found, read and summarize it to the user.
+4. Ask: "I found [list specs found]. Should I use these as context for this build?"
 
 If the user confirms:
 - Phase 2 (Explore): Use PRD's Discovery section as a starting point — focus agents on areas not already covered
@@ -147,7 +155,8 @@ If the user says "whatever you think is best", provide your recommendation and g
    - Key decisions made
    - Files modified/created
    - Suggested next steps
-3. **CLAUDE.md refresh**: If a CLAUDE.md exists, check whether this feature introduced changes that should be reflected:
+3. **Requirements update**: If `.claude/requirements.md` exists, read it and find the checkbox line matching the feature just built. Change `- [ ]` to `- [x]` and append `(completed YYYY-MM-DD)`. Present the change to the user and **wait for approval** before writing. If no matching line is found, skip silently.
+4. **CLAUDE.md refresh**: If a CLAUDE.md exists, check whether this feature introduced changes that should be reflected:
    - New architecture patterns or layers
    - New development commands (build, test, lint)
    - New key files or entry points

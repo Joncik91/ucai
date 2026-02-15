@@ -1,6 +1,6 @@
 # Ucai — Use Claude Code As Is
 
-A Claude Code plugin that solves the same problems as community frameworks (GSD, BMAD, Ralph, Agent OS) — but using the tool's native architecture instead of fighting it.
+A Claude Code plugin that solves the same problems as community frameworks (GSD, BMAD, Ralph, Agent OS, CCPM) — but using the tool's native architecture instead of fighting it.
 
 ## Why
 
@@ -14,7 +14,8 @@ Ucai was built from the inside out. We read the source code. We studied how Anth
 | No structure | Persona prompts + ceremonies | Commands with phased workflows + parallel agents |
 | No guardrails | CLAUDE.md rules (hope-based) | PreToolUse hooks (deterministic) |
 | No iteration | External bash loops | Stop hooks (native, built-in) |
-| No planning | Manual PRD docs or skipped entirely | /plan command with discovery agents + structured PRD output |
+| No planning | Manual PRD docs or skipped entirely | Spec-driven `/plan` with discovery agents + structured output |
+| No project lifecycle | 15+ commands, external state | `/plan` at two levels + files that commands auto-load |
 | No onboarding | Template CLAUDE.md dumps | Agent-powered codebase analysis |
 
 ## Installation
@@ -55,37 +56,75 @@ Run `/help` to see them listed.
 
 ## Getting Started
 
-Once installed, open any project and run:
+### Existing project (brownfield)
+
+Open any project and run:
 
 ```
 /ucai:init
 ```
 
-This analyzes your codebase with parallel agents and generates a CLAUDE.md with real project facts — tech stack, conventions, structure, key files. Review the proposal and approve.
+This analyzes your codebase with parallel agents and generates a CLAUDE.md with real project facts — tech stack, conventions, structure, key files.
 
-For larger features, start with a plan:
+### New project (greenfield)
+
+Start with a project-level plan:
+
+```
+/ucai:plan
+```
+
+With no arguments, this enters project-level mode — it asks what you're building, researches the domain with parallel agents, and produces a project spec and full requirements backlog:
+
+- `.claude/project.md` — Vision, goals, target users, constraints, tech stack
+- `.claude/requirements.md` — Full feature backlog with MoSCoW priorities
+
+### Plan a feature
 
 ```
 /ucai:plan Add user authentication with OAuth
 ```
 
-This runs discovery agents (codebase + web research), walks through requirements and architecture with approval gates, and outputs a structured PRD to `.claude/prd.md`.
+With arguments, this creates a feature-level PRD grounded in your project spec (if available). Each feature gets its own PRD at `.claude/prds/<slug>.md` — never overwritten.
 
-Then build a feature:
+### Build a feature
 
 ```
 /ucai:build Add a health check endpoint
 ```
 
-The build command walks through 7 phases — understand, explore, clarify, design, build, verify, done — with approval gates at each boundary. You stay in control. If a `.claude/prd.md` exists from `/plan`, it's automatically loaded as context.
+The build command walks through 7 phases — understand, explore, clarify, design, build, verify, done — with approval gates at each boundary. It auto-loads the full spec chain: project.md, requirements.md, and the matching PRD. When done, it marks the feature complete in requirements.md.
 
-For tasks that need multiple passes:
+### Iterate
 
 ```
 /ucai:iterate Refactor the auth module --max-iterations 5
 ```
 
 Claude works autonomously, and each time it tries to stop, the Stop hook feeds the task back. It reviews its own previous work, continues, and repeats until done or the iteration limit is hit.
+
+## Spec-Driven Development
+
+Ucai uses a spec chain — persistent files that carry context across sessions:
+
+```
+/plan                          → .claude/project.md + .claude/requirements.md
+/plan add auth                 → .claude/prds/auth.md
+/plan add payments             → .claude/prds/payments.md
+/build add auth                → requirements.md updated (auth ✅)
+/build add payments            → requirements.md updated (payments ✅)
+```
+
+Every session knows what exists, what was decided, and what's next. No external memory service, no vector DB — just files that commands read and write.
+
+```
+.claude/
+├── project.md              # Vision, goals, users, constraints
+├── requirements.md         # Feature backlog (checkboxes track progress)
+└── prds/
+    ├── auth.md             # Feature PRD (preserved)
+    └── payments.md         # Feature PRD (preserved)
+```
 
 ## Commands
 
@@ -97,19 +136,26 @@ Analyzes your project with parallel agents and generates a proper CLAUDE.md with
 /ucai:init /path/to/project
 ```
 
-### `/ucai:plan` — PRD Generation
-5-phase workflow: Understand → Discovery → Requirements → Architecture → Output.
-Spawns parallel agents for codebase and web research. Produces a structured PRD at `.claude/prd.md` with approval gates at requirements and architecture boundaries.
+### `/ucai:plan` — Project Spec & Feature PRDs
+Works at two levels:
 
+**No arguments** — Project-level planning for greenfield or project definition:
+```
+/ucai:plan
+```
+Phases: Understand → Discovery → Project Definition → Requirements Backlog → Output. Produces `.claude/project.md` and `.claude/requirements.md`.
+
+**With arguments** — Feature-level PRD generation:
 ```
 /ucai:plan Add real-time notifications
 /ucai:plan Migrate from REST to GraphQL
 ```
+Phases: Understand → Discovery → Requirements → Architecture → Output. Produces `.claude/prds/<slug>.md`. Auto-loads project spec as context if available.
 
 ### `/ucai:build` — Feature Development
 7-phase workflow: Understand → Explore → Clarify → Design → Build → Verify → Done.
 Uses parallel agents at explore, design, and review phases. Explicit user approval gates.
-Auto-loads `.claude/prd.md` as context if present. Detects and loads relevant skills (plugin and project-level) based on the feature being built.
+Auto-loads the full spec chain (project.md, requirements.md, matching PRD). Marks features complete in requirements.md when done.
 
 ```
 /ucai:build Add user authentication with JWT
@@ -125,7 +171,7 @@ Native Ralph-style loops using Stop hooks. No bash wrappers.
 ```
 
 ### `/ucai:review` — Multi-Agent Code Review
-Parallel agents independently review for conventions, bugs, and security. Results validated and filtered.
+Parallel agents independently review for conventions, bugs, and security. Validates against project specs if available. Results validated and filtered.
 
 ```
 /ucai:review
@@ -144,7 +190,7 @@ ucai/
 ├── CLAUDE.md                     # Project guidelines
 ├── commands/                     # Slash commands
 │   ├── init.md                   # /init
-│   ├── plan.md                   # /plan
+│   ├── plan.md                   # /plan (project + feature modes)
 │   ├── build.md                  # /build
 │   ├── iterate.md                # /iterate
 │   ├── review.md                 # /review
@@ -158,7 +204,7 @@ ucai/
 ├── hooks/                        # Lifecycle handlers
 │   ├── hooks.json                # Hook configuration
 │   └── handlers/
-│       ├── sessionstart-handler.js  # Context injection (git branch, iterate status, skills)
+│       ├── sessionstart-handler.js  # Context injection (git branch, iterate status, specs, skills)
 │       ├── pretooluse-guard.js      # Config file protection
 │       └── stop-handler.js          # Iteration control
 ├── scripts/
@@ -224,8 +270,9 @@ Claude Code automatically discovers project-level skills alongside plugin skills
 ## Principles
 
 1. **Use native systems** — Commands, agents, hooks, skills. Not wrappers.
-2. **Context is a public good** — Only add what Claude doesn't know. Progressive disclosure.
-3. **Agents are not personas** — Model assignments, tool declarations, focused missions.
-4. **Explicit approval gates** — Never proceed without user decision.
-5. **Parallel by default** — Spawn focused agents simultaneously. Consolidate.
-6. **CLAUDE.md is for project facts** — Not framework configuration.
+2. **Spec-driven** — Every piece of work traces back to a specification.
+3. **Context is a public good** — Only add what Claude doesn't know. Progressive disclosure.
+4. **Agents are not personas** — Model assignments, tool declarations, focused missions.
+5. **Explicit approval gates** — Never proceed without user decision.
+6. **Parallel by default** — Spawn focused agents simultaneously. Consolidate.
+7. **CLAUDE.md is for project facts** — Not framework configuration.
