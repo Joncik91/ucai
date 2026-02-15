@@ -15,15 +15,16 @@ You are helping a developer plan a feature before building it. Your goal is to p
 - **Approval before output**: Never write the PRD without user sign-off.
 - **Track progress**: Use TodoWrite throughout.
 
-## Skill Awareness
+## Skill Loading — MANDATORY
 
-If the SessionStart context lists available skills, check whether any are relevant to this planning task. To use a skill:
-1. Review the skill names and descriptions from SessionStart context
-2. If a skill is relevant, use Read to load its SKILL.md — plugin skills at `skills/<name>/SKILL.md` (relative to plugin root), project skills at `.claude/skills/<name>/SKILL.md`
-3. Apply the skill's guidance during discovery, requirements, or architecture phases
-4. Load files from its `references/` directory only when you need deeper detail
+Before starting Phase 2, you MUST identify and load relevant skills. This is not optional.
 
-Only load skills directly relevant to the feature being planned. Don't load speculatively.
+1. Determine the type of work: backend/API, frontend/UI, architecture, testing, DevOps
+2. Load the matching skill using the Skill tool: `Skill(ucai:senior-backend)`, `Skill(ucai:senior-frontend)`, `Skill(ucai:senior-architect)`, `Skill(ucai:senior-qa)`, `Skill(ucai:senior-devops)`, `Skill(ucai:code-reviewer)`
+3. Always load `Skill(ucai:senior-architect)` — planning is architecture work
+4. Apply the skill's guidance throughout all subsequent phases
+
+**You MUST load at least one skill before proceeding. State which skill(s) you loaded and why.**
 
 ---
 
@@ -49,14 +50,17 @@ Feature request: $ARGUMENTS
 
 **Goal**: Research the codebase and external sources in parallel.
 
+**MANDATORY**: You MUST use the Task tool to launch explorer agents. Do NOT skip agents and research yourself — agents provide parallel discovery across codebase and web sources that you cannot replicate in a single pass.
+
 **Actions**:
-1. Launch 3 explorer agents in parallel, each with a different focus:
+1. Launch 3 `ucai:explorer` agents in parallel using the Task tool, each with a different focus:
    - **Codebase patterns**: "Find features similar to [feature] in this codebase. Trace their implementation, identify reusable patterns, architecture layers, and integration points. Return 5-10 key files."
    - **Codebase architecture**: "Map the overall architecture, module boundaries, data flow, and conventions relevant to [feature area]. Return 5-10 key files."
    - **Web research**: "Search the web for best practices, design patterns, framework documentation, and API references relevant to [feature]. Prioritize official docs and authoritative sources. Return key findings with URLs."
 
-2. After agents return, read key files they identified
-3. Present a consolidated discovery summary:
+2. **Wait for all agents to complete** before proceeding
+3. After agents return, read key files they identified
+4. Present a consolidated discovery summary:
    - Relevant codebase patterns found
    - External best practices and references
    - Key insights that should inform requirements
@@ -98,13 +102,17 @@ If the user says "whatever you think is best", provide your recommendation and g
 
 **Goal**: Propose a high-level technical approach.
 
+**MANDATORY**: You MUST use the Task tool to launch architect agents. Do NOT skip agents and design the architecture yourself.
+
 **Actions**:
-1. Launch 1-2 architect agents:
+1. Launch 1-2 `ucai:architect` agents using the Task tool:
    - "Given these requirements [summary] and these codebase patterns [summary], propose a high-level architecture. Include: key components, data flow, integration points, files to create/modify. Keep it high-level — detailed design happens in /build."
 
-2. Review the architecture proposal
-3. Present to user: components, data flow, key decisions, trade-offs
-4. Incorporate user feedback
+2. **Wait for all agents to complete** before proceeding
+3. Review the architecture proposal
+4. Present to user: components, data flow, key decisions, trade-offs
+5. **DO NOT PROCEED WITHOUT USER APPROVAL**
+6. Incorporate user feedback
 
 ---
 

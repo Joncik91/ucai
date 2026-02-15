@@ -13,15 +13,15 @@ You are performing a thorough code review using parallel agents for independent 
 - Current git status: !`git status`
 - Current git diff: !`git diff HEAD`
 
-## Skill Awareness
+## Skill Loading — MANDATORY
 
-If the SessionStart context lists available skills, check whether any are relevant to this review. To use a skill:
-1. Review the skill names and descriptions from SessionStart context
-2. If a skill is relevant, use Read to load its SKILL.md — plugin skills at `skills/<name>/SKILL.md` (relative to plugin root), project skills at `.claude/skills/<name>/SKILL.md`
+Before starting Phase 2, you MUST load the `ucai:code-reviewer` skill — this is a code review workflow.
+
+1. Load: `Skill(ucai:code-reviewer)`
+2. Also load the domain skill matching the code being reviewed: `Skill(ucai:senior-backend)`, `Skill(ucai:senior-frontend)`, etc.
 3. Apply the skill's guidance when evaluating code quality and conventions
-4. Load files from its `references/` directory only when you need deeper detail
 
-Only load skills directly relevant to the review. Don't load speculatively.
+**You MUST load at least one skill before proceeding. State which skill(s) you loaded and why.**
 
 ---
 
@@ -42,8 +42,10 @@ Only load skills directly relevant to the review. Don't load speculatively.
 
 **Goal**: Get independent perspectives on the code.
 
+**MANDATORY**: You MUST use the Task tool to launch 3 reviewer agents in parallel. Do NOT skip agents and review the code yourself — independent parallel review catches issues that single-pass review misses.
+
 **Actions**:
-Launch 3 reviewer agents in parallel:
+Launch 3 `ucai:reviewer` agents in parallel using the Task tool:
 
 - **Agent 1** (sonnet): Review for CLAUDE.md compliance and project convention adherence
 - **Agent 2** (sonnet): Review for bugs, logic errors, and functional correctness

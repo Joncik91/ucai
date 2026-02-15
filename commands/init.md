@@ -11,15 +11,15 @@ You are setting up a project to work effectively with Claude Code. Your goal is 
 
 CLAUDE.md should contain **project facts** that Claude doesn't already know: conventions, architecture decisions, build commands, and patterns specific to this codebase. Nothing generic.
 
-## Skill Awareness
+## Skill Loading — MANDATORY
 
-If the SessionStart context lists available skills, check whether any are relevant to project initialization. To use a skill:
-1. Review the skill names and descriptions from SessionStart context
-2. If a skill is relevant, use Read to load its SKILL.md — plugin skills at `skills/<name>/SKILL.md` (relative to plugin root), project skills at `.claude/skills/<name>/SKILL.md`
-3. Apply the skill's guidance when analyzing the project or drafting CLAUDE.md
-4. Load files from its `references/` directory only when you need deeper detail
+Before starting Phase 2A, you MUST load the `ucai:senior-architect` skill — project initialization is architecture analysis work.
 
-Only load skills directly relevant to project setup. Don't load speculatively.
+1. Load the skill using the Skill tool: `Skill(ucai:senior-architect)`
+2. If the project is clearly a specific domain (backend API, frontend app, etc.), also load the matching skill: `Skill(ucai:senior-backend)`, `Skill(ucai:senior-frontend)`, etc.
+3. Apply the skill's guidance when analyzing the project and drafting CLAUDE.md
+
+**You MUST load at least one skill before proceeding. State which skill(s) you loaded and why.**
 
 ---
 
@@ -44,15 +44,18 @@ Project path: $ARGUMENTS (default: current directory)
 
 **Goal**: Understand the project deeply before writing anything.
 
+**MANDATORY**: You MUST use the Task tool to launch project-scanner agents. Do NOT skip agents and analyze the project yourself — agents provide parallel, thorough analysis that you cannot replicate in a single pass.
+
 **Actions**:
-1. Launch 2-3 project-scanner agents in parallel, each targeting a different aspect:
+1. Launch 2-3 `ucai:project-scanner` agents in parallel using the Task tool, each targeting a different aspect:
    - Agent 1: "Analyze the tech stack, dependencies, and build/test/lint commands"
    - Agent 2: "Map the directory structure, architecture patterns, and module organization"
    - Agent 3: "Extract coding conventions, naming patterns, and formatting rules from existing code"
 
-2. After agents return, read all key files they identified
-3. Consolidate findings into a unified project understanding
-4. Proceed to Phase 3
+2. **Wait for all agents to complete** before proceeding
+3. After agents return, read all key files they identified
+4. Consolidate findings into a unified project understanding
+5. Proceed to Phase 3
 
 ---
 
