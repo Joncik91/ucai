@@ -1,7 +1,7 @@
 ---
 description: Controlled autonomous iteration using native Stop hooks
 argument-hint: TASK [--max-iterations N] [--completion-promise TEXT]
-allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/setup-iterate.sh:*)
+allowed-tools: Bash(node *setup-iterate.js*)
 ---
 
 # Iterate Command
@@ -9,7 +9,7 @@ allowed-tools: Bash(${CLAUDE_PLUGIN_ROOT}/scripts/setup-iterate.sh:*)
 Execute the setup script to initialize the iteration loop:
 
 ```!
-"${CLAUDE_PLUGIN_ROOT}/scripts/setup-iterate.sh" $ARGUMENTS
+node "${CLAUDE_PLUGIN_ROOT}/scripts/setup-iterate.js" $ARGUMENTS
 ```
 
 You are now in a controlled iteration loop. Work on the task described above.

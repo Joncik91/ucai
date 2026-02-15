@@ -110,10 +110,9 @@ ucai/
 ├── hooks/                        # Lifecycle handlers
 │   ├── hooks.json                # Hook configuration
 │   └── handlers/
-│       ├── session-start.sh      # Context injection
-│       └── stop-handler.sh       # Iteration control
+│       └── stop-handler.js       # Iteration control (Node.js)
 ├── scripts/
-│   └── setup-iterate.sh          # Iterate loop setup
+│   └── setup-iterate.js          # Iterate loop setup (Node.js)
 └── skills/                       # Progressive disclosure
     └── ucai-patterns/
         ├── SKILL.md              # Best practices

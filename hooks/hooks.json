@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "test -f .claude/ucai-iterate.local.md || exit 0"
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/stop-handler.js\""
           }
         ]
       }
