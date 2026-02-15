@@ -58,16 +58,19 @@ If the user declines, proceed with $ARGUMENTS only.
 
 **Goal**: Map the relevant codebase.
 
+**MANDATORY**: You MUST use the Task tool to launch explorer agents. Do NOT skip agents and read files yourself — agents provide parallel, thorough exploration that you cannot replicate in a single pass.
+
 **Actions**:
-1. Launch 2-3 explorer agents in parallel, each targeting a different aspect:
+1. Launch 2-3 `ucai:explorer` agents in parallel using the Task tool, each targeting a different aspect:
    - "Find features similar to [feature] and trace their implementation"
    - "Map the architecture and abstractions for [relevant area]"
-   - "Identify UI patterns, testing approaches, or extension points relevant to [feature]"
+   - "Identify testing approaches, extension points, or patterns relevant to [feature]"
 
    Each agent should return a list of 5-10 key files.
 
-2. After agents return, read all identified files
-3. Present comprehensive summary of findings
+2. **Wait for all agents to complete** before proceeding
+3. After agents return, read all identified files yourself
+4. Present comprehensive summary of findings
 
 ---
 
