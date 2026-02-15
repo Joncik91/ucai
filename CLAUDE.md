@@ -41,15 +41,21 @@ ucai/
 Commands define phased workflows with approval gates. Agents are read-only workers spawned in parallel via the Task tool. Implementation (Write/Edit) happens only in commands, after user approval.
 
 ### Hook conventions
-- **SessionStart**: External Node.js script (`sessionstart-handler.js`) injects git branch, iterate status, CLAUDE.md presence
+- **SessionStart**: External Node.js script (`sessionstart-handler.js`) injects git branch, iterate status, CLAUDE.md presence, available skills
 - **PreToolUse**: External Node.js script (`pretooluse-guard.js`) guards plugin config files
 - **Stop**: External Node.js script (`stop-handler.js`) for iteration control
 - **Paths**: Always use `${CLAUDE_PLUGIN_ROOT}` with quotes for Windows compatibility
 
+### Skill awareness
+- Commands include a "Skill Awareness" section that instructs Claude to check SessionStart context for available skills
+- SessionStart hook scans both plugin skills (`skills/*/SKILL.md`) and project skills (`.claude/skills/*/SKILL.md`)
+- Skills announced as `[plugin] name (desc)` or `[project] name (desc)` — Claude decides which to load
+- Project-level skills follow the same structure as plugin skills: `SKILL.md` with YAML frontmatter + optional `references/`
+
 ### State management
 - Local state files: `.claude/*.local.md` (gitignored)
 - YAML frontmatter for structured fields, markdown body for content
-- Parsed with regex (`/^---\n([\s\S]*?)\n---\n([\s\S]*)$/`)
+- Parsed with regex (`/^---\r?\n([\s\S]*?)\r?\n---/`) — use `\r?` for Windows CRLF compatibility
 
 ## Conventions
 

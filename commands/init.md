@@ -11,6 +11,16 @@ You are setting up a project to work effectively with Claude Code. Your goal is 
 
 CLAUDE.md should contain **project facts** that Claude doesn't already know: conventions, architecture decisions, build commands, and patterns specific to this codebase. Nothing generic.
 
+## Skill Awareness
+
+If the SessionStart context lists available skills, check whether any are relevant to project initialization. To use a skill:
+1. Review the skill names and descriptions from SessionStart context
+2. If a skill is relevant, use Read to load its SKILL.md — plugin skills at `skills/<name>/SKILL.md` (relative to plugin root), project skills at `.claude/skills/<name>/SKILL.md`
+3. Apply the skill's guidance when analyzing the project or drafting CLAUDE.md
+4. Load files from its `references/` directory only when you need deeper detail
+
+Only load skills directly relevant to project setup. Don't load speculatively.
+
 ---
 
 ## Phase 1: Detection (MANDATORY — do this BEFORE anything else)

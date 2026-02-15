@@ -15,6 +15,16 @@ You are helping a developer plan a feature before building it. Your goal is to p
 - **Approval before output**: Never write the PRD without user sign-off.
 - **Track progress**: Use TodoWrite throughout.
 
+## Skill Awareness
+
+If the SessionStart context lists available skills, check whether any are relevant to this planning task. To use a skill:
+1. Review the skill names and descriptions from SessionStart context
+2. If a skill is relevant, use Read to load its SKILL.md — plugin skills at `skills/<name>/SKILL.md` (relative to plugin root), project skills at `.claude/skills/<name>/SKILL.md`
+3. Apply the skill's guidance during discovery, requirements, or architecture phases
+4. Load files from its `references/` directory only when you need deeper detail
+
+Only load skills directly relevant to the feature being planned. Don't load speculatively.
+
 ---
 
 ## Phase 1: Understand

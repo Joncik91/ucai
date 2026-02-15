@@ -15,6 +15,16 @@ You are helping a developer implement a new feature. Follow a systematic approac
 - **Simple and elegant**: Prioritize readable, maintainable code.
 - **Track progress**: Use TodoWrite throughout.
 
+## Skill Awareness
+
+If the SessionStart context lists available skills, check whether any are relevant to this feature. To use a skill:
+1. Review the skill names and descriptions from SessionStart context
+2. If a skill is relevant, use Read to load its SKILL.md — plugin skills at `skills/<name>/SKILL.md` (relative to plugin root), project skills at `.claude/skills/<name>/SKILL.md`
+3. Apply the skill's guidance during exploration, design, or implementation
+4. Load files from its `references/` directory only when you need deeper detail
+
+Only load skills directly relevant to the feature. Don't load speculatively.
+
 ---
 
 ## Phase 1: Understand

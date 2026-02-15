@@ -109,7 +109,7 @@ Spawns parallel agents for codebase and web research. Produces a structured PRD 
 ### `/ucai:build` — Feature Development
 7-phase workflow: Understand → Explore → Clarify → Design → Build → Verify → Done.
 Uses parallel agents at explore, design, and review phases. Explicit user approval gates.
-Auto-loads `.claude/prd.md` as context if present.
+Auto-loads `.claude/prd.md` as context if present. Detects and loads relevant skills (plugin and project-level) based on the feature being built.
 
 ```
 /ucai:build Add user authentication with JWT
@@ -158,7 +158,7 @@ ucai/
 ├── hooks/                        # Lifecycle handlers
 │   ├── hooks.json                # Hook configuration
 │   └── handlers/
-│       ├── sessionstart-handler.js  # Context injection (git branch, iterate status)
+│       ├── sessionstart-handler.js  # Context injection (git branch, iterate status, skills)
 │       ├── pretooluse-guard.js      # Config file protection
 │       └── stop-handler.js          # Iteration control
 ├── scripts/
@@ -173,6 +173,36 @@ ucai/
 ```
 
 Every component is a native Claude Code system. Nothing invented.
+
+## Project-Level Skills
+
+You can create custom skills in any project. Commands automatically detect and load relevant skills during their workflows.
+
+```
+your-project/
+└── .claude/
+    └── skills/
+        └── my-skill/
+            ├── SKILL.md          # Required: YAML frontmatter (name, description) + body
+            └── references/       # Optional: additional detail loaded on demand
+```
+
+Example `SKILL.md`:
+
+```markdown
+---
+name: my-api-conventions
+description: Use when building or modifying API endpoints in this project
+---
+
+# API Conventions
+
+- All endpoints return JSON with `{ data, error, meta }` envelope
+- Use zod for request validation
+- ...
+```
+
+At session start, the hook announces available skills (both plugin-level and project-level). Commands check whether any are relevant to the current task and load them on demand — no configuration needed.
 
 ## Principles
 
