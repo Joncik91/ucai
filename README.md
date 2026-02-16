@@ -161,8 +161,8 @@ Phases: Understand → Discovery → Project Definition → Requirements Backlog
 Phases: Understand → Discovery → Requirements → Architecture → Output. Produces `.claude/prds/<slug>.md`. Auto-loads project spec as context if available.
 
 ### `/ucai:build` — Feature Development
-7-phase workflow: Understand → Explore → Clarify → Design → Build → Verify → Done.
-Uses parallel agents at explore, design, and review phases. Explicit user approval gates.
+8-phase workflow: Understand → Explore → Clarify → Design → Build → Verify → Test → Done.
+Uses parallel agents at explore, design, and review phases. Mandatory manual testing gate before marking complete. Explicit user approval gates.
 Auto-loads project.md, requirements.md, and matching PRD if they exist. Checks build order for dependencies and marks all covered requirements done when complete.
 
 ```

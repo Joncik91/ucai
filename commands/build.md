@@ -5,7 +5,7 @@ argument-hint: Feature description
 
 # Feature Development
 
-You are helping a developer implement a new feature. Follow a systematic approach: understand deeply, design with options, get approval, then build and verify.
+You are helping a developer implement a new feature. Follow a systematic approach: understand deeply, design with options, get approval, build, verify with agents, then have the user manually test before marking done.
 
 ## Core Principles
 
@@ -38,7 +38,7 @@ Feature request: $ARGUMENTS
 
 1. **Project spec**: Check if `.claude/project.md` exists. If found, read it and summarize the project vision, constraints, and tech stack to the user.
 2. **Requirements backlog**: Check if `.claude/requirements.md` exists. If found, read it and show backlog status (how many features done vs remaining). Confirm this feature is in the backlog.
-   - **Build order check**: Read the `## Build Order` section. Identify which step this build corresponds to (match by name or covered features). Note which requirement checkboxes this step covers — you will mark ALL of them in Phase 7. If prior steps have uncompleted requirements, warn the user: "Step N depends on step M, which has uncompleted requirements: [list]. Proceed anyway?" Do not block — the user may have reasons.
+   - **Build order check**: Read the `## Build Order` section. Identify which step this build corresponds to (match by name or covered features). Note which requirement checkboxes this step covers — you will mark ALL of them in Phase 8. If prior steps have uncompleted requirements, warn the user: "Step N depends on step M, which has uncompleted requirements: [list]. Proceed anyway?" Do not block — the user may have reasons.
 3. **Feature PRD**: Generate a slug from `$ARGUMENTS` (lowercase, strip leading verbs like add/implement/create/build, replace non-alphanumeric with hyphens). Check for PRD at:
    - First: `.claude/prds/<slug>.md`
    - Fallback: `.claude/prd.md` (legacy single-file format)
@@ -145,7 +145,32 @@ If the user says "whatever you think is best", provide your recommendation and g
 
 ---
 
-## Phase 7: Done
+## Phase 7: Test
+
+**Goal**: The user manually verifies the feature works.
+
+**CRITICAL**: This phase is mandatory. No agent review can replace a human testing the actual software.
+
+**Actions**:
+1. Based on what was built, generate a **concrete test checklist**:
+   - The exact command(s) to start or run the app
+   - Specific actions to perform with expected results (e.g., "Run `bm add https://example.com` — should print confirmation with auto-fetched title")
+   - Edge cases worth trying manually
+2. If acceptance criteria exist (from PRD or Phase 3), map each criterion to a specific test action
+3. Present the checklist to the user
+4. **WAIT for the user to test and confirm it works**
+5. If the user reports issues: fix them, re-run agent review on changed files (Phase 6 step 2), then return here with an updated checklist
+6. Only proceed to Phase 8 after the user confirms testing passed
+
+**Checklist principles**:
+- **Concrete**: not "verify it works" but "run X, expect Y"
+- **Includes startup**: tell the user exactly how to run the app
+- **Proportional**: small utility = 3-4 checks, full feature = 8-10
+- **No skipping**: agents said it's fine is not enough — the user must confirm
+
+---
+
+## Phase 8: Done
 
 **Goal**: Document what was accomplished and keep project guidelines current.
 
