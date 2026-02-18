@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           echo "Checking required files..."
-          for file in plugin.json marketplace.json hooks/hooks.json CLAUDE.md README.md; do
+          for file in plugin.json .claude-plugin/marketplace.json hooks/hooks.json CLAUDE.md README.md; do
             if [ ! -f "$file" ]; then
               echo "MISSING: $file"
               exit 1
@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: |
           echo "Validating JSON..."
-          for file in plugin.json marketplace.json hooks/hooks.json; do
+          for file in plugin.json .claude-plugin/marketplace.json hooks/hooks.json; do
             node -e "JSON.parse(require('fs').readFileSync('$file', 'utf8'))" || {
               echo "INVALID JSON: $file"
               exit 1
