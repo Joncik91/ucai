@@ -51,7 +51,7 @@ Use this mode when starting a new project or defining project scope for the firs
 **Goal**: Know what needs to be built.
 
 **Actions**:
-1. Create todo list with all project-level phases (1P–5P)
+1. Create todo list with all project-level phases (1P–6P)
 2. If `.claude/project.md` already exists, read it and ask: "A project spec already exists. Overwrite, refine, or abort?" **Wait for user decision.**
 3. If `.claude/requirements.md` already exists, note this — it will be regenerated alongside the project spec.
 4. Determine if this is greenfield (no source code) or brownfield (existing codebase):
@@ -100,18 +100,58 @@ Use this mode when starting a new project or defining project scope for the firs
      - Focus on choices that are painful to reverse later (ORM, state management, CSS approach, auth provider)
    - **Non-Functional Requirements**: Performance, security, scalability targets
 
-2. **Design Direction** (conditional — only if the project has a UI):
-   - Load `Skill(ucai:senior-frontend)` if not already loaded
-   - Define upfront: font pairing, primary accent color, aesthetic mood (editorial, startup, technical, warm)
-   - This ensures visual cohesion across all features built later — a solo dev who picks these per-component gets chaos
-   - Keep it to 5-6 lines, not a full design doc
-
-3. Present the draft to the user for validation
-4. **DO NOT PROCEED WITHOUT APPROVAL**
+2. Present the draft to the user for validation
+3. **DO NOT PROCEED WITHOUT APPROVAL**
 
 ---
 
-## Phase 4P: Requirements Backlog
+## Phase 4P: UI Design System
+
+**Goal**: Define a cohesive visual language that every future `/build` with UI will inherit.
+
+**Condition**: Only enter this phase if the project has a user-facing UI (web app, dashboard, landing page, mobile). Skip to Phase 5P if the project is a CLI, API, background service, or library.
+
+**Actions**:
+1. Load `Skill(ucai:senior-frontend)` — apply its UI Design System guidance throughout this phase
+2. Determine whether the project has a UI: infer from the tech stack (Phase 3P) or ask the user directly
+3. If UI confirmed, draft each decision below and present as a block for user approval:
+
+   **Aesthetic mood** — drives all other choices, pick one:
+   - **Editorial**: refined, content-first, long-form reading (Newsreader/Literata + warm off-white)
+   - **Startup / modern**: energetic, bold, product-focused (Bricolage Grotesque/Satoshi + clean white or dark)
+   - **Technical**: precise, data-dense, structured (IBM Plex Sans/Mono + cool gray or dark theme)
+   - **Warm / human**: approachable, friendly, community-oriented (DM Serif Display + DM Sans + off-white)
+
+   **Typography** (per skill guidelines — Inter, Roboto, Arial, system-ui are banned):
+   - Heading font: [specific Google Font] — [why, one sentence]
+   - Body font: [specific Google Font] — [why, one sentence — must contrast with heading: serif + sans]
+   - Weight contrast: 200–300 body, 800–900 headings
+
+   **Color system**:
+   - Background: [off-white `#FAF8F5` / cool gray / dark — never pure white or pure black]
+   - Text: [near-black `#1C1917` or equivalent — never pure black]
+   - Accent: ONE dominant accent color, used sparingly (primary actions, active states, key highlights) — [hex + rationale]
+   - All colors defined as CSS custom properties in `:root`, never hardcoded in components
+
+   **Layout defaults**:
+   - Border radius: ONE size everywhere — [8px / 12px / 16px]
+   - Max content width: 680px for prose, 1200px for dashboards
+   - Section spacing: 48px minimum between major sections
+
+   **Component tone** (informs how every component is built):
+   - Buttons: 8–12px radius (not pill), primary filled / secondary bordered / ghost text-only
+   - Loading: skeleton screens with shimmer — never spinners
+   - Empty states: typographic statement + action — never "No data found" or sad-face illustrations
+   - Error copy: human-readable — "Something went wrong on our end", not "Error 500"
+
+4. Present the full design system draft to the user
+5. **DO NOT PROCEED WITHOUT APPROVAL** — incorporate feedback, then continue
+
+This design system is written into `project.md` and acts as the contract for all subsequent feature builds. A solo dev who defers these decisions to individual `/build` runs gets visual chaos.
+
+---
+
+## Phase 5P: Requirements Backlog
 
 **Goal**: Define the full feature backlog.
 
@@ -141,7 +181,7 @@ If the user says "whatever you think is best", provide your recommendation and g
 
 ---
 
-## Phase 5P: Output
+## Phase 6P: Output
 
 **Goal**: Write the project spec files.
 
@@ -174,12 +214,18 @@ status: draft
 - **[Category]**: [choice] — [why over alternatives]
 - **[Category]**: [choice] — [why over alternatives]
 
-## Design Direction
-<!-- Only include if the project has a UI -->
-- **Aesthetic**: [mood — editorial, startup, technical, warm]
-- **Fonts**: [heading font] + [body font] — [why]
-- **Accent color**: [color] — [why]
-- **Background tone**: [warm off-white / cool gray / dark theme / etc.]
+## Design System
+<!-- Only include if the project has a UI — output from Phase 4P -->
+- **Aesthetic**: [mood — editorial / startup / technical / warm] — [one sentence why]
+- **Heading font**: [font name] — [why]
+- **Body font**: [font name] — [why]
+- **Background**: [color/hex — never pure white or black]
+- **Text**: [color/hex — never pure black]
+- **Accent**: [color/hex] — [why this color, used sparingly]
+- **Border radius**: [px] everywhere
+- **Loading**: skeleton screens with shimmer
+- **Empty states**: typographic statement + action
+- **Error copy**: human-readable ("Something went wrong on our end")
 
 ## Non-Functional Requirements
 - **Performance**: [targets]
