@@ -14,7 +14,7 @@ Ucai was built from the inside out. We read the source code. We studied how Anth
 | No structure | Persona prompts + ceremonies | Commands with phased workflows + parallel agents |
 | No guardrails | CLAUDE.md rules (hope-based) | PreToolUse hooks (deterministic) |
 | No iteration | External bash loops | Stop hooks (native, built-in) |
-| No planning | Manual PRD docs or skipped entirely | `/plan` with discovery agents + structured file output |
+| No planning | Manual PRD/FRD docs or skipped entirely | `/plan` with discovery agents + structured file output |
 | No onboarding | Template CLAUDE.md dumps | Agent-powered codebase analysis |
 
 ## Installation
@@ -78,7 +78,7 @@ Then build features step by step from the build order:
 /ucai:build Endpoint system
 ```
 
-For complex steps, optionally create a detailed PRD first:
+For complex steps, optionally create a detailed FRD first:
 
 ```
 /ucai:plan Core scraping pipeline
@@ -142,7 +142,7 @@ Commands write files. Other commands read them. That's it — native Read/Write 
 
 ```
 /plan                          → .claude/project.md + .claude/requirements.md
-/plan add auth                 → .claude/prds/auth.md
+/plan add auth                 → .claude/frds/auth.md
 /build add auth                → requirements.md updated (auth ✅)
 /docs                          → README.md, docs/ (project-dependent)
 /release patch                 → CHANGELOG.md + version bump + git tag
@@ -152,9 +152,9 @@ Commands write files. Other commands read them. That's it — native Read/Write 
 .claude/
 ├── project.md              # Vision, goals, users, constraints
 ├── requirements.md         # Feature backlog (checkboxes track progress)
-└── prds/
-    ├── auth.md             # Feature PRD (preserved)
-    └── payments.md         # Feature PRD (preserved)
+└── frds/
+    ├── auth.md             # Feature FRD (preserved)
+    └── payments.md         # Feature FRD (preserved)
 ```
 
 Each command auto-loads whatever exists. A new session reads the files and knows what's been planned, built, and what's next. The SessionStart hook announces progress and the next build order step.
@@ -169,7 +169,7 @@ Analyzes your project with parallel agents and generates a proper CLAUDE.md with
 /ucai:init /path/to/project
 ```
 
-### `/ucai:plan` — Project Spec & Feature PRDs
+### `/ucai:plan` — Project Spec & Feature FRDs
 Works at two levels:
 
 **No arguments** — Project-level planning for greenfield or project definition:
@@ -178,17 +178,17 @@ Works at two levels:
 ```
 Phases: Understand → Discovery → Project Definition → Requirements Backlog → Output. Produces `.claude/project.md` and `.claude/requirements.md` (with sequenced build order).
 
-**With arguments** — Feature-level PRD generation (optional, for complex features):
+**With arguments** — Feature-level FRD generation (optional, for complex features):
 ```
 /ucai:plan Add real-time notifications
 /ucai:plan Migrate from REST to GraphQL
 ```
-Phases: Understand → Discovery → Requirements → Architecture → Output. Produces `.claude/prds/<slug>.md`. Auto-loads project spec as context if available.
+Phases: Understand → Discovery → Requirements → Architecture → Output. Produces `.claude/frds/<slug>.md`. Auto-loads project spec as context if available.
 
 ### `/ucai:build` — Feature Development
 8-phase workflow: Understand → Explore → Clarify → Design → Build → Verify → Test → Done.
 Uses parallel agents at explore, design, and review phases. Mandatory manual testing gate before marking complete. Explicit user approval gates.
-Auto-loads project.md, requirements.md, and matching PRD if they exist. Checks build order for dependencies and marks all covered requirements done when complete.
+Auto-loads project.md, requirements.md, and matching FRD if they exist. Checks build order for dependencies and marks all covered requirements done when complete.
 
 ```
 /ucai:build Add user authentication with JWT

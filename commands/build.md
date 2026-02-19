@@ -39,17 +39,17 @@ Feature request: $ARGUMENTS
 1. **Project spec**: Check if `.claude/project.md` exists. If found, read it and summarize the project vision, constraints, and tech stack to the user.
 2. **Requirements backlog**: Check if `.claude/requirements.md` exists. If found, read it and show backlog status (how many features done vs remaining). Confirm this feature is in the backlog.
    - **Build order check**: Read the `## Build Order` section. Identify which step this build corresponds to (match by name or covered features). Note which requirement checkboxes this step covers — you will mark ALL of them in Phase 8. If prior steps have uncompleted requirements, warn the user: "Step N depends on step M, which has uncompleted requirements: [list]. Proceed anyway?" Do not block — the user may have reasons.
-3. **Feature PRD**: Generate a slug from `$ARGUMENTS` (lowercase, strip leading verbs like add/implement/create/build, replace non-alphanumeric with hyphens). Check for PRD at:
-   - First: `.claude/prds/<slug>.md`
+3. **Feature FRD**: Generate a slug from `$ARGUMENTS` (lowercase, strip leading verbs like add/implement/create/build, replace non-alphanumeric with hyphens). Check for FRD at:
+   - First: `.claude/frds/<slug>.md`
    - Fallback: `.claude/prd.md` (legacy single-file format)
    - If found, read and summarize it to the user.
 4. Ask: "I found [list specs found]. Should I use these as context for this build?"
 
 If the user confirms:
-- Phase 2 (Explore): Use PRD's Discovery section as a starting point — focus agents on areas not already covered
-- Phase 3 (Clarify): Use PRD's Requirements as the baseline — only clarify gaps or changes since the PRD was written
-- Phase 4 (Design): Present PRD's Architecture as one option alongside architect-generated alternatives
-- Phase 6 (Verify): Use PRD's Acceptance Criteria for verification
+- Phase 2 (Explore): Use FRD's Discovery section as a starting point — focus agents on areas not already covered
+- Phase 3 (Clarify): Use FRD's Requirements as the baseline — only clarify gaps or changes since the FRD was written
+- Phase 4 (Design): Present FRD's Architecture as one option alongside architect-generated alternatives
+- Phase 6 (Verify): Use FRD's Acceptance Criteria for verification
 
 If the user declines, proceed with $ARGUMENTS only.
 
@@ -156,7 +156,7 @@ If the user says "whatever you think is best", provide your recommendation and g
    - The exact command(s) to start or run the app
    - Specific actions to perform with expected results (e.g., "Run `bm add https://example.com` — should print confirmation with auto-fetched title")
    - Edge cases worth trying manually
-2. If acceptance criteria exist (from PRD or Phase 3), map each criterion to a specific test action
+2. If acceptance criteria exist (from FRD or Phase 3), map each criterion to a specific test action
 3. Present the checklist to the user
 4. **WAIT for the user to test and confirm it works**
 5. If the user reports issues: fix them, re-run agent review on changed files (Phase 6 step 2), then return here with an updated checklist

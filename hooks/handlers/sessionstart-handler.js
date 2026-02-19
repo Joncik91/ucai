@@ -163,22 +163,26 @@ function getSpecStatus() {
     } catch {}
   }
 
-  // Announce PRDs
-  var prdsDir = ".claude/prds"
-  if (fs.existsSync(prdsDir)) {
+  // Announce FRDs
+  var frdsDir = ".claude/frds"
+  if (fs.existsSync(frdsDir)) {
     try {
-      var prdFiles = fs.readdirSync(prdsDir)
+      var frdFiles = fs.readdirSync(frdsDir)
         .filter(function (f) { return f.endsWith(".md") })
         .map(function (f) { return f.replace(/\.md$/, "") })
-      if (prdFiles.length > 0) {
-        parts.push("PRDs: " + prdFiles.join(", "))
+      if (frdFiles.length > 0) {
+        parts.push("FRDs: " + frdFiles.join(", "))
       }
     } catch {}
   }
 
-  // Legacy fallback
-  if (parts.length === 0 && fs.existsSync(".claude/prd.md")) {
-    parts.push("Legacy PRD found (prd.md)")
+  // Legacy fallback (old prds/ folder or single prd.md)
+  if (parts.length === 0) {
+    if (fs.existsSync(".claude/prds")) {
+      parts.push("Legacy PRDs found in .claude/prds/ — consider renaming to .claude/frds/")
+    } else if (fs.existsSync(".claude/prd.md")) {
+      parts.push("Legacy PRD found (prd.md)")
+    }
   }
 
   return parts.length > 0 ? parts.join(" | ") : null

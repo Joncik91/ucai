@@ -1,5 +1,5 @@
 ---
-description: Project spec (no args) or feature PRD (with args)
+description: Project spec (no args) or feature FRD (with args)
 argument-hint: [feature description]
 ---
 
@@ -8,7 +8,7 @@ argument-hint: [feature description]
 You are helping a developer plan before building. This command works at two levels:
 
 - **No arguments** (`/plan`): Define the project — vision, goals, and full requirements backlog
-- **With arguments** (`/plan <feature>`): Create a feature PRD grounded in the project spec
+- **With arguments** (`/plan <feature>`): Create a feature FRD grounded in the project spec
 
 ## Core Principles
 
@@ -223,13 +223,13 @@ updated: [ISO 8601 date]
 4. **DO NOT WRITE FILES WITHOUT USER APPROVAL**
 5. Create `.claude/` directory if it does not exist
 6. Write `.claude/project.md` and `.claude/requirements.md`
-7. Confirm: "Project spec written. Pick the next step from the Build Order and run `/build <step>` to start implementing. For complex steps, you can optionally run `/plan <step>` first to create a detailed PRD."
+7. Confirm: "Project spec written. Pick the next step from the Build Order and run `/build <step>` to start implementing. For complex steps, you can optionally run `/plan <step>` first to create a detailed FRD."
 
 ---
 
 # Feature-Level Mode
 
-Use this mode when planning a specific feature. Produces a per-feature PRD.
+Use this mode when planning a specific feature. Produces a per-feature FRD.
 
 ## Phase 1F: Understand
 
@@ -243,7 +243,7 @@ Feature request: $ARGUMENTS
 3. **Load project context** (if available):
    - Check `.claude/project.md` — if found, read and summarize project vision and constraints
    - Check `.claude/requirements.md` — if found, read and confirm this feature is in the backlog. Check the Build Order section to understand where this feature fits in the sequence and what it depends on.
-4. Check for existing PRD at `.claude/prds/<slug>.md`. If found, ask: "A PRD for this feature already exists. Overwrite, refine, or abort?" **Wait for user decision.**
+4. Check for existing FRD at `.claude/frds/<slug>.md`. If found, ask: "An FRD for this feature already exists. Overwrite, refine, or abort?" **Wait for user decision.**
 5. If the feature is unclear, ask:
    - What problem does this solve?
    - What should it do?
@@ -381,12 +381,12 @@ Incorporate user feedback.
 
 ---
 
-## Phase 5F: Output PRD
+## Phase 5F: Output FRD
 
-**Goal**: Write the feature PRD.
+**Goal**: Write the feature FRD.
 
 **Actions**:
-1. Compile all findings into the PRD using this structure:
+1. Compile all findings into the FRD using this structure:
 
 ```markdown
 ---
@@ -396,7 +396,7 @@ created: [ISO 8601 date]
 status: draft
 ---
 
-# PRD: [Feature Name]
+# FRD: [Feature Name]
 
 ## Overview
 [1-2 paragraphs: what the feature is, why it's needed]
@@ -472,8 +472,8 @@ status: draft
 - [URL with description]
 ```
 
-2. Present the PRD draft to the user
+2. Present the FRD draft to the user
 3. **DO NOT WRITE THE FILE WITHOUT USER APPROVAL**
-4. Create `.claude/prds/` directory if it does not exist
-5. Write `.claude/prds/<slug>.md`
-6. Confirm: "PRD written to `.claude/prds/<slug>.md`. Run `/build [feature]` to implement — the build command will auto-load this PRD and any project specs as context."
+4. Create `.claude/frds/` directory if it does not exist
+5. Write `.claude/frds/<slug>.md`
+6. Confirm: "FRD written to `.claude/frds/<slug>.md`. Run `/build [feature]` to implement — the build command will auto-load this FRD and any project specs as context."

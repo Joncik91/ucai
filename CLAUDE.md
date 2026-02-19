@@ -23,8 +23,8 @@ ucai/
 
 ## Commands
 - `/init` — Analyze project, generate CLAUDE.md. Uses project.md as context if available.
-- `/plan` — Project spec (no args) or feature PRD (with args). Outputs to `.claude/project.md` + `.claude/requirements.md` (with build order) or `.claude/prds/<slug>.md`
-- `/build` — Feature development: explore → design → approve → implement → review → manual test. Auto-loads project.md, requirements.md, and matching PRD. Checks build order for dependencies and marks covered requirements done.
+- `/plan` — Project spec (no args) or feature FRD (with args). Outputs to `.claude/project.md` + `.claude/requirements.md` (with build order) or `.claude/frds/<slug>.md`
+- `/build` — Feature development: explore → design → approve → implement → review → manual test. Auto-loads project.md, requirements.md, and matching FRD. Checks build order for dependencies and marks covered requirements done.
 - `/debug` — Structured debugging: investigate → diagnose → fix → verify. Parallel agents trace bugs, analyze recent changes, identify root cause.
 - `/docs` — Generate/update documentation from codebase + spec files. Adapts to project type (API docs, README, deployment guide).
 - `/release` — Changelog generation, version bump, git tag from git history since last tag. Cross-references requirements.md.
@@ -58,7 +58,7 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 
 ### Context chain
 - `/plan` (no args) produces `.claude/project.md` + `.claude/requirements.md` (with build order)
-- `/plan <feature>` produces `.claude/prds/<slug>.md` (per-feature, never overwritten, optional)
+- `/plan <feature>` produces `.claude/frds/<slug>.md` (per-feature, never overwritten, optional)
 - All commands auto-load whatever spec files exist in `.claude/`
 - `/build` reads build order to identify step dependencies and covered requirements
 - `/build` Phase 7 marks all covered requirements done in `requirements.md` (`- [ ]` → `- [x]`)
@@ -67,11 +67,11 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - `/docs` reads codebase + spec files to generate appropriate documentation (writes to project root or `docs/`, not `.claude/`)
 - `/debug` reads spec chain for project context but does not write to `.claude/`
 - SessionStart hook announces project name, progress (N/M done), and next build order step
-- Legacy `.claude/prd.md` still detected as fallback
+- Legacy `.claude/prd.md` and `.claude/prds/` still detected as fallback
 
 ### State management
 - Local state files: `.claude/*.local.md` (gitignored)
-- Permanent spec files: `.claude/project.md`, `.claude/requirements.md`, `.claude/prds/*.md` (tracked in git)
+- Permanent spec files: `.claude/project.md`, `.claude/requirements.md`, `.claude/frds/*.md` (tracked in git)
 - YAML frontmatter for structured fields, markdown body for content
 - Parsed with regex (`/^---\r?\n([\s\S]*?)\r?\n---/`) — use `\r?` for Windows CRLF compatibility
 
