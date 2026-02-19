@@ -46,6 +46,9 @@ After installing, all commands are namespaced under `ucai:`:
 /ucai:init
 /ucai:plan
 /ucai:build
+/ucai:debug
+/ucai:docs
+/ucai:release
 /ucai:iterate
 /ucai:review
 /ucai:cancel-iterate
@@ -88,6 +91,13 @@ Once you have code, generate project guidelines:
 /ucai:init
 ```
 
+When ready to share or ship:
+
+```
+/ucai:docs
+/ucai:release patch
+```
+
 ### Existing project (brownfield)
 
 Open any project and start with onboarding:
@@ -103,6 +113,19 @@ To plan a roadmap, run `/plan` with no arguments to define project scope and req
 ```
 /ucai:plan
 /ucai:build Add real-time notifications
+```
+
+To debug issues:
+
+```
+/ucai:debug TypeError: Cannot read property 'map' of undefined
+```
+
+When ready to share or ship:
+
+```
+/ucai:docs
+/ucai:release patch
 ```
 
 ### Iterate
@@ -121,6 +144,8 @@ Commands write files. Other commands read them. That's it — native Read/Write 
 /plan                          → .claude/project.md + .claude/requirements.md
 /plan add auth                 → .claude/prds/auth.md
 /build add auth                → requirements.md updated (auth ✅)
+/docs                          → README.md, docs/ (project-dependent)
+/release patch                 → CHANGELOG.md + version bump + git tag
 ```
 
 ```
@@ -186,6 +211,32 @@ Parallel agents independently review for conventions, bugs, and security. Valida
 /ucai:review src/auth/
 ```
 
+### `/ucai:debug` — Structured Debugging
+Parallel investigation agents trace bugs through the codebase, analyze recent changes, and identify root cause. Proposes a targeted fix with approval gate.
+
+```
+/ucai:debug TypeError: Cannot read property 'map' of undefined
+/ucai:debug Login fails after session timeout
+```
+
+### `/ucai:docs` — Documentation Generation
+Scans codebase and spec files to generate appropriate documentation. Adapts to what the project has — API docs, README, deployment guide. References project.md and requirements.md if available.
+
+```
+/ucai:docs
+/ucai:docs api
+/ucai:docs readme
+```
+
+### `/ucai:release` — Changelog & Version Bump
+Reads git history since last tag, categorizes changes, generates a changelog, bumps the version, and creates a git tag. Cross-references requirements.md for completed features.
+
+```
+/ucai:release patch
+/ucai:release minor
+/ucai:release v2.1.0
+```
+
 ### `/ucai:cancel-iterate` — Stop Iterate Loop
 Cancels an active iteration loop.
 
@@ -200,6 +251,9 @@ ucai/
 │   ├── init.md                   # /init
 │   ├── plan.md                   # /plan (project + feature modes)
 │   ├── build.md                  # /build
+│   ├── debug.md                  # /debug
+│   ├── docs.md                   # /docs
+│   ├── release.md                # /release
 │   ├── iterate.md                # /iterate
 │   ├── review.md                 # /review
 │   └── cancel-iterate.md        # /cancel-iterate

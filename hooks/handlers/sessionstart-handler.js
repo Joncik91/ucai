@@ -196,7 +196,7 @@ function getAvailableSkills() {
 
 function main() {
   const parts = [
-    "Ucai plugin is active. Use /init to analyze this project, /build for feature development, /iterate for autonomous iteration, or /review for code review."
+    "Ucai plugin is active. Use /init to analyze this project, /plan for specs, /build for features, /debug for bugs, /docs for documentation, /release for versioning, /iterate for autonomous iteration, or /review for code review."
   ]
 
   const branch = getGitBranch()

@@ -24,6 +24,9 @@ ucai/
 - `/init` — Analyze project, generate CLAUDE.md. Uses project.md as context if available.
 - `/plan` — Project spec (no args) or feature PRD (with args). Outputs to `.claude/project.md` + `.claude/requirements.md` (with build order) or `.claude/prds/<slug>.md`
 - `/build` — Feature development: explore → design → approve → implement → review → manual test. Auto-loads project.md, requirements.md, and matching PRD. Checks build order for dependencies and marks covered requirements done.
+- `/debug` — Structured debugging: investigate → diagnose → fix → verify. Parallel agents trace bugs, analyze recent changes, identify root cause.
+- `/docs` — Generate/update documentation from codebase + spec files. Adapts to project type (API docs, README, deployment guide).
+- `/release` — Changelog generation, version bump, git tag from git history since last tag. Cross-references requirements.md.
 - `/iterate` — Controlled autonomous iteration via Stop hooks
 - `/review` — Multi-agent parallel code review (validates against project specs if available)
 - `/cancel-iterate` — Stop an active iterate loop
@@ -59,6 +62,9 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - `/build` reads build order to identify step dependencies and covered requirements
 - `/build` Phase 7 marks all covered requirements done in `requirements.md` (`- [ ]` → `- [x]`)
 - `/init` uses `project.md` as context baseline if available
+- `/release` reads git history + `requirements.md` to generate changelog and connect releases to planned work
+- `/docs` reads codebase + spec files to generate appropriate documentation (writes to project root or `docs/`, not `.claude/`)
+- `/debug` reads spec chain for project context but does not write to `.claude/`
 - SessionStart hook announces project name, progress (N/M done), and next build order step
 - Legacy `.claude/prd.md` still detected as fallback
 
@@ -113,4 +119,7 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - `hooks/handlers/pretooluse-guard.js` — Config file protection hook
 - `scripts/setup-iterate.js` — Iterate loop setup
 - `commands/build.md` — Most complex command (7-phase workflow)
+- `commands/debug.md` — Structured debugging workflow
+- `commands/docs.md` — Documentation generation
+- `commands/release.md` — Release automation
 - `skills/ucai-patterns/SKILL.md` — Best practices skill
