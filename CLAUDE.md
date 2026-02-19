@@ -17,7 +17,8 @@ ucai/
 │   └── handlers/      # Hook handler scripts
 ├── scripts/           # Utility scripts (Node.js)
 ├── skills/            # Progressive disclosure (SKILL.md + references/)
-└── .claude-plugin/    # Plugin install metadata
+├── .claude-plugin/    # Plugin install metadata
+└── .github/           # Issue templates and PR template
 ```
 
 ## Commands
@@ -82,7 +83,12 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - `camelCase` variables/functions, `SCREAMING_SNAKE_CASE` constants
 - Shebang (`#!/usr/bin/env node`) on executable scripts
 - Empty catch blocks for cleanup operations
-- No external dependencies — Node.js builtins only (`fs`, `readline`, `path`)
+- No external dependencies — Node.js builtins only (`fs`, `path`, `readline`, `child_process`)
+- Hook scripts use `process.stdout.write()` for JSON output, `console.error()` for logging (never `console.log()` in hooks)
+- Stdin accumulation pattern in all handlers: `process.stdin.on("data"/"end")`
+- String concatenation with `+` preferred; template literals only for multi-line output
+- Cross-platform paths: always `path.resolve()`/`path.join()`, never string concatenation
+- Windows path normalization: `.replace(/\\/g, "/")` and case-insensitive comparison via `process.platform === "win32"`
 
 ### Markdown (commands/agents/skills)
 - YAML frontmatter with type-specific fields
@@ -118,7 +124,7 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - `hooks/handlers/stop-handler.js` — Iteration control logic
 - `hooks/handlers/pretooluse-guard.js` — Config file protection hook
 - `scripts/setup-iterate.js` — Iterate loop setup
-- `commands/build.md` — Most complex command (7-phase workflow)
+- `commands/build.md` — Most complex command (8-phase workflow)
 - `commands/debug.md` — Structured debugging workflow
 - `commands/docs.md` — Documentation generation
 - `commands/release.md` — Release automation
