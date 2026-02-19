@@ -95,11 +95,19 @@ Use this mode when starting a new project or defining project scope for the firs
    - **Goals**: Concrete project goals (3-5 items)
    - **Target Users**: User personas with descriptions
    - **Constraints**: Technical, business, or timeline constraints
-   - **Tech Stack**: Languages, frameworks, key dependencies (decided or recommended)
+   - **Tech Stack**: Languages, frameworks, key dependencies with rationale
+     - For each major dependency choice, state *why* over alternatives (e.g., "Prisma over Drizzle — better migration tooling for solo dev workflow")
+     - Focus on choices that are painful to reverse later (ORM, state management, CSS approach, auth provider)
    - **Non-Functional Requirements**: Performance, security, scalability targets
 
-2. Present the draft to the user for validation
-3. **DO NOT PROCEED WITHOUT APPROVAL**
+2. **Design Direction** (conditional — only if the project has a UI):
+   - Load `Skill(ucai:senior-frontend)` if not already loaded
+   - Define upfront: font pairing, primary accent color, aesthetic mood (editorial, startup, technical, warm)
+   - This ensures visual cohesion across all features built later — a solo dev who picks these per-component gets chaos
+   - Keep it to 5-6 lines, not a full design doc
+
+3. Present the draft to the user for validation
+4. **DO NOT PROCEED WITHOUT APPROVAL**
 
 ---
 
@@ -163,7 +171,15 @@ status: draft
 - [Constraint]
 
 ## Tech Stack
-- [Language/framework/dependency]
+- **[Category]**: [choice] — [why over alternatives]
+- **[Category]**: [choice] — [why over alternatives]
+
+## Design Direction
+<!-- Only include if the project has a UI -->
+- **Aesthetic**: [mood — editorial, startup, technical, warm]
+- **Fonts**: [heading font] + [body font] — [why]
+- **Accent color**: [color] — [why]
+- **Background tone**: [warm off-white / cool gray / dark theme / etc.]
 
 ## Non-Functional Requirements
 - **Performance**: [targets]
@@ -258,7 +274,7 @@ Feature request: $ARGUMENTS
 
 ## Phase 3F: Requirements
 
-**Goal**: Define what the feature must do.
+**Goal**: Define what the feature must do — and how the user moves through it.
 
 **CRITICAL**: Do not skip this phase.
 
@@ -281,8 +297,14 @@ Feature request: $ARGUMENTS
    **Acceptance Criteria**:
    - Testable criteria for verifying the feature is complete
 
-2. Present requirements to user for validation
-3. **DO NOT PROCEED TO ARCHITECTURE WITHOUT APPROVAL**
+2. **User Flows** (conditional — only if the feature has user-facing interaction):
+   - Sketch the primary journey: "User lands on → clicks → sees → submits → gets feedback"
+   - Use a Mermaid flowchart or numbered steps — not wireframes, just the *flow*
+   - Include error/edge paths where they matter (e.g., "form fails validation → show inline errors → user corrects → resubmits")
+   - A solo dev who skips this builds the wrong screens or misses states
+
+3. Present requirements (and user flows if applicable) to user for validation
+4. **DO NOT PROCEED TO ARCHITECTURE WITHOUT APPROVAL**
 
 If the user says "whatever you think is best", provide your recommendation and get explicit confirmation.
 
@@ -290,21 +312,72 @@ If the user says "whatever you think is best", provide your recommendation and g
 
 ## Phase 4F: Architecture
 
-**Goal**: Propose a high-level technical approach.
+**Goal**: Propose a high-level technical approach — structure, data, interfaces, and visuals as needed.
 
 **MANDATORY**: You MUST use the Task tool to launch architect agents. Do NOT skip agents and design the architecture yourself.
 
-**Actions**:
-1. Launch 1-2 `ucai:architect` agents using the Task tool:
-   - "Given these requirements [summary] and these codebase patterns [summary], propose a high-level architecture. Include: key components, data flow, integration points, files to create/modify. Keep it high-level — detailed design happens in /build."
+### Step 1: Determine Applicable Sections
 
-   If project.md exists, include tech stack and constraints in the agent's prompt.
+Before launching agents, determine which architecture sub-sections apply to this feature. Infer from the feature description, requirements, and codebase context:
 
-2. **Wait for all agents to complete** before proceeding
-3. Review the architecture proposal
-4. Present to user: components, data flow, key decisions, trade-offs
-5. **DO NOT PROCEED WITHOUT USER APPROVAL**
-6. Incorporate user feedback
+| Section | Trigger | Example |
+|---------|---------|---------|
+| **Core architecture** | Always | Components, data flow, files to create/modify |
+| **Data model** | Feature touches persistence (DB, files, external storage) | "user profiles", "order history", "settings" |
+| **API surface** | Feature has a client/server boundary | "dashboard", "form submission", "webhook" |
+| **UI structure** | Feature is user-facing with visual components | "settings page", "onboarding flow", "admin panel" |
+| **Security notes** | Feature touches auth, payments, PII, or external APIs | "login", "checkout", "API keys" |
+
+State which sections apply and why. The user confirms or adjusts at the approval gate below.
+
+### Step 2: Launch Agents
+
+Launch 1-2 `ucai:architect` agents using the Task tool:
+- "Given these requirements [summary] and these codebase patterns [summary], propose a high-level architecture. Include: key components, data flow, integration points, files to create/modify. Keep it high-level — detailed design happens in /build."
+
+If project.md exists, include tech stack and constraints in the agent's prompt.
+
+**Wait for all agents to complete** before proceeding.
+
+### Step 3: Draft Architecture (with conditional sections)
+
+**Core architecture** (always):
+- Key components and their responsibilities
+- Data flow between components
+- Integration points with existing code
+- Files to create or modify
+- Key decisions with rationale and trade-offs
+
+**Data model** (conditional — feature touches persistence):
+- Entity definitions with key fields and types
+- Relationships between entities (Mermaid ERD if 3+ entities, bullet list if simpler)
+- Indexes or constraints that matter for performance
+- A solo dev who skips this migrates the schema 3 times
+
+**API surface** (conditional — feature has a client/server boundary):
+- Endpoints as a markdown table: method, path, request shape, response shape
+- Not an OpenAPI spec — just enough to not surprise yourself later
+- Auth requirements per endpoint (if applicable)
+- Error response conventions
+
+**UI structure** (conditional — feature is user-facing):
+- Component tree: parent → children hierarchy
+- Rough layout sketch (ASCII) showing spatial arrangement — not pixels, just structure
+- If project.md defines a design direction (fonts, palette, aesthetic), reference it here
+- Load `Skill(ucai:senior-frontend)` if not already loaded for design system guidance
+- Key states: loading, empty, error, populated
+
+**Security notes** (conditional — feature touches auth, payments, PII, or external APIs):
+- 3-5 bullet points on what to watch for
+- Not a threat model — just "validate X server-side", "sanitize Y before rendering", "rate-limit Z endpoint", "don't log PII in W"
+
+### Step 4: Present and Approve
+
+Present the full architecture to the user, clearly labeling which conditional sections were included and why.
+
+**DO NOT PROCEED WITHOUT USER APPROVAL.**
+
+Incorporate user feedback.
 
 ---
 
@@ -359,6 +432,10 @@ status: draft
 ### Acceptance Criteria
 - [ ] [Criterion]
 
+### User Flows
+<!-- Only include if the feature has user-facing interaction -->
+[Mermaid flowchart or numbered steps showing the primary user journey]
+
 ## Architecture
 
 ### High-Level Design
@@ -372,6 +449,24 @@ status: draft
 
 ### Files to Create/Modify
 - [Preliminary file list]
+
+### Data Model
+<!-- Only include if the feature touches persistence -->
+[Entity definitions, relationships — Mermaid ERD or bullet list]
+
+### API Surface
+<!-- Only include if the feature has a client/server boundary -->
+| Method | Path | Request | Response |
+|--------|------|---------|----------|
+| [GET/POST/etc.] | [/path] | [shape] | [shape] |
+
+### UI Structure
+<!-- Only include if the feature is user-facing -->
+[Component tree + ASCII layout sketch + key states]
+
+### Security Notes
+<!-- Only include if the feature touches auth, payments, PII, or external APIs -->
+- [Bullet points on what to watch for]
 
 ## References
 - [URL with description]
