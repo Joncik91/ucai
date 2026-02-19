@@ -1,20 +1,85 @@
 ---
 name: senior-frontend
-description: Frontend development skill for React, Next.js, TypeScript, and Tailwind CSS applications. Use when building React components, optimizing Next.js performance, analyzing bundle sizes, scaffolding frontend projects, implementing accessibility, or reviewing frontend code quality.
+description: Frontend development skill for React, Next.js, TypeScript, and Tailwind CSS applications. Use when building React components, optimizing Next.js performance, analyzing bundle sizes, scaffolding frontend projects, implementing accessibility, reviewing frontend code quality, performing visual overhauls, or designing UI/UX systems.
 ---
 
 # Senior Frontend
 
-Frontend development patterns, performance optimization, and automation tools for React/Next.js applications.
+Frontend development patterns, performance optimization, UI design systems, and automation tools for React/Next.js applications.
 
 ## Table of Contents
 
+- [UI Design System](#ui-design-system)
 - [Project Scaffolding](#project-scaffolding)
 - [Component Generation](#component-generation)
 - [Bundle Analysis](#bundle-analysis)
 - [React Patterns](#react-patterns)
 - [Next.js Optimization](#nextjs-optimization)
 - [Accessibility and Testing](#accessibility-and-testing)
+
+---
+
+## UI Design System
+
+Reference: `references/ui_design_system.md`
+
+Use this when performing visual overhauls or building new UIs. The core principle: actively avoid the "AI slop" aesthetic. Every design decision must be intentional.
+
+**Before writing any code**, leave a comment at the top of the main CSS/style section stating: (1) the fonts you chose and why, (2) the primary accent color and why, (3) one sentence on overall aesthetic direction.
+
+### Typography — The Highest-Leverage Decision
+
+**Banned fonts**: Inter, Roboto, Arial, Open Sans, Lato, system-ui, Space Grotesk. If they exist, replace them.
+
+Choose distinctive Google Fonts by mood:
+- **Editorial**: Newsreader, Literata, Crimson Pro, Fraunces, Playfair Display, Lora
+- **Startup / modern**: Bricolage Grotesque, Cabinet Grotesk, Satoshi, General Sans, Outfit, Manrope
+- **Technical**: IBM Plex Sans, IBM Plex Mono, Source Serif 4, JetBrains Mono
+- **Warm / human**: DM Serif Display + DM Sans, Syne + Source Sans 3
+
+Always pair heading + body fonts with contrast (serif + sans). Weight contrast: 200/300 body, 800/900 headings. Size jumps: 3x minimum between body and hero headings.
+
+### Color & Theme
+
+- All colors as CSS custom properties in `:root`. No hardcoded hex in components
+- ONE dominant accent, used sparingly (primary actions, active states, key highlights)
+- No purple gradients on white. No rainbow palettes. Dominant + sharp accent wins
+- Inspiration: IDE themes (Dracula, Nord, Catppuccin, Gruvbox), editorial design, architectural photography
+- Off-white (`#FAF8F5`) over pure white. Near-black (`#1C1917`) over pure black
+
+### Motion
+
+- Page load: one staggered reveal, 80-120ms delay increments, reading order
+- Hover: `translateY(-2px)` + shadow for cards. Background shift for buttons
+- Transitions: 200-400ms, `ease-out` or `cubic-bezier(0.4, 0, 0.2, 1)`. Never linear
+- CSS-only animations. Respect `prefers-reduced-motion`
+- Never: parallax, particles, 3D flips, blob backgrounds, typing animations
+
+### Component Standards
+
+- **Buttons**: 8-12px border-radius (not pill). Primary filled, secondary bordered, ghost text-only
+- **Cards**: subtle shadow or 1px border, 12-16px radius, 24-32px padding, lift on hover
+- **Forms**: 44-48px inputs, labels above (never floating), warm error copy
+- **Empty states**: typographic statement + action. No sad faces or "No data found"
+- **Loading**: skeleton screens with shimmer. Never spinners
+- **Errors**: human copy. "Something went wrong on our end" not "Error 500"
+
+### Layout
+
+- 48px minimum between major sections. Generous whitespace
+- 680px max for text, 1200px for dashboards
+- Asymmetric layouts over centered everything
+- Consistent border-radius: pick one (8px, 12px, or 16px) everywhere
+
+### Final Check
+
+1. Cohesive across pages (fonts, palette, spacing rhythm)?
+2. ONE moment of visual delight on page load?
+3. "A designer made this" — not "an AI made this"?
+4. Content over chrome?
+5. Accessible (keyboard, contrast, screen reader)?
+
+See `references/ui_design_system.md` for the full design system with detailed rules, anti-patterns, and micro-details.
 
 ---
 
@@ -468,6 +533,7 @@ function List<T>({ items, renderItem }: ListProps<T>) {
 
 ## Resources
 
+- UI Design System: `references/ui_design_system.md`
 - React Patterns: `references/react_patterns.md`
 - Next.js Optimization: `references/nextjs_optimization_guide.md`
 - Best Practices: `references/frontend_best_practices.md`
