@@ -182,11 +182,23 @@ If the user says "whatever you think is best", provide your recommendation and g
    - Files modified/created
    - Suggested next steps
 3. **Requirements update**: If `.claude/requirements.md` exists:
-   - Read the Build Order section to find which requirements this step covers (the "covers:" list from Phase 1)
-   - Mark ALL matching checkboxes: change `- [ ]` to `- [x]` and append `(completed YYYY-MM-DD)`
-   - Update the `updated` field in the YAML frontmatter to today's date
-   - Present all changes to the user and **wait for approval** before writing
-   - If no matching lines are found, skip silently
+   - Re-read `.claude/requirements.md` in full (do not rely on memory from earlier phases)
+   - In the `## Build Order` section, find the step matching this build (match by step name or feature argument)
+   - From the matching step's `covers:` field, extract each feature name (comma-separated after `covers:`)
+   - For each feature name, scan the requirement sections (`## Must Have`, `## Should Have`, etc.) for a `- [ ]` line whose text contains that feature name (fuzzy match — the requirement line may have extra description after a `—`)
+   - Collect every matching `- [ ]` line
+   - Present the proposed changes to the user:
+     ```
+     Marking these requirements done in requirements.md:
+     - [ ] Feature A  →  - [x] Feature A (completed YYYY-MM-DD)
+     - [ ] Feature B  →  - [x] Feature B (completed YYYY-MM-DD)
+     ```
+   - **Wait for the user to confirm** ("yes", "ok", "looks good", etc.)
+   - After confirmation, use the Edit tool to apply each change one at a time:
+     - Replace `- [ ] [exact line text]` with `- [x] [exact line text] (completed YYYY-MM-DD)`
+     - Replace the `updated:` value in the YAML frontmatter with today's date
+   - Confirm: "Requirements updated in `.claude/requirements.md`"
+   - If no matching lines are found, tell the user and skip silently
 4. **CLAUDE.md refresh**: If a CLAUDE.md exists, check whether this feature introduced changes that should be reflected:
    - New architecture patterns or layers
    - New development commands (build, test, lint)
