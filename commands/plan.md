@@ -71,10 +71,10 @@ Use this mode when starting a new project or defining project scope for the firs
 **MANDATORY**: You MUST use the Task tool to launch explorer agents. Do NOT skip agents and research yourself.
 
 **Actions**:
-1. Launch 2-3 `ucai:explorer` agents in parallel using the Task tool:
-   - **Domain research**: "Search the web for best practices, architecture patterns, and framework documentation relevant to [project type]. Prioritize official docs. Return key findings with URLs."
-   - **Similar projects**: "Search the web for open-source projects similar to [project description]. Analyze their architecture, tech stack choices, and patterns. Return key findings."
-   - **Codebase analysis** (brownfield only): "Analyze the existing codebase structure, tech stack, conventions, and patterns. Return 5-10 key files and architectural insights."
+1. Launch 2-3 `ucai:explorer` agents in parallel using the Task tool (level: **thorough**, max_turns: 30):
+   - **Domain research**: "Level: thorough. Search the web for best practices, architecture patterns, and framework documentation relevant to [project type]. Prioritize official docs. Return key findings with URLs."
+   - **Similar projects**: "Level: medium. Search the web for open-source projects similar to [project description]. Analyze their architecture, tech stack choices, and patterns. Return key findings."
+   - **Codebase analysis** (brownfield only): "Level: thorough. Analyze the existing codebase structure, tech stack, conventions, and patterns. Return 5-10 key files and architectural insights."
 
 2. **Wait for all agents to complete** before proceeding
 3. Present a consolidated discovery summary:
@@ -259,10 +259,10 @@ Feature request: $ARGUMENTS
 **MANDATORY**: You MUST use the Task tool to launch explorer agents. Do NOT skip agents and research yourself.
 
 **Actions**:
-1. Launch 3 `ucai:explorer` agents in parallel using the Task tool, each with a different focus:
-   - **Codebase patterns**: "Find features similar to [feature] in this codebase. Trace their implementation, identify reusable patterns, architecture layers, and integration points. Return 5-10 key files."
-   - **Codebase architecture**: "Map the overall architecture, module boundaries, data flow, and conventions relevant to [feature area]. Return 5-10 key files."
-   - **Web research**: "Search the web for best practices, design patterns, framework documentation, and API references relevant to [feature]. Prioritize official docs and authoritative sources. Return key findings with URLs."
+1. Launch 3 `ucai:explorer` agents in parallel using the Task tool (level: **medium**, max_turns: 20), each with a different focus:
+   - **Codebase patterns**: "Level: medium. Find features similar to [feature] in this codebase. Trace their implementation, identify reusable patterns, architecture layers, and integration points. Return 5-10 key files."
+   - **Codebase architecture**: "Level: medium. Map the overall architecture, module boundaries, data flow, and conventions relevant to [feature area]. Return 5-10 key files."
+   - **Web research**: "Level: medium. Search the web for best practices, design patterns, framework documentation, and API references relevant to [feature]. Prioritize official docs and authoritative sources. Return key findings with URLs."
 
    If project.md exists, include project context (tech stack, constraints) in each agent's prompt.
 

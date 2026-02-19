@@ -107,6 +107,8 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - All agents use `sonnet` model
 - Read-only tools only (no Write/Edit)
 - Color-coded: yellow (scanner), cyan (explorer), green (architect), red (reviewer), blue (verifier)
+- Explorer agents support 3 thoroughness levels: **quick** (~8 calls, max_turns: 12), **medium** (~15 calls, max_turns: 20), **thorough** (~25 calls, max_turns: 30)
+- Commands specify level + max_turns when spawning explorers; prefix agent prompt with "Level: <level>"
 
 ## Principles
 1. Use native systems — commands, agents, hooks, skills. Not wrappers.

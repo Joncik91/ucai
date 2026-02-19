@@ -58,13 +58,13 @@ Input: $ARGUMENTS
 **MANDATORY**: You MUST use the Task tool to launch explorer agents. Do NOT skip agents and investigate yourself.
 
 **Actions**:
-1. Launch 3 `ucai:explorer` agents in parallel using the Task tool:
+1. Launch 3 `ucai:explorer` agents in parallel using the Task tool (level: **thorough**, max_turns: 30):
 
-   - **Error tracing**: "Trace this error through the codebase: [error/bug description]. Start from [error location/stack trace if available]. Follow the call chain — function calls, imports, data flow. Identify where the failure originates. Return 5-10 key files with file:line references and a call chain summary."
+   - **Error tracing**: "Level: thorough. Trace this error through the codebase: [error/bug description]. Start from [error location/stack trace if available]. Follow the call chain — function calls, imports, data flow. Identify where the failure originates. Return 5-10 key files with file:line references and a call chain summary."
 
-   - **Recent changes**: "Investigate recent changes that could have caused [bug]. Run `git log --oneline -20` to see recent commits. Use `git diff HEAD~5` to see what changed. Use Grep to find the function/module involved and check `git log -p --follow` on suspect files. Return a timeline of relevant changes with commit hashes."
+   - **Recent changes**: "Level: medium. Investigate recent changes that could have caused [bug]. Run `git log --oneline -20` to see recent commits. Use `git diff HEAD~5` to see what changed. Use Grep to find the function/module involved and check `git log -p --follow` on suspect files. Return a timeline of relevant changes with commit hashes."
 
-   - **Working comparisons**: "Find similar patterns in this codebase that work correctly. The broken behavior is: [bug description]. Search for analogous code paths that handle similar logic successfully. Compare the working implementation with the broken one. Identify what differs. Return 5-10 key files with file:line references."
+   - **Working comparisons**: "Level: medium. Find similar patterns in this codebase that work correctly. The broken behavior is: [bug description]. Search for analogous code paths that handle similar logic successfully. Compare the working implementation with the broken one. Identify what differs. Return 5-10 key files with file:line references."
 
    Include project context (tech stack, conventions) in each agent's prompt if available.
 
