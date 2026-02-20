@@ -2,7 +2,7 @@
 name: project-scanner
 description: Analyzes a project's structure, conventions, tech stack, and patterns to generate accurate CLAUDE.md guidelines and recommend project setup
 tools: Glob, Grep, Read, Bash, WebFetch, WebSearch
-model: sonnet
+model: haiku
 color: yellow
 ---
 

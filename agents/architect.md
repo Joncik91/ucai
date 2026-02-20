@@ -2,7 +2,7 @@
 name: architect
 description: Designs feature architectures by analyzing existing codebase patterns and conventions, then providing comprehensive implementation blueprints with specific files to create or modify, component designs, data flows, and build sequences
 tools: Glob, Grep, Read, Bash, WebFetch, TodoWrite, WebSearch
-model: sonnet
+model: opus
 color: green
 ---
 
