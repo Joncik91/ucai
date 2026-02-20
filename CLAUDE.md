@@ -50,11 +50,9 @@ for file in plugin.json .claude-plugin/marketplace.json hooks/hooks.json CLAUDE.
 node -e "JSON.parse(require('fs').readFileSync('plugin.json', 'utf8'))"
 node -e "JSON.parse(require('fs').readFileSync('hooks/hooks.json', 'utf8'))"
 
-# Syntax-check all JS files
-node -c hooks/handlers/sessionstart-handler.js
-node -c hooks/handlers/pretooluse-guard.js
-node -c hooks/handlers/stop-handler.js
-node -c scripts/setup-iterate.js
+# Syntax-check all JS files (glob auto-covers new handlers)
+for file in hooks/handlers/*.js scripts/*.js; do
+  node -c "$file" || exit 1; done
 
 # Validate frontmatter presence in commands and agents
 head -1 commands/*.md | grep -q "^---"
@@ -74,6 +72,8 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - **SessionStart**: `sessionstart-handler.js` injects git branch, iterate status, CLAUDE.md presence, spec file status, available skills
 - **PreToolUse**: `pretooluse-guard.js` guards plugin config files (Write/Edit matcher)
 - **Stop**: `stop-handler.js` for iteration control
+- **PreCompact**: `precompact-handler.js` — if iterate loop active, surfaces state in systemMessage before compaction
+- **SessionEnd**: `session-end-handler.js` — deletes stale iterate state file on session termination
 - **Paths**: Always use `${CLAUDE_PLUGIN_ROOT}` with quotes for Windows compatibility
 
 ### Skill awareness
@@ -145,6 +145,8 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - `hooks/handlers/sessionstart-handler.js` — Session context injection (most complex handler)
 - `hooks/handlers/stop-handler.js` — Iteration control logic
 - `hooks/handlers/pretooluse-guard.js` — Config file protection hook
+- `hooks/handlers/precompact-handler.js` — Iterate state surfacing before context compaction
+- `hooks/handlers/session-end-handler.js` — Iterate state cleanup on session termination
 - `scripts/setup-iterate.js` — Iterate loop setup
 - `commands/build.md` — Most complex command (8-phase workflow)
 - `skills/ucai-patterns/SKILL.md` — Best practices skill
