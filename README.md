@@ -24,7 +24,7 @@ Ucai is built from the inside out — using Claude Code's native systems exactly
 ## ✨ What Ucai Gives You
 
 - Project planning with discovery agents
-- Feature-level FRDs
+- Feature-level FRDs with optional agile milestone breakdown
 - 8-phase build workflow with parallel agents
 - Native autonomous iteration (`/ucai:iterate`)
 - Multi‑agent code review
@@ -102,11 +102,16 @@ Then build features:
 /ucai:build Endpoint system
 ```
 
-For complex features:
+For large or complex features (agile mode):
 
 ```
-/ucai:plan Core scraping pipeline
-/ucai:build Core scraping pipeline
+/ucai:plan Desktop app advanced features
+# /plan detects complexity and suggests milestone breakdown
+# Produces FRD with M1..MN milestones
+
+/ucai:build Desktop app advanced features
+# /build lists pending milestones, you pick one, it scopes the session
+# Repeat for each milestone
 ```
 
 Generate project guidelines:
@@ -208,6 +213,8 @@ Produces `project.md` + `requirements.md`.
 /ucai:plan Migrate from REST to GraphQL
 ```
 Produces `.claude/frds/<slug>.md`. Auto-loads project spec as context if available.
+
+For large features (≥4 Must Have requirements or ≥3 user flows), `/plan` automatically suggests **agile mode** — breaking requirements into independently-buildable milestones stored in the same FRD. Each `/build` run targets one milestone at a time.
 
 ### `/ucai:build` — Feature Development
 
