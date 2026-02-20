@@ -6,10 +6,6 @@ Ucai was built from the inside out.
 We read the source code. We studied how Anthropic builds their own plugins.
 Every component maps 1:1 to a native Claude Code system — no wrappers, no personas, no bash loops.
 
-## 🎥 Demo
-
-> Add a 20–30 second GIF here showing `/ucai:plan` → `/ucai:build` → `/ucai:iterate`.
-
 ## 🥊 Frameworks vs. Ucai — What's Actually Different?
 
 Community frameworks were built from the outside in — wrapping Claude Code in bash scripts, mega-prompts, and persona engineering.
