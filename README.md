@@ -1,12 +1,20 @@
 # Ucai — Use Claude Code As Is
 
-A Claude Code plugin that solves the same problems as community frameworks (GSD, BMAD, Ralph, Agent OS) — but using the tool's native architecture instead of fighting it.
+A Claude Code plugin that solves the same problems as GSD, BMAD, Ralph, and Agent OS — but using Claude Code's native architecture instead of fighting it.
 
-## Why
+Ucai was built from the inside out.
+We read the source code. We studied how Anthropic builds their own plugins.
+Every component maps 1:1 to a native Claude Code system — no wrappers, no personas, no bash loops.
 
-Community frameworks were built from the outside looking in. They solve real problems — context rot, lack of structure, no guardrails, no iteration control — but they do it by wrapping the tool in bash scripts, mega-prompts, and persona engineering.
+## 🎥 Demo
 
-Ucai was built from the inside out. We read the source code. We studied how Anthropic builds their own plugins. Every component maps 1:1 to a native Claude Code system.
+> Add a 20–30 second GIF here showing `/ucai:plan` → `/ucai:build` → `/ucai:iterate`.
+
+## 🥊 Frameworks vs. Ucai — What's Actually Different?
+
+Community frameworks were built from the outside in — wrapping Claude Code in bash scripts, mega-prompts, and persona engineering.
+
+Ucai is built from the inside out — using Claude Code's native systems exactly as Anthropic designed them.
 
 | Problem | Framework Approach | Ucai (Native) Approach |
 |---------|-------------------|----------------------|
@@ -17,11 +25,31 @@ Ucai was built from the inside out. We read the source code. We studied how Anth
 | No planning | Manual PRD/FRD docs or skipped entirely | `/plan` with discovery agents + structured file output |
 | No onboarding | Template CLAUDE.md dumps | Agent-powered codebase analysis |
 
-## Installation
+## ✨ What Ucai Gives You
 
-Requires Claude Code **v1.0.33+** (`claude --version` to check).
+- Project planning with discovery agents
+- Feature-level FRDs
+- 8-phase build workflow with parallel agents
+- Native autonomous iteration (`/ucai:iterate`)
+- Multi‑agent code review
+- Structured debugging
+- Documentation generation
+- Release automation
+- Built-in senior-level skills (backend, frontend, QA, DevOps, architecture)
 
-### From marketplace (recommended)
+All using native Claude Code commands, agents, hooks, and skills.
+
+## ⚡ Quickstart
+
+### Requirements
+
+Claude Code **v1.0.33+**. Check with:
+
+```
+claude --version
+```
+
+### Install (Marketplace)
 
 Inside an interactive Claude Code session:
 
@@ -30,17 +58,17 @@ Inside an interactive Claude Code session:
 /plugin install ucai@ucai-marketplace
 ```
 
-This installs Ucai globally — available in every project, every session.
+This installs Ucai globally — available in every project and every session.
 
-### For development/testing
+### Development / Local Testing
 
 ```bash
 claude --plugin-dir ./ucai
 ```
 
-### Verify installation
+## 🧪 Verify Installation
 
-After installing, all commands are namespaced under `ucai:`:
+All commands are namespaced under `ucai:`:
 
 ```
 /ucai:init
@@ -56,9 +84,9 @@ After installing, all commands are namespaced under `ucai:`:
 
 Run `/help` to see them listed.
 
-## Getting Started
+## 🚀 Getting Started
 
-### New project (greenfield)
+### Greenfield (New Project)
 
 Start with a project-level plan:
 
@@ -66,103 +94,102 @@ Start with a project-level plan:
 /ucai:plan
 ```
 
-With no arguments, this enters project-level mode — it asks what you're building, researches the domain with parallel agents, and produces a project spec with a full requirements backlog and build order:
+This produces:
 
-- `.claude/project.md` — Vision, goals, target users, constraints, tech stack
-- `.claude/requirements.md` — Feature backlog with MoSCoW priorities + sequenced build order
+- `.claude/project.md` — Vision, goals, users, constraints
+- `.claude/requirements.md` — Feature backlog + sequenced build order
 
-Then build features step by step from the build order:
+Then build features:
 
 ```
 /ucai:build Core scraping pipeline
 /ucai:build Endpoint system
 ```
 
-For complex steps, optionally create a detailed FRD first:
+For complex features:
 
 ```
 /ucai:plan Core scraping pipeline
 /ucai:build Core scraping pipeline
 ```
 
-Once you have code, generate project guidelines:
+Generate project guidelines:
 
 ```
 /ucai:init
 ```
 
-When ready to share or ship:
+Ship:
 
 ```
 /ucai:docs
 /ucai:release patch
 ```
 
-### Existing project (brownfield)
+### Brownfield (Existing Project)
 
-Open any project and start with onboarding:
+Start with onboarding:
 
 ```
 /ucai:init
 ```
 
-This analyzes your codebase with parallel agents and generates a CLAUDE.md with real project facts — tech stack, conventions, structure, key files.
+This analyzes your codebase with parallel agents and generates a real, fact-based CLAUDE.md.
 
-To plan a roadmap, run `/plan` with no arguments to define project scope and requirements. Then build features from the build order:
+Plan a roadmap:
 
 ```
 /ucai:plan
+```
+
+Build features:
+
+```
 /ucai:build Add real-time notifications
 ```
 
-To debug issues:
+Debug:
 
 ```
 /ucai:debug TypeError: Cannot read property 'map' of undefined
 ```
 
-When ready to share or ship:
+Ship:
 
 ```
 /ucai:docs
 /ucai:release patch
 ```
 
-### Iterate
+## 🔁 Iterate (Native Autonomous Loops)
 
 ```
 /ucai:iterate Refactor the auth module --max-iterations 5
 ```
 
-Claude works autonomously, and each time it tries to stop, the Stop hook feeds the task back. It reviews its own previous work, continues, and repeats until done or the iteration limit is hit.
+Ucai uses native Stop hooks — no bash wrappers.
+Claude works autonomously, reviews its own work, and continues until done or the iteration limit is reached.
 
-## How Context Persists
+## 🧠 How Context Persists
 
-Commands write files. Other commands read them. That's it — native Read/Write tools, no external memory.
-
-```
-/plan                          → .claude/project.md + .claude/requirements.md
-/plan add auth                 → .claude/frds/auth.md
-/build add auth                → requirements.md updated (auth ✅)
-/docs                          → README.md, docs/ (project-dependent)
-/release patch                 → CHANGELOG.md + version bump + git tag
-```
+> Commands write files. Other commands read them. That's it — native Read/Write tools, no external memory.
 
 ```
 .claude/
-├── project.md              # Vision, goals, users, constraints
-├── requirements.md         # Feature backlog (checkboxes track progress)
+├── project.md
+├── requirements.md
 └── frds/
-    ├── auth.md             # Feature FRD (preserved)
-    └── payments.md         # Feature FRD (preserved)
+    ├── auth.md
+    └── payments.md
 ```
 
-Each command auto-loads whatever exists. A new session reads the files and knows what's been planned, built, and what's next. The SessionStart hook announces progress and the next build order step.
+Every command auto-loads what exists.
+New sessions instantly know the project state.
 
-## Commands
+## 🧩 Commands
 
 ### `/ucai:init` — Project Onboarding
-Analyzes your project with parallel agents and generates a proper CLAUDE.md with actual project facts — not framework config. Uses project.md as context if available.
+Analyzes your project with parallel agents and generates a real CLAUDE.md.
 
 ```
 /ucai:init
@@ -170,25 +197,25 @@ Analyzes your project with parallel agents and generates a proper CLAUDE.md with
 ```
 
 ### `/ucai:plan` — Project Spec & Feature FRDs
-Works at two levels:
 
-**No arguments** — Project-level planning for greenfield or project definition:
+Two modes:
+
+**Project-level:**
 ```
 /ucai:plan
 ```
-Phases: Understand → Discovery → Project Definition → Requirements Backlog → Output. Produces `.claude/project.md` and `.claude/requirements.md` (with sequenced build order).
+Produces `project.md` + `requirements.md`.
 
-**With arguments** — Feature-level FRD generation (optional, for complex features):
+**Feature-level:**
 ```
 /ucai:plan Add real-time notifications
 /ucai:plan Migrate from REST to GraphQL
 ```
-Phases: Understand → Discovery → Requirements → Architecture → Output. Produces `.claude/frds/<slug>.md`. Auto-loads project spec as context if available.
+Produces `.claude/frds/<slug>.md`. Auto-loads project spec as context if available.
 
 ### `/ucai:build` — Feature Development
-8-phase workflow: Understand → Explore → Clarify → Design → Build → Verify → Test → Done.
-Uses parallel agents at explore, design, and review phases. Mandatory manual testing gate before marking complete. Explicit user approval gates.
-Auto-loads project.md, requirements.md, and matching FRD if they exist. Checks build order for dependencies and marks all covered requirements done when complete.
+
+8-phase workflow with parallel agents and explicit approval gates.
 
 ```
 /ucai:build Add user authentication with JWT
@@ -196,7 +223,8 @@ Auto-loads project.md, requirements.md, and matching FRD if they exist. Checks b
 ```
 
 ### `/ucai:iterate` — Controlled Autonomous Iteration
-Native Ralph-style loops using Stop hooks. No bash wrappers.
+
+Native Stop hooks. No wrappers.
 
 ```
 /ucai:iterate Build a REST API --completion-promise 'All endpoints working and tested' --max-iterations 15
@@ -204,7 +232,8 @@ Native Ralph-style loops using Stop hooks. No bash wrappers.
 ```
 
 ### `/ucai:review` — Multi-Agent Code Review
-Parallel agents independently review for conventions, bugs, and security. Validates against project specs if available. Results validated and filtered.
+
+Parallel agents check conventions, bugs, security.
 
 ```
 /ucai:review
@@ -212,7 +241,8 @@ Parallel agents independently review for conventions, bugs, and security. Valida
 ```
 
 ### `/ucai:debug` — Structured Debugging
-Parallel investigation agents trace bugs through the codebase, analyze recent changes, and identify root cause. Proposes a targeted fix with approval gate.
+
+Parallel investigation agents trace root causes.
 
 ```
 /ucai:debug TypeError: Cannot read property 'map' of undefined
@@ -220,7 +250,8 @@ Parallel investigation agents trace bugs through the codebase, analyze recent ch
 ```
 
 ### `/ucai:docs` — Documentation Generation
-Scans codebase and spec files to generate appropriate documentation. Adapts to what the project has — API docs, README, deployment guide. References project.md and requirements.md if available.
+
+Generates README, API docs, deployment guides.
 
 ```
 /ucai:docs
@@ -229,7 +260,8 @@ Scans codebase and spec files to generate appropriate documentation. Adapts to w
 ```
 
 ### `/ucai:release` — Changelog & Version Bump
-Reads git history since last tag, categorizes changes, generates a changelog, bumps the version, and creates a git tag. Cross-references requirements.md for completed features.
+
+Reads git history, bumps version, creates tag.
 
 ```
 /ucai:release patch
@@ -237,55 +269,29 @@ Reads git history since last tag, categorizes changes, generates a changelog, bu
 /ucai:release v2.1.0
 ```
 
-### `/ucai:cancel-iterate` — Stop Iterate Loop
-Cancels an active iteration loop.
+### `/ucai:cancel-iterate`
 
-## Architecture
+Stops an active iteration loop.
+
+## 🏗 Architecture
 
 ```
 ucai/
-├── plugin.json                   # Plugin manifest
-├── marketplace.json              # Marketplace listing
-├── CLAUDE.md                     # Project guidelines
-├── commands/                     # Slash commands
-│   ├── init.md                   # /init
-│   ├── plan.md                   # /plan (project + feature modes)
-│   ├── build.md                  # /build
-│   ├── debug.md                  # /debug
-│   ├── docs.md                   # /docs
-│   ├── release.md                # /release
-│   ├── iterate.md                # /iterate
-│   ├── review.md                 # /review
-│   └── cancel-iterate.md        # /cancel-iterate
-├── agents/                       # Subagents (all read-only, sonnet)
-│   ├── project-scanner.md        # Codebase analysis
-│   ├── explorer.md               # Deep exploration
-│   ├── architect.md              # Architecture design
-│   ├── reviewer.md               # Code review
-│   └── verifier.md               # Acceptance validation
-├── hooks/                        # Lifecycle handlers
-│   ├── hooks.json                # Hook configuration
-│   └── handlers/
-│       ├── sessionstart-handler.js  # Context injection (git branch, iterate status, specs, skills)
-│       ├── pretooluse-guard.js      # Config file protection
-│       └── stop-handler.js          # Iteration control
+├── plugin.json
+├── marketplace.json
+├── CLAUDE.md
+├── commands/
+├── agents/
+├── hooks/
 ├── scripts/
-│   └── setup-iterate.js          # Iterate loop setup
-└── skills/                       # Progressive disclosure (auto-loaded by Claude Code)
-    ├── ucai-patterns/            # Claude Code best practices
-    ├── senior-backend/           # API design, databases, auth
-    ├── senior-frontend/          # React, Next.js, Tailwind
-    ├── senior-architect/         # System design, ADRs
-    ├── code-reviewer/            # Code review automation
-    ├── senior-qa/                # Testing patterns
-    └── senior-devops/            # CI/CD, deployment
+└── skills/
 ```
 
 Every component is a native Claude Code system. Nothing invented.
 
-## Skills
+## 🧠 Built‑In Skills
 
-Ucai ships with 7 curated skills that Claude Code auto-loads based on context:
+Ucai ships with 7 curated skills auto-loaded by Claude Code:
 
 | Skill | Activates when |
 |-------|---------------|
@@ -299,42 +305,18 @@ Ucai ships with 7 curated skills that Claude Code auto-loads based on context:
 
 Engineering skills sourced from [alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills) (MIT). Browse [skillsmp.com](https://skillsmp.com) for 200,000+ community skills.
 
-### Project-Level Custom Skills
+You can also add project-level custom skills under `.claude/skills/`.
 
-You can also create custom skills in any project:
+## 🧭 Principles
 
-```
-your-project/
-└── .claude/
-    └── skills/
-        └── my-skill/
-            ├── SKILL.md          # Required: YAML frontmatter (name, description) + body
-            └── references/       # Optional: additional detail loaded on demand
-```
+1. **Use native systems** — Commands, agents, hooks, skills
+2. **Files are context** — No external memory
+3. **Context is a public good** — Only add what Claude doesn't know
+4. **Agents are not personas** — Real model assignments + tools
+5. **Explicit approval gates** — Never proceed without user decision
+6. **Parallel by default** — Spawn focused agents simultaneously
+7. **CLAUDE.md is for project facts** — Not framework config
 
-Example `SKILL.md`:
+## ⭐ Support the Project
 
-```markdown
----
-name: my-api-conventions
-description: Use when building or modifying API endpoints in this project
----
-
-# API Conventions
-
-- All endpoints return JSON with `{ data, error, meta }` envelope
-- Use zod for request validation
-- ...
-```
-
-Claude Code automatically discovers project-level skills alongside plugin skills — no configuration needed.
-
-## Principles
-
-1. **Use native systems** — Commands, agents, hooks, skills. Not wrappers.
-2. **Files are context** — Commands write specs, other commands read them. No external memory needed.
-3. **Context is a public good** — Only add what Claude doesn't know. Progressive disclosure.
-4. **Agents are not personas** — Model assignments, tool declarations, focused missions.
-5. **Explicit approval gates** — Never proceed without user decision.
-6. **Parallel by default** — Spawn focused agents simultaneously. Consolidate.
-7. **CLAUDE.md is for project facts** — Not framework configuration.
+If Ucai helps you ship faster, consider starring the repo.
