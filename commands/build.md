@@ -43,7 +43,14 @@ Feature request: $ARGUMENTS
    - First: `.claude/frds/<slug>.md`
    - Fallback: `.claude/prd.md` (legacy single-file format)
    - If found, read and summarize it to the user.
-4. Ask: "I found [list specs found]. Should I use these as context for this build?"
+4. **Agile mode check**: If an FRD was found and loaded, check its YAML frontmatter for `mode: agile`.
+   - If `mode: agile` is present, find the `## Milestones` section in the FRD
+   - List all milestones with their name, scope summary, and completion status (`- [ ]` = pending, `- [x]` = done)
+   - Skip milestones that are already fully complete (all criteria checked)
+   - Ask: "This FRD uses agile mode. Which milestone do you want to build next? [list remaining milestones]"
+   - **Wait for user to select a milestone**
+   - Note the selected milestone's name, scope, and acceptance criteria — throughout phases 2–8, scope all work to this milestone only. Do not implement or review code outside its defined scope.
+5. Ask: "I found [list specs found]. Should I use these as context for this build?"
 
 If the user confirms:
 - Phase 2 (Explore): Use FRD's Discovery section as a starting point — focus agents on areas not already covered
@@ -199,7 +206,23 @@ If the user says "whatever you think is best", provide your recommendation and g
      - Replace the `updated:` value in the YAML frontmatter with today's date
    - Confirm: "Requirements updated in `.claude/requirements.md`"
    - If no matching lines are found, tell the user and skip silently
-4. **CLAUDE.md refresh**: If a CLAUDE.md exists, check whether this feature introduced changes that should be reflected:
+4. **Milestone update**: If the FRD had `mode: agile` and a milestone was selected in Phase 1:
+   - Re-read the FRD file in full (do not rely on memory — the file may have changed)
+   - Find the selected milestone's `**Acceptance criteria**:` block
+   - Collect all `- [ ]` criteria in that block
+   - Present the proposed changes to the user:
+     ```
+     Marking M[N]: [Name] complete in .claude/frds/<slug>.md:
+     - [ ] Criterion A  →  - [x] Criterion A
+     - [ ] Criterion B  →  - [x] Criterion B
+     ```
+   - **Wait for user confirmation** before editing
+   - After confirmation, use the Edit tool to mark each criterion done: `- [ ]` → `- [x]`
+   - Count remaining milestones with unchecked criteria
+   - If milestones remain: "M[N+1]: [name] is next. Run `/build [feature]` to continue."
+   - If all milestones are complete: "All milestones complete — feature is done."
+   - If no matching criteria are found, tell the user and skip silently
+5. **CLAUDE.md refresh**: If a CLAUDE.md exists, check whether this feature introduced changes that should be reflected:
    - New architecture patterns or layers
    - New development commands (build, test, lint)
    - New key files or entry points
