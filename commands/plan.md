@@ -305,15 +305,16 @@ Feature request: $ARGUMENTS
 **MANDATORY**: You MUST use the Task tool to launch explorer agents. Do NOT skip agents and research yourself.
 
 **Actions**:
-1. Launch 3 `ucai:explorer` agents in parallel using the Task tool (level: **medium**, max_turns: 20), each with a different focus:
-   - **Codebase patterns**: "Level: medium. Find features similar to [feature] in this codebase. Trace their implementation, identify reusable patterns, architecture layers, and integration points. Return 5-10 key files."
-   - **Codebase architecture**: "Level: medium. Map the overall architecture, module boundaries, data flow, and conventions relevant to [feature area]. Return 5-10 key files."
-   - **Web research**: "Level: medium. Search the web for best practices, design patterns, framework documentation, and API references relevant to [feature]. Prioritize official docs and authoritative sources. Return key findings with URLs."
+1. Ask the user: "How deep should the discovery be? **quick** (haiku, ~8 calls, fast) / **medium** (sonnet, ~15 calls, balanced) / **thorough** (sonnet, ~25 calls, comprehensive) [default: medium]" — wait for answer. Use the chosen level, model, and max_turns throughout this phase: quick → haiku + 12, medium → sonnet + 20, thorough → sonnet + 30.
+2. Launch 3 `ucai:explorer` agents in parallel using the Task tool, each with a different focus:
+   - **Codebase patterns**: "Level: [chosen]. Find features similar to [feature] in this codebase. Trace their implementation, identify reusable patterns, architecture layers, and integration points. Return 5-10 key files."
+   - **Codebase architecture**: "Level: [chosen]. Map the overall architecture, module boundaries, data flow, and conventions relevant to [feature area]. Return 5-10 key files."
+   - **Web research**: "Level: [chosen]. Search the web for best practices, design patterns, framework documentation, and API references relevant to [feature]. Prioritize official docs and authoritative sources. Return key findings with URLs."
 
    If project.md exists, include project context (tech stack, constraints) in each agent's prompt.
 
-2. **Wait for all agents to complete** before proceeding
-3. After agents return, read key files they identified
+3. **Wait for all agents to complete** before proceeding
+4. After agents return, read key files they identified
 4. Present a consolidated discovery summary
 
 ---

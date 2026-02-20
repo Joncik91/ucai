@@ -77,16 +77,17 @@ If the user declines, proceed with $ARGUMENTS only.
 **MANDATORY**: You MUST use the Task tool to launch explorer agents. Do NOT skip agents and read files yourself — agents provide parallel, thorough exploration that you cannot replicate in a single pass.
 
 **Actions**:
-1. Launch 2-3 `ucai:explorer` agents in parallel using the Task tool (level: **medium**, max_turns: 20), each targeting a different aspect:
-   - "Level: medium. Find features similar to [feature] and trace their implementation"
-   - "Level: medium. Map the architecture and abstractions for [relevant area]"
-   - "Level: medium. Identify testing approaches, extension points, or patterns relevant to [feature]"
+1. Ask the user: "How deep should the codebase exploration be? **quick** (haiku, ~8 calls, fast) / **medium** (sonnet, ~15 calls, balanced) / **thorough** (sonnet, ~25 calls, comprehensive) [default: medium]" — wait for answer. Use the chosen level, model, and max_turns throughout this phase: quick → haiku + 12, medium → sonnet + 20, thorough → sonnet + 30.
+2. Launch 2-3 `ucai:explorer` agents in parallel using the Task tool, each targeting a different aspect:
+   - "Level: [chosen]. Find features similar to [feature] and trace their implementation"
+   - "Level: [chosen]. Map the architecture and abstractions for [relevant area]"
+   - "Level: [chosen]. Identify testing approaches, extension points, or patterns relevant to [feature]"
 
    Each agent should return a list of 5-10 key files.
 
-2. **Wait for all agents to complete** before proceeding
-3. After agents return, read all identified files yourself
-4. Present comprehensive summary of findings
+3. **Wait for all agents to complete** before proceeding
+4. After agents return, read all identified files yourself
+5. Present comprehensive summary of findings
 
 ---
 
