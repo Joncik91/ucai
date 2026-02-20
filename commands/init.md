@@ -48,10 +48,10 @@ Project path: $ARGUMENTS (default: current directory)
 **MANDATORY**: You MUST use the Task tool to launch project-scanner agents. Do NOT skip agents and analyze the project yourself — agents provide parallel, thorough analysis that you cannot replicate in a single pass.
 
 **Actions**:
-1. Launch 2-3 `ucai:project-scanner` agents in parallel using the Task tool, each targeting a different aspect:
-   - Agent 1: "Analyze the tech stack, dependencies, and build/test/lint commands"
-   - Agent 2: "Map the directory structure, architecture patterns, and module organization"
-   - Agent 3: "Extract coding conventions, naming patterns, and formatting rules from existing code"
+1. Launch 2-3 `ucai:project-scanner` agents in parallel using the Task tool, each targeting a different aspect. Prefix each Task description with `[haiku]`:
+   - "[haiku] Analyze the tech stack, dependencies, and build/test/lint commands"
+   - "[haiku] Map the directory structure, architecture patterns, and module organization"
+   - "[haiku] Extract coding conventions, naming patterns, and formatting rules from existing code"
 
    If `.claude/project.md` was found in Phase 1, include its content (vision, tech stack, constraints) in each agent's prompt so they can cross-reference what was planned vs what was actually built.
 

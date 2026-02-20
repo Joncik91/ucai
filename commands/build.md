@@ -78,10 +78,10 @@ If the user declines, proceed with $ARGUMENTS only.
 
 **Actions**:
 1. Ask the user: "How deep should the codebase exploration be? **quick** (haiku, ~8 calls, fast) / **medium** (sonnet, ~15 calls, balanced) / **thorough** (sonnet, ~25 calls, comprehensive) [default: medium]" — wait for answer. Use the chosen level, model, and max_turns throughout this phase: quick → haiku + 12, medium → sonnet + 20, thorough → sonnet + 30.
-2. Launch 2-3 `ucai:explorer` agents in parallel using the Task tool, each targeting a different aspect:
-   - "Level: [chosen]. Find features similar to [feature] and trace their implementation"
-   - "Level: [chosen]. Map the architecture and abstractions for [relevant area]"
-   - "Level: [chosen]. Identify testing approaches, extension points, or patterns relevant to [feature]"
+2. Launch 2-3 `ucai:explorer` agents in parallel using the Task tool, each targeting a different aspect. Prefix each Task description with `[haiku]` (quick) or `[sonnet]` (medium/thorough):
+   - "[model] Level: [chosen]. Find features similar to [feature] and trace their implementation"
+   - "[model] Level: [chosen]. Map the architecture and abstractions for [relevant area]"
+   - "[model] Level: [chosen]. Identify testing approaches, extension points, or patterns relevant to [feature]"
 
    Each agent should return a list of 5-10 key files.
 
@@ -112,10 +112,10 @@ If the user says "whatever you think is best", provide your recommendation and g
 **Goal**: Present architecture options with trade-offs.
 
 **Actions**:
-1. Launch 2-3 architect agents in parallel with different focuses:
-   - Minimal changes (smallest change, maximum reuse)
-   - Clean architecture (maintainability, elegant abstractions)
-   - Pragmatic balance (speed + quality)
+1. Launch 2-3 `ucai:architect` agents in parallel using the Task tool. Prefix each Task description with `[opus]`:
+   - "[opus] Minimal changes: design [feature] using the smallest change, maximizing reuse"
+   - "[opus] Clean architecture: design [feature] prioritizing maintainability and elegant abstractions"
+   - "[opus] Pragmatic balance: design [feature] balancing speed and quality"
 2. Review all approaches and form your recommendation
 3. Present to user: brief summary of each, trade-offs, your recommendation with reasoning
 4. **Ask user which approach they prefer**

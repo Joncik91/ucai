@@ -46,11 +46,11 @@ Before starting Phase 2, you MUST load the `ucai:code-reviewer` skill — this i
 **MANDATORY**: You MUST use the Task tool to launch 3 reviewer agents in parallel. Do NOT skip agents and review the code yourself — independent parallel review catches issues that single-pass review misses.
 
 **Actions**:
-Launch 3 `ucai:reviewer` agents in parallel using the Task tool:
+Launch 3 `ucai:reviewer` agents in parallel using the Task tool. Prefix each Task description with `[sonnet]`:
 
-- **Agent 1** (sonnet): Review for CLAUDE.md compliance and project convention adherence
-- **Agent 2** (sonnet): Review for bugs, logic errors, and functional correctness
-- **Agent 3** (sonnet): Review for security vulnerabilities and performance issues
+- **Agent 1** (sonnet): "[sonnet] Review for CLAUDE.md compliance and project convention adherence"
+- **Agent 2** (sonnet): "[sonnet] Review for bugs, logic errors, and functional correctness"
+- **Agent 3** (sonnet): "[sonnet] Review for security vulnerabilities and performance issues"
 
 Each agent should return issues with:
 - Confidence score (0-100)

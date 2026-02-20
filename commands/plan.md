@@ -71,10 +71,10 @@ Use this mode when starting a new project or defining project scope for the firs
 **MANDATORY**: You MUST use the Task tool to launch explorer agents. Do NOT skip agents and research yourself.
 
 **Actions**:
-1. Launch 2-3 `ucai:explorer` agents in parallel using the Task tool (level: **thorough**, max_turns: 30):
-   - **Domain research**: "Level: thorough. Search the web for best practices, architecture patterns, and framework documentation relevant to [project type]. Prioritize official docs. Return key findings with URLs."
-   - **Similar projects**: "Level: medium. Search the web for open-source projects similar to [project description]. Analyze their architecture, tech stack choices, and patterns. Return key findings."
-   - **Codebase analysis** (brownfield only): "Level: thorough. Analyze the existing codebase structure, tech stack, conventions, and patterns. Return 5-10 key files and architectural insights."
+1. Launch 2-3 `ucai:explorer` agents in parallel using the Task tool. Prefix each Task description with `[sonnet]`:
+   - **Domain research** (max_turns: 30): "[sonnet] Level: thorough. Search the web for best practices, architecture patterns, and framework documentation relevant to [project type]. Prioritize official docs. Return key findings with URLs."
+   - **Similar projects** (max_turns: 20): "[sonnet] Level: medium. Search the web for open-source projects similar to [project description]. Analyze their architecture, tech stack choices, and patterns. Return key findings."
+   - **Codebase analysis** (brownfield only, max_turns: 30): "[sonnet] Level: thorough. Analyze the existing codebase structure, tech stack, conventions, and patterns. Return 5-10 key files and architectural insights."
 
 2. **Wait for all agents to complete** before proceeding
 3. Present a consolidated discovery summary:
@@ -306,10 +306,10 @@ Feature request: $ARGUMENTS
 
 **Actions**:
 1. Ask the user: "How deep should the discovery be? **quick** (haiku, ~8 calls, fast) / **medium** (sonnet, ~15 calls, balanced) / **thorough** (sonnet, ~25 calls, comprehensive) [default: medium]" — wait for answer. Use the chosen level, model, and max_turns throughout this phase: quick → haiku + 12, medium → sonnet + 20, thorough → sonnet + 30.
-2. Launch 3 `ucai:explorer` agents in parallel using the Task tool, each with a different focus:
-   - **Codebase patterns**: "Level: [chosen]. Find features similar to [feature] in this codebase. Trace their implementation, identify reusable patterns, architecture layers, and integration points. Return 5-10 key files."
-   - **Codebase architecture**: "Level: [chosen]. Map the overall architecture, module boundaries, data flow, and conventions relevant to [feature area]. Return 5-10 key files."
-   - **Web research**: "Level: [chosen]. Search the web for best practices, design patterns, framework documentation, and API references relevant to [feature]. Prioritize official docs and authoritative sources. Return key findings with URLs."
+2. Launch 3 `ucai:explorer` agents in parallel using the Task tool, each with a different focus. Prefix each Task description with `[haiku]` (quick) or `[sonnet]` (medium/thorough):
+   - **Codebase patterns**: "[model] Level: [chosen]. Find features similar to [feature] in this codebase. Trace their implementation, identify reusable patterns, architecture layers, and integration points. Return 5-10 key files."
+   - **Codebase architecture**: "[model] Level: [chosen]. Map the overall architecture, module boundaries, data flow, and conventions relevant to [feature area]. Return 5-10 key files."
+   - **Web research**: "[model] Level: [chosen]. Search the web for best practices, design patterns, framework documentation, and API references relevant to [feature]. Prioritize official docs and authoritative sources. Return key findings with URLs."
 
    If project.md exists, include project context (tech stack, constraints) in each agent's prompt.
 
@@ -408,8 +408,8 @@ State which sections apply and why. The user confirms or adjusts at the approval
 
 ### Step 2: Launch Agents
 
-Launch 1-2 `ucai:architect` agents using the Task tool:
-- "Given these requirements [summary] and these codebase patterns [summary], propose a high-level architecture. Include: key components, data flow, integration points, files to create/modify. Keep it high-level — detailed design happens in /build."
+Launch 1-2 `ucai:architect` agents using the Task tool. Prefix each Task description with `[opus]`:
+- "[opus] Given these requirements [summary] and these codebase patterns [summary], propose a high-level architecture. Include: key components, data flow, integration points, files to create/modify. Keep it high-level — detailed design happens in /build."
 
 If project.md exists, include tech stack and constraints in the agent's prompt.
 

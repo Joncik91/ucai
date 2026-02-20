@@ -63,11 +63,11 @@ Input: $ARGUMENTS
 **Actions**:
 1. Launch 2-3 agents in parallel using the Task tool:
 
-   - **Project scanner** (`ucai:project-scanner`): "Analyze the codebase structure for documentation purposes. Identify: public APIs and their signatures, CLI commands and their options, entry points, exported modules, configuration options, environment variables, data models, and key abstractions. Return a structured inventory of what should be documented."
+   - **Project scanner** (`ucai:project-scanner`, haiku): "[haiku] Analyze the codebase structure for documentation purposes. Identify: public APIs and their signatures, CLI commands and their options, entry points, exported modules, configuration options, environment variables, data models, and key abstractions. Return a structured inventory of what should be documented."
 
-   - **Docs auditor** (`ucai:explorer`, level: **quick**, max_turns: 12): "Level: quick. Find all existing documentation in the project: README.md, inline JSDoc/docstrings, code comments, docs/ folder, markdown files, configuration examples. Assess what's current, what's stale, and what's missing. Return findings with file:line references."
+   - **Docs auditor** (`ucai:explorer`, sonnet, max_turns: 12): "[sonnet] Level: quick. Find all existing documentation in the project: README.md, inline JSDoc/docstrings, code comments, docs/ folder, markdown files, configuration examples. Assess what's current, what's stale, and what's missing. Return findings with file:line references."
 
-   - **Setup analyst** (`ucai:explorer`, level: **quick**, max_turns: 12): "Level: quick. Identify the project's setup and deployment model. What does someone need to know to install, configure, and run this project? Check: package.json scripts, Dockerfile, docker-compose, CI/CD configs, environment files (.env.example), and any setup scripts. Return a step-by-step setup flow."
+   - **Setup analyst** (`ucai:explorer`, sonnet, max_turns: 12): "[sonnet] Level: quick. Identify the project's setup and deployment model. What does someone need to know to install, configure, and run this project? Check: package.json scripts, Dockerfile, docker-compose, CI/CD configs, environment files (.env.example), and any setup scripts. Return a step-by-step setup flow."
 
    Include project context (tech stack, constraints) in each agent's prompt if available.
 
