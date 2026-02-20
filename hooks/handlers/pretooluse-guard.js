@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
 // Ucai PreToolUse Guard
-// Blocks Write/Edit calls targeting plugin config files
-// Exit code 2 = block operation (stderr shown to Claude)
-// Exit code 0 = allow operation
+// Guards Write/Edit calls targeting plugin config files
+// Exit code 0 always — decision communicated via JSON hookSpecificOutput:
+//   permissionDecision "ask"   = pause and show user a dialog
+//   permissionDecision "allow" = proceed (used when only path normalization applies)
+//   no JSON output             = fast path allow (normal file, clean path)
+// updatedInput is emitted whenever file_path contains backslashes (normalizes to forward slashes)
 
 const path = require("path")
 
@@ -26,21 +29,39 @@ process.stdin.on("end", () => {
       process.exit(0)
     }
 
-    const resolved = path.resolve(filePath)
+    const resolved = path.resolve(PLUGIN_ROOT, filePath)
     const relative = path.relative(PLUGIN_ROOT, resolved).replace(/\\/g, "/")
+    const normalized = filePath.replace(/\\/g, "/")
+    const needsNormalization = filePath !== normalized
 
     const isProtected = process.platform === "win32"
       ? PROTECTED_FILES.some((f) => f.toLowerCase() === relative.toLowerCase())
       : PROTECTED_FILES.includes(relative)
 
-    if (isProtected) {
-      process.stderr.write(
-        "BLOCKED: " + relative + " is a protected ucai config file. " +
-        "Ask the user for permission before modifying it."
-      )
-      process.exit(2)
+    if (!isProtected && !needsNormalization) {
+      process.exit(0)
     }
 
+    const hookOutput = {}
+
+    if (isProtected) {
+      hookOutput.permissionDecision = "ask"
+      hookOutput.permissionDecisionReason =
+        relative + " is a protected ucai config file. Allow Claude to modify it?"
+    } else {
+      hookOutput.permissionDecision = "allow"
+    }
+
+    if (needsNormalization) {
+      hookOutput.updatedInput = { file_path: normalized }
+    }
+
+    process.stdout.write(JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        ...hookOutput,
+      },
+    }))
     process.exit(0)
   } catch {
     process.exit(0)

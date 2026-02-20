@@ -149,6 +149,8 @@ After you select, phases 2–8 are scoped entirely to that milestone. Phase 8 ma
 
 Uses native Stop hooks. Claude works autonomously, reviews its own output, and continues until the completion promise is met or the iteration limit is reached.
 
+**Context compaction is handled automatically.** If the context window fills during a long iteration run, the PreCompact hook reads the iterate state and injects it into the compaction summary — so the loop continues without losing track of where it is.
+
 Stop at any time:
 
 ```

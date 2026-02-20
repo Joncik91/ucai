@@ -31,6 +31,7 @@ Ucai is built from the inside out — using Claude Code's native systems exactly
 - Structured debugging
 - Documentation generation
 - Release automation
+- Hook lifecycle coverage — session context injection, config guardrails, subagent quality gates, and iterate-state preservation across compaction
 - Built-in senior-level skills (backend, frontend, QA, DevOps, architecture)
 
 All using native Claude Code commands, agents, hooks, and skills.

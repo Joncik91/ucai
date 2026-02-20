@@ -70,11 +70,14 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 
 ### Hook conventions
 - **SessionStart**: `sessionstart-handler.js` injects git branch, iterate status, CLAUDE.md presence, spec file status, available skills
-- **PreToolUse**: `pretooluse-guard.js` guards plugin config files (Write/Edit matcher)
-- **Stop**: `stop-handler.js` for iteration control
+- **PreToolUse**: `pretooluse-guard.js` guards plugin config files (Write/Edit matcher); emits `permissionDecision: "ask"` for protected files and `updatedInput` to normalize backslash paths
+- **UserPromptSubmit**: `userpromptsubmit-handler.js` — if iterate loop active, injects loop context into additionalContext; non-blocking
+- **Stop**: `stop-handler.js` — iteration control; reads iterate state file, blocks exit to continue loop
+- **SubagentStop**: `subagent-stop-handler.js` — blocks on empty output; injects one-line result preview into session context
 - **PreCompact**: `precompact-handler.js` — if iterate loop active, surfaces state in systemMessage before compaction
 - **SessionEnd**: `session-end-handler.js` — deletes stale iterate state file on session termination
 - **Paths**: Always use `${CLAUDE_PLUGIN_ROOT}` with quotes for Windows compatibility
+- **MCP**: `plugin.json` supports an optional `mcpServers` field to bundle MCP server definitions; Ucai omits it (no external server dependencies by design)
 
 ### Skill awareness
 - Commands include a "Skill Awareness" section that instructs Claude to check SessionStart context for available skills
@@ -99,7 +102,7 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 ## Conventions
 
 ### JavaScript
-- No semicolons (ASI style) — **exception**: `stop-handler.js` and `pretooluse-guard.js` have them; follow file-local style
+- No semicolons (ASI style) — **exception**: `stop-handler.js` has them; follow file-local style
 - Double quotes for strings
 - `camelCase` variables/functions, `SCREAMING_SNAKE_CASE` constants
 - Shebang (`#!/usr/bin/env node`) on executable scripts
@@ -147,6 +150,8 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - `hooks/handlers/pretooluse-guard.js` — Config file protection hook
 - `hooks/handlers/precompact-handler.js` — Iterate state surfacing before context compaction
 - `hooks/handlers/session-end-handler.js` — Iterate state cleanup on session termination
+- `hooks/handlers/userpromptsubmit-handler.js` — Iterate context injection for user prompts
+- `hooks/handlers/subagent-stop-handler.js` — Subagent output quality gate
 - `scripts/setup-iterate.js` — Iterate loop setup
 - `commands/build.md` — Most complex command (8-phase workflow)
 - `skills/ucai-patterns/SKILL.md` — Best practices skill
