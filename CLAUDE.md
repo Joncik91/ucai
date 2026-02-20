@@ -127,7 +127,7 @@ Commands define phased workflows with approval gates. Agents are read-only worke
 - Scripts/handlers: `.js`
 
 ### Agent design
-- Model assignments: haiku (project-scanner), sonnet (explorer, reviewer, verifier), opus (architect)
+- Model assignments: haiku (project-scanner, explorer-haiku), sonnet (explorer, reviewer, verifier), opus (architect, explorer-opus, reviewer-opus)
 - Read-only tools only (no Write/Edit)
 - Color-coded: yellow (scanner), cyan (explorer), green (architect), red (reviewer), blue (verifier)
 - Explorer agents support 3 thoroughness levels: **quick** (~8 calls, max_turns: 12), **medium** (~15 calls, max_turns: 20), **thorough** (~25 calls, max_turns: 30)

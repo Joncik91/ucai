@@ -58,7 +58,7 @@ Input: $ARGUMENTS
 **MANDATORY**: You MUST use the Task tool to launch explorer agents. Do NOT skip agents and investigate yourself.
 
 **Actions**:
-1. Launch 3 `ucai:explorer` agents in parallel using the Task tool with `model: opus`. Prefix each Task description with `[opus]`:
+1. Launch 3 `ucai:explorer-opus` agents in parallel using the Task tool. Prefix each Task description with `[opus]`:
 
    - **Error tracing** (max_turns: 30): "[opus] Level: thorough. Trace this error through the codebase: [error/bug description]. Start from [error location/stack trace if available]. Follow the call chain — function calls, imports, data flow. Identify where the failure originates. Return 5-10 key files with file:line references and a call chain summary."
 
