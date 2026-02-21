@@ -23,19 +23,7 @@ Commands auto-load whatever exists. Start a new session and `/build` already kno
 
 ## Full Workflow: New Project
 
-### 1. Onboard the codebase
-
-```
-/ucai:init
-```
-
-Launches parallel agents to analyze your codebase structure, tech stack, conventions, and key files. Produces a fact-based `CLAUDE.md` — not a template, an actual description of your project.
-
-Run this first on any project, greenfield or brownfield. On a greenfield project with no source files yet it generates a starter `CLAUDE.md` from your description.
-
----
-
-### 2. Define the project spec
+### 1. Define the project spec
 
 ```
 /ucai:plan
@@ -54,7 +42,7 @@ Produces:
 
 ---
 
-### 3. Plan a feature (optional but recommended for complex work)
+### 2. Plan a feature (optional but recommended for complex work)
 
 ```
 /ucai:plan Add real-time notifications
@@ -106,7 +94,7 @@ mode: agile
 
 ---
 
-### 4. Build a feature
+### 3. Build a feature
 
 ```
 /ucai:build Add real-time notifications
@@ -137,6 +125,23 @@ This FRD uses agile mode. Which milestone do you want to build next?
 ```
 
 After you select, phases 2–8 are scoped entirely to that milestone. Phase 8 marks its acceptance criteria done in the FRD and tells you what's next.
+
+---
+
+### 4. Onboard the codebase
+
+```
+/ucai:init
+```
+
+Launches parallel agents to analyze your codebase structure, tech stack, conventions, and key files. Produces a fact-based `CLAUDE.md` — not a template, an actual description of your project.
+
+**When to run `/init` on a new project — two valid timings:**
+
+- **Right after `/plan`** — if planning produced thorough architectural decisions: the tech stack is chosen, the folder structure is defined, key conventions are decided (state management approach, API style, testing framework, etc.). At this point you know exactly what CLAUDE.md should say, even before writing code.
+- **After the first `/build`** — if planning left those choices open and they were only resolved during implementation. Wait until code exists, then run `/init` to capture what was actually built.
+
+For brownfield (existing) projects, `/init` is the starting point — run it before anything else.
 
 ---
 
@@ -212,10 +217,11 @@ Reads git history since the last tag, cross-references `requirements.md` to conn
 ### Starting a new project
 
 ```
-/ucai:init                              # generate CLAUDE.md
 /ucai:plan                              # define project spec + backlog
+/ucai:init                              # if plan settled stack + conventions → generate CLAUDE.md now
 /ucai:plan Vertical slice               # optional: FRD for first build
 /ucai:build Vertical slice              # build step 1 from build order
+/ucai:init                              # if stack/conventions were left open → generate CLAUDE.md now
 /ucai:build Authentication              # build step 2
 ...
 /ucai:docs                              # generate documentation

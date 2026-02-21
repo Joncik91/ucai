@@ -2,7 +2,7 @@
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "ucai-marketplace",
   "metadata": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Ucai — Use Claude Code As Is. Native plugin leveraging built-in architecture for structured workflows, parallel agents, and iteration control."
   },
   "owner": {
@@ -12,7 +12,7 @@
     {
       "name": "ucai",
       "description": "Structured workflows, parallel agents, hooks, and skills using Claude Code's native architecture. Commands for project planning, feature development, code review, and autonomous iteration — zero external dependencies.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "source": "./",
       "category": "development",
       "keywords": ["workflow", "agents", "hooks", "skills", "code-review", "planning", "iteration", "native"],

@@ -97,6 +97,53 @@ Run `/help` to see them listed.
 
 → **[Full workflow guide](docs/workflow-guide.md)** — getting started patterns, agile milestone mode, command deep-dives, context chain reference.
 
+## 🚀 Typical E2E Workflow
+
+### Greenfield project
+
+```
+# 1. Define what you're building — project.md + requirements backlog
+/ucai:plan
+
+# 2. Generate CLAUDE.md — two valid timings, pick one:
+#    Right after /plan  →  if planning settled the stack, folder structure,
+#                          and key conventions well enough to write them down now
+#    After first /build →  if those choices were left open and only resolved
+#                          once implementation started
+/ucai:init
+
+# 3. FRD for your first feature (optional but recommended for complex work)
+/ucai:plan vertical slice
+
+# 4. Build it — 8-phase: explore → clarify → design → implement → verify → test
+/ucai:build vertical slice
+
+# 5. Keep building from the backlog
+/ucai:build authentication
+/ucai:build notifications
+...
+
+# 6. Review, document, release
+/ucai:review
+/ucai:docs
+/ucai:release minor
+```
+
+### Existing project
+
+```
+# 1. Analyze the codebase → generate CLAUDE.md
+/ucai:init
+
+# 2. Create a requirements backlog if one doesn't exist
+/ucai:plan
+
+# 3. Jump straight to building
+/ucai:build fix the broken auth flow
+```
+
+`/ucai:build` auto-loads the FRD created by `/ucai:plan <feature>` when names match. `/ucai:debug`, `/ucai:review`, and `/ucai:docs` are standalone — use them whenever needed.
+
 ## 🧠 Built-In Skills
 
 Ucai ships with 7 curated skills auto-loaded by Claude Code:
