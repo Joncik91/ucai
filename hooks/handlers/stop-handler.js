@@ -38,7 +38,7 @@ function run(hookInput) {
   const stateContent = fs.readFileSync(STATE_FILE, "utf8");
 
   // Parse markdown frontmatter (YAML between ---)
-  const fmMatch = stateContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  const fmMatch = stateContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
   if (!fmMatch) {
     console.error("Ucai iterate: State file has no frontmatter");
     cleanup();

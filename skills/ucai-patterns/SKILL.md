@@ -38,6 +38,25 @@ Agents are focused workers, not personas.
 
 For detailed patterns, see: `references/agent-patterns.md`
 
+## Batch Operations
+
+The golden rule: **1 message = ALL related operations**. Every round-trip to Claude adds latency. Batch everything that can go together.
+
+**Good patterns**:
+- Spawn ALL parallel agents in one message (multiple Task calls in one response)
+- Read ALL files you need in one message (multiple Read calls simultaneously)
+- Batch ALL TodoWrite updates in a single call, not one per item
+- Stage all writes for one phase before moving to the next
+
+**Anti-patterns**:
+- Spawning one agent, waiting for it, then spawning the next
+- Reading files one at a time in a loop across multiple messages
+- Calling TodoWrite once per todo item across separate turns
+
+**Why it matters**: In a 5-agent parallel analysis, serial spawning adds 4 unnecessary round-trips. At 2-3 seconds per round-trip, that is 8-12 seconds of pure latency before any work begins. Batching collapses this to a single round-trip.
+
+For detailed patterns, see: `references/agent-patterns.md`
+
 ## Hook Patterns
 
 Hooks are lifecycle event handlers. They are the primary extension point.

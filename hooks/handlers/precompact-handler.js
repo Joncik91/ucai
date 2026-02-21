@@ -18,12 +18,15 @@ process.stdin.on("end", () => {
     }
 
     const stateContent = fs.readFileSync(STATE_FILE, "utf8")
-    const fmMatch = stateContent.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+    const fmMatch = stateContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
     if (!fmMatch) {
       process.exit(0)
     }
 
     const frontmatter = fmMatch[1]
+    const rawBody = fmMatch[2] ? fmMatch[2].trim() : ""
+    const taskBody = rawBody.length > 200 ? rawBody.slice(0, 200) + "..." : rawBody
+
     function getField(name) {
       const m = frontmatter.match(new RegExp("^" + name + ":\\s*(.*)$", "m"))
       return m ? m[1].trim() : null
@@ -42,6 +45,9 @@ process.stdin.on("end", () => {
       msg += " | Completion promise: <promise>" + completionPromise + "</promise>"
     }
     msg += " — state preserved in .claude/ucai-iterate.local.md"
+    if (taskBody) {
+      msg += " | Task: " + taskBody
+    }
 
     process.stdout.write(JSON.stringify({ systemMessage: msg }))
     process.exit(0)
