@@ -5,5 +5,6 @@
   "author": {
     "name": "Ucai"
   },
-  "keywords": ["workflow", "agents", "hooks", "native"]
+  "keywords": ["workflow", "agents", "hooks", "native"],
+  "license": "MIT"
 }
