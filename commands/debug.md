@@ -1,6 +1,7 @@
 ---
 description: Structured debugging with parallel investigation agents
 argument-hint: Bug description or error message
+disable-model-invocation: true
 ---
 
 # Debugging

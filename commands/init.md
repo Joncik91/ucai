@@ -1,6 +1,7 @@
 ---
 description: Analyze project and generate CLAUDE.md + setup
 argument-hint: [project-path]
+disable-model-invocation: true
 ---
 
 # Project Initialization

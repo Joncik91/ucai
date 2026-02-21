@@ -1,6 +1,7 @@
 ---
 description: Project spec (no args) or feature FRD (with args)
 argument-hint: [feature description]
+disable-model-invocation: true
 ---
 
 # Planning
@@ -480,6 +481,8 @@ mode: agile    # omit this line for standard (non-agile) FRDs
 
 # FRD: [Feature Name]
 
+> **For Claude:** To implement this FRD, run `/build [feature]`. The build command will auto-load this file and any project specs as context.
+
 ## Overview
 [1-2 paragraphs: what the feature is, why it's needed]
 
@@ -574,7 +577,10 @@ mode: agile    # omit this line for standard (non-agile) FRDs
 ```
 
 2. Present the FRD draft to the user
-3. **DO NOT WRITE THE FILE WITHOUT USER APPROVAL**
+3. <HARD-GATE>
+   DO NOT write the FRD file until the user has reviewed and approved the draft above.
+   Presenting the draft is not the same as getting approval.
+   </HARD-GATE>
 4. Create `.claude/frds/` directory if it does not exist
 5. Write `.claude/frds/<slug>.md`
 6. Confirm with an appropriate message based on mode:

@@ -1,6 +1,7 @@
 ---
 description: Feature development with exploration, design, and review
 argument-hint: Feature description
+disable-model-invocation: true
 ---
 
 # Feature Development
@@ -128,7 +129,10 @@ If the user says "whatever you think is best", provide your recommendation and g
 
 **Goal**: Implement the feature.
 
-**DO NOT START WITHOUT USER APPROVAL**
+<HARD-GATE>
+DO NOT start writing code until the user explicitly approves the chosen approach.
+Approval of the design in Phase 4 is NOT approval to begin implementation.
+</HARD-GATE>
 
 **Actions**:
 1. Wait for explicit user approval of the chosen approach

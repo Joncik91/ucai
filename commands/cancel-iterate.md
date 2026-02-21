@@ -1,6 +1,7 @@
 ---
 description: Cancel active iterate loop
 allowed-tools: Bash(test -f .claude/ucai-iterate.local.md:*), Bash(rm .claude/ucai-iterate.local.md), Read(.claude/ucai-iterate.local.md)
+disable-model-invocation: true
 ---
 
 # Cancel Iterate

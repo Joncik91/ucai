@@ -43,6 +43,7 @@ Agents are focused workers, not personas.
 - Assign appropriate models (sonnet for exploration, opus for deep bug analysis)
 - Restrict tool access to what each agent needs
 - Consolidate results in the orchestrating command, not in another agent
+- **1 message = ALL agents**: Spawn all parallel agents in one message — see Batch Operations below
 
 For detailed patterns, see: `references/agent-patterns.md`
 
@@ -82,6 +83,20 @@ For detailed patterns, see: `references/agent-patterns.md`
 | "Let me spawn this agent first, then spawn the next" | All parallel agents go in one message. Always. |
 | "Sequential is safer" | Sequential adds latency with zero safety benefit for independent tasks. |
 
+**Gate — before spawning any agent:**
+```
+Am I about to launch this agent alone, wait for it, then spawn the next?
+→ Yes → STOP. Bundle all agents into one message first.
+→ No  → Proceed.
+```
+
+**Gate — before any file read:**
+```
+Do I know other files I'll need in this session?
+→ Yes → Read all of them now in this same message.
+→ No  → Proceed with current read.
+```
+
 ## Hook Patterns
 
 Hooks are lifecycle event handlers. They are the primary extension point.
@@ -103,3 +118,5 @@ For detailed patterns, see: `references/hook-patterns.md`
 | "The hook will handle this automatically" | Hooks run on lifecycle events. Read the handler to confirm scope. |
 | "Exit code 2 might be too aggressive" | Exit code 2 is the designed block mechanism. Use it when blocking is correct. |
 | "I'll skip the Stop hook iteration check" | The iterate loop depends on the Stop hook. Skipping breaks the loop. |
+
+For skill and command authoring principles (persuasion techniques, gate functions, enforcement language), see: `references/skill-design-principles.md`

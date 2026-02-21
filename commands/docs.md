@@ -1,6 +1,7 @@
 ---
 description: Generate or update project documentation from codebase and specs
 argument-hint: "[scope: api|readme|deploy|all]"
+disable-model-invocation: true
 ---
 
 # Documentation Generation

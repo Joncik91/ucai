@@ -1,6 +1,7 @@
 ---
 description: Generate changelog, bump version, and create git tag
 argument-hint: "[major|minor|patch|vX.Y.Z]"
+disable-model-invocation: true
 ---
 
 # Release

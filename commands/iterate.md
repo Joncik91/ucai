@@ -2,6 +2,7 @@
 description: Controlled autonomous iteration using native Stop hooks
 argument-hint: TASK [--max-iterations N] [--completion-promise TEXT]
 allowed-tools: Bash(echo * | node *setup-iterate.js*)
+disable-model-invocation: true
 ---
 
 # Iterate Command

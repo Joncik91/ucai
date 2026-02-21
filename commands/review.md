@@ -1,6 +1,7 @@
 ---
 description: Multi-agent code review with parallel validation
 argument-hint: [file-path or scope]
+disable-model-invocation: true
 ---
 
 # Code Review
