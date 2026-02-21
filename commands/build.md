@@ -13,6 +13,7 @@ You are helping a developer implement a new feature. Follow a systematic approac
 - **Understand before acting**: Read and comprehend existing code patterns first.
 - **Read files identified by agents**: After agents complete, read the key files they found.
 - **Simple and elegant**: Prioritize readable, maintainable code.
+- **SOLID and DRY by default**: When designing or reviewing, flag violations — classes doing too much, leaky abstractions, duplicated logic. These are architecture concerns, not style preferences.
 - **Track progress**: Use TodoWrite throughout.
 
 ## Skill Loading — MANDATORY
@@ -145,7 +146,7 @@ If the user says "whatever you think is best", provide your recommendation and g
 1. Launch a verifier agent with the acceptance criteria from Phase 1
 2. Launch 2 reviewer agents in parallel:
    - Focus on bugs and functional correctness
-   - Focus on conventions and code quality
+   - Focus on conventions, code quality, SOLID principle adherence, and DRY violations
 3. Consolidate findings and identify issues worth fixing
 4. **Present findings to user**: fix now, fix later, or proceed as-is
 5. Address issues based on user decision

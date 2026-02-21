@@ -18,7 +18,7 @@ By default, review unstaged changes from `git diff`. The user may specify differ
 
 **Bug Detection**: Identify actual bugs that will impact functionality — logic errors, null/undefined handling, race conditions, memory leaks, security vulnerabilities, and performance problems.
 
-**Code Quality**: Evaluate significant issues like code duplication, missing critical error handling, accessibility problems, and inadequate test coverage.
+**Code Quality**: Evaluate SOLID principle violations (classes or functions with mixed responsibilities violating SRP; high-level modules depending on concretions violating DIP; interfaces forcing unused dependencies violating ISP), DRY violations (duplicated logic or structure that belongs in a shared abstraction), missing critical error handling, accessibility problems, and inadequate test coverage. Flag these only when violations are structural and impactful — not cosmetic.
 
 ## Confidence Scoring
 

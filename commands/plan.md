@@ -98,6 +98,7 @@ Use this mode when starting a new project or defining project scope for the firs
    - **Tech Stack**: Languages, frameworks, key dependencies with rationale
      - For each major dependency choice, state *why* over alternatives (e.g., "Prisma over Drizzle — better migration tooling for solo dev workflow")
      - Focus on choices that are painful to reverse later (ORM, state management, CSS approach, auth provider)
+     - Address repository and service topology: monorepo vs separate repos, monolith vs microservices — these are architectural decisions painful to reverse. Default recommendation: monolith for teams <10 and unclear domain boundaries; monorepo unless services have genuinely independent release cycles
    - **Non-Functional Requirements**: Performance, security, scalability targets
 
 2. Present the draft to the user for validation
@@ -173,7 +174,7 @@ This design system is written into `project.md` and acts as the contract for all
    - Sequence the remaining Must Have features in logical build order after the vertical slice
    - Add a `## Build Order` section to requirements.md with numbered steps and dependency notes
 
-3. Identify cross-cutting concerns (auth, error handling, logging, testing strategy)
+3. Identify cross-cutting concerns (auth, error handling, logging, testing strategy, shared abstractions that prevent duplication across features)
 4. Present the backlog AND the build order to the user for validation
 5. **DO NOT PROCEED WITHOUT APPROVAL**
 
@@ -423,6 +424,7 @@ If project.md exists, include tech stack and constraints in the agent's prompt.
 - Integration points with existing code
 - Files to create or modify
 - Key decisions with rationale and trade-offs
+- SOLID and DRY evaluation: note responsibilities per component (SRP), flag high-coupling between modules (DIP), identify duplicated patterns worth abstracting (DRY)
 
 **Data model** (conditional — feature touches persistence):
 - Entity definitions with key fields and types
