@@ -40,7 +40,7 @@ All using native Claude Code commands, agents, hooks, and skills.
 
 ### Requirements
 
-Claude Code **v1.0.33+**. Check with:
+Claude Code **v2.1.0+**. Check with:
 
 ```
 claude --version

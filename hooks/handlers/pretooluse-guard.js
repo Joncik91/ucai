@@ -2,11 +2,10 @@
 
 // Ucai PreToolUse Guard
 // Guards Write/Edit calls targeting plugin config files
-// Exit code 0 always — decision communicated via hookSpecificOutput:
-//   permissionDecision "ask"   = pause and show user a dialog
-//   permissionDecision "allow" = auto-approve (path normalization only case)
-//   no JSON output             = fast path allow (normal file, clean path)
-// updatedInput inside hookSpecificOutput normalizes backslash paths to forward slashes
+// Exit code 0 always — decision communicated via structured JSON output:
+//   hookSpecificOutput.permissionDecision "ask" = pause and show user a dialog
+//   no JSON output                              = fast path allow (normal file, clean path)
+// updatedInput is emitted at top level whenever file_path contains backslashes (normalizes to forward slashes)
 
 const path = require("path")
 
@@ -42,21 +41,22 @@ process.stdin.on("end", () => {
       process.exit(0)
     }
 
-    const specific = { hookEventName: "PreToolUse" }
+    const hookOutput = {}
 
     if (isProtected) {
-      specific.permissionDecision = "ask"
-      specific.permissionDecisionReason =
-        relative + " is a protected ucai config file. Allow Claude to modify it?"
-    } else {
-      specific.permissionDecision = "allow"
+      hookOutput.hookSpecificOutput = {
+        hookEventName: "PreToolUse",
+        permissionDecision: "ask",
+        permissionDecisionReason:
+          relative + " is a protected ucai config file. Allow Claude to modify it?"
+      }
     }
 
     if (needsNormalization) {
-      specific.updatedInput = { ...data.tool_input, file_path: normalized }
+      hookOutput.updatedInput = { ...data.tool_input, file_path: normalized }
     }
 
-    process.stdout.write(JSON.stringify({ hookSpecificOutput: specific }))
+    process.stdout.write(JSON.stringify(hookOutput))
     process.exit(0)
   } catch {
     process.exit(0)
