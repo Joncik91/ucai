@@ -3,16 +3,14 @@
 // Ucai PreToolUse Guard
 // Guards Write/Edit calls targeting plugin config files
 // Exit code 0 always — decision communicated via hookSpecificOutput:
-//   permissionDecision "ask"   = pause and show user a dialog
-//   permissionDecision "allow" = auto-approve (path normalization only case)
-//   no JSON output             = fast path allow (normal file, clean path)
-// updatedInput goes INSIDE hookSpecificOutput (not top-level) to normalize backslash paths
+//   permissionDecision "ask" = pause and show user a dialog
+//   no JSON output           = allow (normal file, fast path)
 
 const path = require("path")
 
 const PROTECTED_FILES = [
   "plugin.json",
-  "marketplace.json",
+  ".claude-plugin/marketplace.json",
   "hooks/hooks.json"
 ]
 
@@ -31,32 +29,23 @@ process.stdin.on("end", () => {
 
     const resolved = path.resolve(PLUGIN_ROOT, filePath)
     const relative = path.relative(PLUGIN_ROOT, resolved).replace(/\\/g, "/")
-    const normalized = filePath.replace(/\\/g, "/")
-    const needsNormalization = filePath !== normalized
 
     const isProtected = process.platform === "win32"
       ? PROTECTED_FILES.some((f) => f.toLowerCase() === relative.toLowerCase())
       : PROTECTED_FILES.includes(relative)
 
-    if (!isProtected && !needsNormalization) {
+    if (!isProtected) {
       process.exit(0)
     }
 
-    const specific = { hookEventName: "PreToolUse" }
-
-    if (isProtected) {
-      specific.permissionDecision = "ask"
-      specific.permissionDecisionReason =
-        relative + " is a protected ucai config file. Allow Claude to modify it?"
-    } else {
-      specific.permissionDecision = "allow"
-    }
-
-    if (needsNormalization) {
-      specific.updatedInput = { ...data.tool_input, file_path: normalized }
-    }
-
-    process.stdout.write(JSON.stringify({ hookSpecificOutput: specific }))
+    process.stdout.write(JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "ask",
+        permissionDecisionReason:
+          relative + " is a protected ucai config file. Allow Claude to modify it?"
+      }
+    }))
     process.exit(0)
   } catch {
     process.exit(0)

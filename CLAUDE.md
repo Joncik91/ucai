@@ -3,7 +3,7 @@
 ## Overview
 A Claude Code plugin that leverages native architecture — commands, agents, hooks,
 and skills — exactly as Anthropic designed them. v1.1 delivers full hook lifecycle
-coverage and an upgraded PreToolUse guard with permission + path-normalization middleware.
+coverage and a PreToolUse guard that protects plugin config files.
 
 ## Tech Stack
 - **Runtime**: Node.js 18+ (CommonJS, zero external dependencies)
@@ -58,7 +58,7 @@ node -e "const o=JSON.parse(process.argv[1]); if(!o.hookSpecificOutput) process.
 | Hook | Handler | Purpose |
 |------|---------|---------|
 | SessionStart | `sessionstart-handler.js` | Git branch, iterate status, spec files, skills |
-| PreToolUse (Write\|Edit) | `pretooluse-guard.js` | Guard config files; normalize Windows paths |
+| PreToolUse (Write\|Edit) | `pretooluse-guard.js` | Guard config files (ask before modifying) |
 | UserPromptSubmit | `userpromptsubmit-handler.js` | Inject iterate context when loop active |
 | Stop | `stop-handler.js` | Block exit to continue iterate loop |
 | SubagentStop | `subagent-stop-handler.js` | Block on empty output; inject 1-line preview |
@@ -116,7 +116,7 @@ All files `kebab-case`. Exception: `SKILL.md` is uppercase.
 | `hooks/hooks.json` | Hook registration (7 events, timeouts, matchers) |
 | `hooks/handlers/sessionstart-handler.js` | Most complex handler (7.8 KB): git, iterate, skills |
 | `hooks/handlers/stop-handler.js` | Iteration control (5.4 KB, uses semicolons) |
-| `hooks/handlers/pretooluse-guard.js` | Config protection + path normalization middleware |
+| `hooks/handlers/pretooluse-guard.js` | Config file protection (permissionDecision: ask) |
 | `scripts/setup-iterate.js` | Iterate setup: parses `--max-iterations`, `--completion-promise` |
 | `commands/build.md` | Most complex command: 8-phase feature workflow |
 | `.github/workflows/ci.yml` | CI: file exist + JSON syntax + JS syntax + smoke test |
