@@ -317,7 +317,16 @@ Feature request: $ARGUMENTS
 
 3. **Wait for all agents to complete** before proceeding
 4. After agents return, read key files they identified
-4. Present a consolidated discovery summary
+5. Present a consolidated discovery summary
+6. Compile a **Discovery Summary** from agent findings — you will paste this into Phase 4F architect prompts:
+   ```
+   Discovery Summary:
+   - Codebase patterns: [file:line — pattern], [file:line — pattern], ...
+   - Architecture layers: [how existing code is organized]
+   - Integration points: [where the feature connects to existing code]
+   - Research findings: [key best practices, with URLs]
+   - Constraints: [known limitations or conventions to follow]
+   ```
 
 ---
 
@@ -411,7 +420,7 @@ State which sections apply and why. The user confirms or adjusts at the approval
 ### Step 2: Launch Agents
 
 Launch 1-2 `ucai:architect` agents using the Task tool. Prefix each Task description with `[opus]`:
-- "[opus] Given these requirements [summary] and these codebase patterns [summary], propose a high-level architecture. Include: key components, data flow, integration points, files to create/modify. Keep it high-level — detailed design happens in /build."
+- "[opus] Given these requirements: [paste Phase 3F requirements summary] and this discovery context: [paste Discovery Summary], propose a high-level architecture. Include: key components, data flow, integration points, files to create/modify. Keep it high-level — detailed design happens in /build."
 
 If project.md exists, include tech stack and constraints in the agent's prompt.
 

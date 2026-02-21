@@ -91,6 +91,15 @@ If the user declines, proceed with $ARGUMENTS only.
 3. **Wait for all agents to complete** before proceeding
 4. After agents return, read all identified files yourself
 5. Present comprehensive summary of findings
+6. Compile a **Codebase Map** from agent findings — you will paste this into Phase 4 and Phase 6 agent prompts:
+   ```
+   Codebase Map:
+   - Key files: [file:line — role], [file:line — role], ...
+   - Architecture: [patterns, layers, abstractions]
+   - Integration points: [where new code connects to existing code]
+   - Testing: [framework, test file locations, conventions]
+   - Conventions: [naming, structure, error handling rules]
+   ```
 
 ---
 
@@ -115,10 +124,10 @@ If the user says "whatever you think is best", provide your recommendation and g
 **Goal**: Present architecture options with trade-offs.
 
 **Actions**:
-1. Launch 2-3 `ucai:architect` agents in parallel using the Task tool. Prefix each Task description with `[opus]`:
-   - "[opus] Minimal changes: design [feature] using the smallest change, maximizing reuse"
-   - "[opus] Clean architecture: design [feature] prioritizing maintainability and elegant abstractions"
-   - "[opus] Pragmatic balance: design [feature] balancing speed and quality"
+1. Launch 2-3 `ucai:architect` agents in parallel using the Task tool. Prefix each Task description with `[opus]`. Include the Codebase Map compiled in Phase 2 in each prompt:
+   - "[opus] Minimal changes: design [feature] using the smallest change, maximizing reuse. [paste Codebase Map]"
+   - "[opus] Clean architecture: design [feature] prioritizing maintainability and elegant abstractions. [paste Codebase Map]"
+   - "[opus] Pragmatic balance: design [feature] balancing speed and quality. [paste Codebase Map]"
 2. Review all approaches and form your recommendation
 3. Present to user: brief summary of each, trade-offs, your recommendation with reasoning
 4. **Ask user which approach they prefer**
@@ -148,14 +157,14 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
 **Goal**: Ensure the implementation meets requirements.
 
 **Actions**:
-1. Launch a verifier agent with the acceptance criteria from Phase 1
-2. Launch 2 reviewer agents in parallel:
-   - Focus on bugs and functional correctness
-   - Focus on conventions, code quality, SOLID principle adherence, and DRY violations
-3. Consolidate findings and identify issues worth fixing
-4. **Present findings to user**: fix now, fix later, or proceed as-is
-5. Address issues based on user decision
-6. **If fixes were applied, re-run reviewers on the changed files** — fixes can introduce new issues. Repeat steps 2-5 until clean or user approves remaining items.
+1. Launch all 3 agents simultaneously in a single Task tool message (not sequentially):
+   - `ucai:verifier`: acceptance criteria from Phase 1 (or FRD if loaded). Include the Codebase Map from Phase 2.
+   - `ucai:reviewer`: focus on bugs and functional correctness. Include the Codebase Map from Phase 2.
+   - `ucai:reviewer-opus`: focus on conventions, code quality, SOLID principle adherence, and DRY violations. Include the Codebase Map from Phase 2.
+2. **Wait for all 3 to complete**, then consolidate findings and identify issues worth fixing
+3. **Present findings to user**: fix now, fix later, or proceed as-is
+4. Address issues based on user decision
+5. **If fixes were applied, re-run all 3 agents in parallel on the changed files** — fixes can introduce new issues. Repeat steps 1-4 until clean or user approves remaining items.
 
 ---
 
