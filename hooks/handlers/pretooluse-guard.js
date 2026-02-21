@@ -2,7 +2,7 @@
 
 // Ucai PreToolUse Guard
 // Guards Write/Edit calls targeting plugin config files
-// Exit code 0 always — decision communicated via JSON hookSpecificOutput:
+// Exit code 0 always — decision communicated via top-level JSON fields:
 //   permissionDecision "ask"   = pause and show user a dialog
 //   permissionDecision "allow" = proceed (used when only path normalization applies)
 //   no JSON output             = fast path allow (normal file, clean path)
@@ -56,12 +56,7 @@ process.stdin.on("end", () => {
       hookOutput.updatedInput = { ...data.tool_input, file_path: normalized }
     }
 
-    process.stdout.write(JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: "PreToolUse",
-        ...hookOutput,
-      },
-    }))
+    process.stdout.write(JSON.stringify(hookOutput))
     process.exit(0)
   } catch {
     process.exit(0)
