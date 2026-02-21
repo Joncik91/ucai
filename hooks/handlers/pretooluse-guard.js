@@ -53,7 +53,7 @@ process.stdin.on("end", () => {
     }
 
     if (needsNormalization) {
-      hookOutput.updatedInput = { file_path: normalized }
+      hookOutput.updatedInput = { ...data.tool_input, file_path: normalized }
     }
 
     process.stdout.write(JSON.stringify({
