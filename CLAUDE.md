@@ -1,158 +1,123 @@
 # Ucai — Use Claude Code As Is
 
 ## Overview
-A Claude Code plugin that uses the tool's native architecture — commands, agents, hooks, and skills — exactly as Anthropic designed them. Not a framework.
+A Claude Code plugin that leverages native architecture — commands, agents, hooks,
+and skills — exactly as Anthropic designed them. v1.1 delivers full hook lifecycle
+coverage and an upgraded PreToolUse guard with permission + path-normalization middleware.
 
 ## Tech Stack
-- **Runtime**: Node.js (CommonJS, no external dependencies)
+- **Runtime**: Node.js 18+ (CommonJS, zero external dependencies)
 - **Plugin format**: Markdown (YAML frontmatter) + JSON configs
-- **Platform**: Cross-platform (Windows/Linux/macOS), tested on Node 18 and 20
+- **Platform**: Windows/Linux/macOS, CI matrix: Node 18 × 20 on ubuntu + windows
 
-## Project Structure
-```
-ucai/
-├── commands/          # Slash commands (markdown + YAML frontmatter)
-├── agents/            # Subagents (markdown with model/tools/description)
-├── hooks/             # Lifecycle handlers (hooks.json + Node.js scripts)
-│   └── handlers/      # Hook handler scripts
-├── scripts/           # Utility scripts (Node.js)
-├── skills/            # Progressive disclosure (SKILL.md + references/)
-├── .claude-plugin/    # Plugin install metadata
-└── .github/           # Issue templates, PR template, CI workflow
-```
-
-## Commands
-- `/init` — Analyze project, generate CLAUDE.md. Uses project.md as context if available.
-- `/plan` — Project spec (no args) or feature FRD (with args). Outputs to `.claude/project.md` + `.claude/requirements.md` or `.claude/frds/<slug>.md`
-- `/build` — Feature development: explore → design → approve → implement → review → manual test.
-- `/debug` — Structured debugging: investigate → diagnose → fix → verify. Parallel agents.
-- `/docs` — Generate/update documentation from codebase + spec files.
-- `/release` — Changelog generation, version bump, git tag. Cross-references requirements.md.
-- `/iterate` — Controlled autonomous iteration via Stop hooks
-- `/review` — Multi-agent parallel code review
-- `/cancel-iterate` — Stop an active iterate loop
-
-## Development
-- **Dev mode**: `claude --plugin-dir ./ucai`
-- **Install from marketplace**: `/plugin marketplace add Joncik91/ucai`
-- **No build step**: Pure runtime plugin, no compilation
-- **No test suite**: Manual testing via dev mode
-- **No linter/formatter**: No ESLint or Prettier configured
-
-## CI Validation
-All checks run via `.github/workflows/ci.yml` (ubuntu + windows × node 18 + 20):
+## Development Commands
+No build step. Validation only:
 ```bash
-# Validate required files exist
-for file in plugin.json .claude-plugin/marketplace.json hooks/hooks.json CLAUDE.md README.md; do
-  [ -f "$file" ] || exit 1; done
+# Local dev
+claude --plugin-dir ./ucai
 
-# Validate JSON syntax
+# JSON syntax
 node -e "JSON.parse(require('fs').readFileSync('plugin.json', 'utf8'))"
 node -e "JSON.parse(require('fs').readFileSync('hooks/hooks.json', 'utf8'))"
+node -e "JSON.parse(require('fs').readFileSync('.claude-plugin/marketplace.json', 'utf8'))"
 
-# Syntax-check all JS files (glob auto-covers new handlers)
-for file in hooks/handlers/*.js scripts/*.js; do
-  node -c "$file" || exit 1; done
+# JS syntax (all handlers + scripts)
+for file in hooks/handlers/*.js scripts/*.js; do node -c "$file" || exit 1; done
 
-# Validate frontmatter presence in commands and agents
-head -1 commands/*.md | grep -q "^---"
-head -1 agents/*.md | grep -q "^---"
-
-# Smoke test: handler produces valid JSON with correct shape
+# Smoke test
 output=$(node hooks/handlers/sessionstart-handler.js)
 node -e "const o=JSON.parse(process.argv[1]); if(!o.hookSpecificOutput) process.exit(1)" "$output"
 ```
 
-## Architecture Patterns
+## Architecture
 
-### Commands orchestrate, agents execute
-Commands define phased workflows with approval gates. Agents are read-only workers spawned in parallel via the Task tool. Implementation (Write/Edit) happens only in commands, after user approval.
+### Layers
+- **commands/** — Orchestration: phased workflows with user approval gates. Write/Edit only here.
+- **agents/** — Execution: read-only analysis workers, spawned in parallel via Task tool.
+- **hooks/handlers/** — Lifecycle: context injection, state management, config protection.
+- **skills/** — Knowledge: progressive disclosure domain expertise, loaded on-demand.
+- **scripts/** — Utilities: `setup-iterate.js` for iterate loop initialization.
 
-### Hook conventions
-- **SessionStart**: `sessionstart-handler.js` injects git branch, iterate status, CLAUDE.md presence, spec file status, available skills
-- **PreToolUse**: `pretooluse-guard.js` guards plugin config files (Write/Edit matcher); emits `permissionDecision: "ask"` for protected files and `updatedInput` to normalize backslash paths
-- **UserPromptSubmit**: `userpromptsubmit-handler.js` — if iterate loop active, injects loop context into additionalContext; non-blocking
-- **Stop**: `stop-handler.js` — iteration control; reads iterate state file, blocks exit to continue loop
-- **SubagentStop**: `subagent-stop-handler.js` — blocks on empty output; injects one-line result preview into session context
-- **PreCompact**: `precompact-handler.js` — if iterate loop active, surfaces state in systemMessage before compaction
-- **SessionEnd**: `session-end-handler.js` — deletes stale iterate state file on session termination
-- **Paths**: Always use `${CLAUDE_PLUGIN_ROOT}` with quotes for Windows compatibility
-- **MCP**: `plugin.json` supports an optional `mcpServers` field to bundle MCP server definitions; Ucai omits it (no external server dependencies by design)
+### Commands (9 slash commands)
+`/init`, `/plan`, `/build` (8-phase, most complex), `/debug`, `/review`, `/docs`,
+`/release`, `/iterate`, `/cancel-iterate`
 
-### Skill awareness
-- Commands include a "Skill Awareness" section that instructs Claude to check SessionStart context for available skills
-- SessionStart hook scans both plugin skills (`skills/*/SKILL.md`) and project skills (`.claude/skills/*/SKILL.md`)
-- Skills announced as `[plugin] name (desc)` or `[project] name (desc)` — Claude decides which to load
-- Project-level skills follow the same structure as plugin skills: `SKILL.md` with YAML frontmatter + optional `references/`
+### Agents (8, all read-only — no Write/Edit)
+| Agent | Model | Max Turns | Purpose |
+|-------|-------|-----------|---------|
+| `project-scanner` | haiku | — | Fast structure + convention analysis |
+| `explorer-haiku` | haiku | 12 | Quick scan (~8 tool calls) |
+| `explorer` | sonnet | 20 | Balanced analysis (~15 tool calls) |
+| `explorer-opus` | opus | 30 | Deep analysis (~25 tool calls) |
+| `architect` | opus | — | Feature architecture + implementation blueprint |
+| `reviewer` | sonnet | — | Code review with confidence scoring |
+| `reviewer-opus` | opus | — | Deep review for subtle/high-impact issues |
+| `verifier` | sonnet | — | Acceptance criteria validation |
 
-### Context chain
-- `/plan` (no args) produces `.claude/project.md` + `.claude/requirements.md` (with build order)
-- `/plan <feature>` produces `.claude/frds/<slug>.md` (per-feature, never overwritten, optional)
+### Hooks (7 lifecycle handlers, all in `hooks/handlers/`)
+| Hook | Handler | Purpose |
+|------|---------|---------|
+| SessionStart | `sessionstart-handler.js` | Git branch, iterate status, spec files, skills |
+| PreToolUse (Write\|Edit) | `pretooluse-guard.js` | Guard config files; normalize Windows paths |
+| UserPromptSubmit | `userpromptsubmit-handler.js` | Inject iterate context when loop active |
+| Stop | `stop-handler.js` | Block exit to continue iterate loop |
+| SubagentStop | `subagent-stop-handler.js` | Block on empty output; inject 1-line preview |
+| PreCompact | `precompact-handler.js` | Surface iterate state before compaction |
+| SessionEnd | `session-end-handler.js` | Delete stale iterate state on termination |
+
+### Iterate Loop
+State file: `.claude/ucai-iterate.local.md` (gitignored). YAML frontmatter holds
+`iteration`, `max_iterations`, `completion_promise`; body holds the task.
+Stop hook reads state → feeds task back → checks limits → continues or exits.
+
+### Context Chain
+- `/plan` → `.claude/project.md` + `.claude/requirements.md` (with build order)
+- `/plan <feature>` → `.claude/frds/<slug>.md` (never overwritten)
 - All commands auto-load whatever spec files exist in `.claude/`
-- `/build` reads build order to identify step dependencies and marks covered requirements done
-- SessionStart hook announces project name, progress (N/M done), and next build order step
-- Legacy `.claude/prd.md` and `.claude/prds/` still detected as fallback
+- SessionStart announces `[plugin]` and `[project]` skills; Claude decides which to load
 
-### State management
-- Local state files: `.claude/*.local.md` (gitignored)
-- Permanent spec files: `.claude/project.md`, `.claude/requirements.md`, `.claude/frds/*.md` (tracked in git)
-- YAML frontmatter for structured fields, markdown body for content
-- Parsed with regex (`/^---\r?\n([\s\S]*?)\r?\n---/`) — use `\r?` for Windows CRLF compatibility
+### Config Protection
+PreToolUse guards: `plugin.json`, `hooks/hooks.json`, `.claude-plugin/marketplace.json`,
+`CLAUDE.md`, and all skill `.md` files. Emits `permissionDecision: "ask"`.
 
 ## Conventions
 
 ### JavaScript
-- No semicolons (ASI style) — **exception**: `stop-handler.js` has them; follow file-local style
-- Double quotes for strings
+- No semicolons (ASI) — **exception**: `stop-handler.js` uses them; follow file-local style
+- Double quotes for all strings
 - `camelCase` variables/functions, `SCREAMING_SNAKE_CASE` constants
-- Shebang (`#!/usr/bin/env node`) on executable scripts
-- Empty catch blocks for cleanup operations
-- No external dependencies — Node.js builtins only (`fs`, `path`, `readline`, `child_process`)
-- Hook scripts use `process.stdout.write()` for JSON output, `console.error()` for logging (never `console.log()` in hooks)
-- Stdin accumulation pattern in all handlers: `process.stdin.on("data"/"end")`
-- Cross-platform paths: always `path.resolve()`/`path.join()`, never string concatenation
-- Windows path normalization: `.replace(/\\/g, "/")` and case-insensitive comparison via `process.platform === "win32"`
+- Hook output: `process.stdout.write(JSON.stringify(...))` — never `console.log()` in hooks
+- Debug logging: `console.error()` only
+- Stdin: `process.stdin.setEncoding("utf8")` → `.on("data")` → `.on("end")` + try/catch
+- Paths: always `path.resolve()` / `path.join()`, never string concatenation
+- Windows backslash: `.replace(/\\/g, "/")`
+- CRLF-aware frontmatter regex: `\r?` (e.g. `/^---\r?\n([\s\S]*?)\r?\n---/`)
+- Case-insensitive path compare: guard with `process.platform === "win32"`
 
-### Markdown (commands/agents/skills)
-- YAML frontmatter with type-specific fields
-- Commands: `description`, `argument-hint`, `allowed-tools`
-- Agents: `name`, `description`, `tools`, `model`, `color`
-- Skills: `name`, `description`
-- Phased workflows use `## Phase N: Name` headers with `**Goal**:` and `**Actions**:` sub-sections
-- Approval gates stated explicitly in bold/caps
+### Markdown (commands / agents / skills)
+- YAML frontmatter fields by type:
+  - Commands: `description`, `argument-hint`, `allowed-tools`
+  - Agents: `name`, `description`, `tools`, `model`, `color`
+  - Skills: `name`, `description`
+- Phase structure: `## Phase N: Name` → `**Goal**:` + `**Actions**:`
+- Approval gates stated in **BOLD CAPS**
 
 ### File naming
-- All files: `kebab-case`
-- Commands/agents/skills: `.md`
-- Scripts/handlers: `.js`
+All files `kebab-case`. Exception: `SKILL.md` is uppercase.
 
-### Agent design
-- Model assignments: haiku (project-scanner, explorer-haiku), sonnet (explorer, reviewer, verifier), opus (architect, explorer-opus, reviewer-opus)
-- Read-only tools only (no Write/Edit)
-- Color-coded: yellow (scanner), cyan (explorer), green (architect), red (reviewer), blue (verifier)
-- Explorer agents support 3 thoroughness levels: **quick** (~8 calls, max_turns: 12), **medium** (~15 calls, max_turns: 20), **thorough** (~25 calls, max_turns: 30)
-- Commands specify level + max_turns when spawning explorers; prefix agent prompt with "Level: <level>"
-
-## Principles
-1. Use native systems — commands, agents, hooks, skills. Not wrappers.
-2. Context is a public good — only add what Claude doesn't already know.
-3. Agents are not personas — they have model assignments, tool declarations, and focused missions.
-4. Explicit approval gates — never proceed without user decision at boundaries.
-5. Parallel by default — spawn multiple focused agents simultaneously.
-6. CLAUDE.md is for project guidelines — not framework configuration.
+### MCP
+`plugin.json` supports optional `mcpServers` field. Ucai omits it by design (no external deps).
 
 ## Key Files
-- `plugin.json` — Plugin manifest
-- `.claude-plugin/marketplace.json` — Marketplace listing metadata
-- `hooks/hooks.json` — Hook configuration
-- `hooks/handlers/sessionstart-handler.js` — Session context injection (most complex handler)
-- `hooks/handlers/stop-handler.js` — Iteration control logic
-- `hooks/handlers/pretooluse-guard.js` — Config file protection hook
-- `hooks/handlers/precompact-handler.js` — Iterate state surfacing before context compaction
-- `hooks/handlers/session-end-handler.js` — Iterate state cleanup on session termination
-- `hooks/handlers/userpromptsubmit-handler.js` — Iterate context injection for user prompts
-- `hooks/handlers/subagent-stop-handler.js` — Subagent output quality gate
-- `scripts/setup-iterate.js` — Iterate loop setup
-- `commands/build.md` — Most complex command (8-phase workflow)
-- `skills/ucai-patterns/SKILL.md` — Best practices skill
-- `.github/workflows/ci.yml` — CI validation pipeline
+| File | Purpose |
+|------|---------|
+| `plugin.json` | Plugin manifest (name, version 1.1.0, keywords) |
+| `.claude-plugin/marketplace.json` | Marketplace listing metadata |
+| `hooks/hooks.json` | Hook registration (7 events, timeouts, matchers) |
+| `hooks/handlers/sessionstart-handler.js` | Most complex handler (7.8 KB): git, iterate, skills |
+| `hooks/handlers/stop-handler.js` | Iteration control (5.4 KB, uses semicolons) |
+| `hooks/handlers/pretooluse-guard.js` | Config protection + path normalization middleware |
+| `scripts/setup-iterate.js` | Iterate setup: parses `--max-iterations`, `--completion-promise` |
+| `commands/build.md` | Most complex command: 8-phase feature workflow |
+| `.github/workflows/ci.yml` | CI: file exist + JSON syntax + JS syntax + smoke test |
+| `skills/ucai-patterns/SKILL.md` | Best practices for Claude Code plugin development |
