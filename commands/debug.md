@@ -83,6 +83,7 @@ Input: $ARGUMENTS
    - **Root cause**: What is actually broken and why (with file:line references)
    - **Evidence trail**: The chain of evidence — files, lines, git commits that support the diagnosis
    - **Mechanism**: Why this root cause produces the observed behavior
+   - **Security impact**: Does this bug have security implications? (e.g., exposes sensitive data, bypasses auth, enables injection — if yes, flag it explicitly)
 2. If multiple potential causes exist, rank by likelihood and explain the reasoning
 3. Present the diagnosis to the user:
    - Root cause explanation (clear, non-technical where possible)
@@ -106,6 +107,7 @@ Input: $ARGUMENTS
    - Why this fixes the root cause
    - Any risks or side effects
 2. Keep the fix minimal — address the root cause, not symptoms
+   - If the bug had security implications, confirm the fix closes the vector and does not introduce a new one
 3. Follow codebase conventions from CLAUDE.md
 4. **Wait for user approval of the proposed fix**
 5. Implement the fix

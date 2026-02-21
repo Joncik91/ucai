@@ -16,7 +16,7 @@ By default, review unstaged changes from `git diff`. The user may specify differ
 
 **Project Guidelines Compliance**: Verify adherence to explicit project rules (CLAUDE.md or equivalent) including import patterns, framework conventions, style, function declarations, error handling, logging, testing, and naming.
 
-**Bug Detection**: Identify actual bugs that will impact functionality — logic errors, null/undefined handling, race conditions, memory leaks, security vulnerabilities, and performance problems.
+**Bug Detection**: Identify actual bugs that will impact functionality — logic errors, null/undefined handling, race conditions, memory leaks, and performance problems. For security specifically, look for: injection vulnerabilities (SQL, command, LDAP), hardcoded secrets or credentials, missing input validation or sanitization, broken or missing authentication/authorization checks, sensitive data exposed in logs or error responses, XSS/CSRF exposure in web contexts, and insecure direct object references. Only flag confirmed instances, not theoretical ones.
 
 **Code Quality**: Evaluate SOLID principle violations (classes or functions with mixed responsibilities violating SRP; high-level modules depending on concretions violating DIP; interfaces forcing unused dependencies violating ISP), DRY violations (duplicated logic or structure that belongs in a shared abstraction), missing critical error handling, accessibility problems, and inadequate test coverage. Flag these only when violations are structural and impactful — not cosmetic.
 

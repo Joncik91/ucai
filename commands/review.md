@@ -50,7 +50,7 @@ Launch 3 reviewer agents in parallel using the Task tool:
 
 - **Agent 1** (`ucai:reviewer`, sonnet): "[sonnet] Review for CLAUDE.md compliance, project conventions, SOLID principle violations, and DRY violations"
 - **Agent 2** (`ucai:reviewer-opus`, opus): "[opus] Review for bugs, logic errors, and functional correctness"
-- **Agent 3** (`ucai:reviewer-opus`, opus): "[opus] Review for security vulnerabilities and performance issues"
+- **Agent 3** (`ucai:reviewer-opus`, opus): "[opus] Review for security vulnerabilities (injection flaws, hardcoded secrets, missing auth/authz checks, sensitive data in logs or responses, XSS/CSRF in web contexts, insecure direct object references) and performance issues"
 
 Each agent should return issues with:
 - Confidence score (0-100)

@@ -14,6 +14,7 @@ You are helping a developer implement a new feature. Follow a systematic approac
 - **Read files identified by agents**: After agents complete, read the key files they found.
 - **Simple and elegant**: Prioritize readable, maintainable code.
 - **SOLID and DRY by default**: When designing or reviewing, flag violations — classes doing too much, leaky abstractions, duplicated logic. These are architecture concerns, not style preferences.
+- **Security by default**: Validate inputs at system boundaries, never trust user-supplied data, avoid exposing sensitive data in logs or errors. Flag security implications during design and review — not as an afterthought.
 - **Track progress**: Use TodoWrite throughout.
 
 ## Skill Loading — MANDATORY

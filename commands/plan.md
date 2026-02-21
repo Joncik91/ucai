@@ -174,7 +174,7 @@ This design system is written into `project.md` and acts as the contract for all
    - Sequence the remaining Must Have features in logical build order after the vertical slice
    - Add a `## Build Order` section to requirements.md with numbered steps and dependency notes
 
-3. Identify cross-cutting concerns (auth, error handling, logging, testing strategy, shared abstractions that prevent duplication across features)
+3. Identify cross-cutting concerns (auth strategy, input validation, secrets management, error handling and what to expose vs hide, logging and what must never be logged, testing strategy, shared abstractions that prevent duplication across features)
 4. Present the backlog AND the build order to the user for validation
 5. **DO NOT PROCEED WITHOUT APPROVAL**
 
@@ -445,9 +445,12 @@ If project.md exists, include tech stack and constraints in the agent's prompt.
 - Load `Skill(ucai:senior-frontend)` if not already loaded for design system guidance
 - Key states: loading, empty, error, populated
 
-**Security notes** (conditional — feature touches auth, payments, PII, or external APIs):
-- 3-5 bullet points on what to watch for
-- Not a threat model — just "validate X server-side", "sanitize Y before rendering", "rate-limit Z endpoint", "don't log PII in W"
+**Security notes** (conditional — feature touches auth, payments, PII, external APIs, or any input that reaches storage or execution):
+- Always validate inputs server-side — never trust client-supplied data
+- Auth/authz requirements: which endpoints or actions require authentication, which require specific roles
+- Any path where user input reaches SQL, shell commands, file paths, or HTML output — note the sanitization requirement
+- What sensitive data flows through this feature and where it must not appear (logs, error messages, API responses)
+- Rate-limiting or abuse-prevention requirements
 
 ### Step 4: Present and Approve
 

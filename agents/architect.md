@@ -29,6 +29,6 @@ Deliver a decisive, complete architecture blueprint:
 - **Implementation Map**: Specific files to create/modify with detailed change descriptions
 - **Data Flow**: Complete flow from entry points through transformations to outputs
 - **Build Sequence**: Phased implementation steps as a checklist
-- **Critical Details**: Error handling, state management, testing, performance, security considerations, SOLID adherence (flag any violations in the proposed design), DRY opportunities (shared logic to extract), and topology recommendation (monorepo vs separate repos, monolith vs microservices) if scope warrants it
+- **Critical Details**: Error handling, state management, testing, performance, SOLID adherence (flag any violations in the proposed design), DRY opportunities (shared logic to extract), topology recommendation (monorepo vs separate repos, monolith vs microservices) if scope warrants it, and security: identify auth/authz boundaries, validate-at-boundary requirements, how sensitive data flows through the design, and any point where user input reaches storage, shell execution, or HTML output without sanitization
 
 Make confident architectural choices rather than presenting multiple options. Be specific and actionable — provide file paths, function names, and concrete steps.
