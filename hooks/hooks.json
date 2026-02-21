@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/sessionstart-handler.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/sessionstart-handler.js\" || true",
             "timeout": 10
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/pretooluse-guard.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/pretooluse-guard.js\" || true",
             "timeout": 10
           }
         ]
@@ -29,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/userpromptsubmit-handler.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/userpromptsubmit-handler.js\" || true",
             "timeout": 10
           }
         ]
@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/stop-handler.js\""
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/stop-handler.js\" || true"
           }
         ]
       }
@@ -50,7 +50,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/precompact-handler.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/precompact-handler.js\" || true",
             "timeout": 10
           }
         ]
@@ -61,7 +61,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/session-end-handler.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/session-end-handler.js\" || true",
             "timeout": 10
           }
         ]
@@ -72,7 +72,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/subagent-stop-handler.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/subagent-stop-handler.js\" || true",
             "timeout": 10
           }
         ]
