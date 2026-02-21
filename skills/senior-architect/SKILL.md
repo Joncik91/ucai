@@ -270,25 +270,87 @@ See `references/architecture_patterns.md` for detailed pattern descriptions.
 
 ### Monolith vs Microservices Decision
 
-**Choose Monolith when:**
-- [ ] Team is small (<10 developers)
-- [ ] Domain boundaries are unclear
-- [ ] Rapid iteration is priority
-- [ ] Operational complexity must be minimized
-- [ ] Shared database is acceptable
+**2025 consensus: default to modular monolith.** Amazon and Shopify both reversed microservices-first approaches. Microservices add distributed systems complexity with no benefit until you have stable domain boundaries and teams large enough to own services end-to-end.
 
-**Choose Microservices when:**
-- [ ] Teams can own services end-to-end
-- [ ] Independent deployment is critical
-- [ ] Different scaling requirements per component
-- [ ] Technology diversity is needed
-- [ ] Domain boundaries are well understood
+| Team size | Recommended |
+|-----------|-------------|
+| < 10 developers | Simple monolith — Docker adds complexity with no benefit |
+| 10-50 developers | Modular monolith — structure without distribution overhead |
+| 50+ developers | Microservices viable — coordination costs justify it |
 
-**Hybrid approach:**
-Start with a modular monolith. Extract services only when:
+**Modular monolith structure:**
+- Each module maps to a bounded context with its own language
+- Modules communicate through public interfaces only — never by directly accessing another module's DB tables
+- One database schema per module (or separate schemas for hard boundaries)
+- Module-internal code is private; cross-module = defined contracts
+
+**Extract to microservice only when:**
 1. A module has significantly different scaling needs
-2. A team needs independent deployment
+2. A team needs genuinely independent deployment
 3. Technology constraints require separation
+
+**Warning**: Skipping the modular monolith step and going straight to microservices without stable domain boundaries produces a **distributed monolith** — distributed systems overhead with monolithic coupling.
+
+### Architecture Decision Records (ADRs)
+
+Use **MADR format** (`docs/decisions/NNNN-title.md`):
+
+```markdown
+# ADR-0001: Use Drizzle ORM over Prisma
+
+## Status
+Accepted
+
+## Context and Problem Statement
+We need an ORM for the new API. Cold start performance matters (serverless deployment).
+
+## Decision Drivers
+- Serverless cold start time < 100ms
+- TypeScript type safety without code generation step
+- SQL transparency for the team
+
+## Considered Options
+- Drizzle ORM
+- Prisma
+
+## Decision Outcome
+Chosen: **Drizzle ORM** — 7KB vs 2MB+ binary engine eliminates cold start penalty.
+No `prisma generate` step required. 1:1 SQL mapping suits team's SQL familiarity.
+
+### Consequences
+- Good: fast cold starts, direct SQL control, no generation step
+- Bad: less abstraction, Prisma Studio not available
+- Neutral: migrations require `drizzle-kit generate` instead of `prisma migrate dev`
+```
+
+Tooling: **Log4brains** converts the `docs/decisions/` folder into a navigable static site with search and timelines.
+
+### Vertical Slice Architecture
+
+Alternative to layered (controllers/services/repositories) — organize by **feature**, not technical layer:
+
+```
+features/
+  create-order/
+    CreateOrderController.ts
+    CreateOrderHandler.ts    # business logic
+    CreateOrderRepository.ts
+    create-order.test.ts
+  cancel-order/
+    ...
+```
+
+**Prefer vertical slices when:** teams own features end-to-end, development speed is primary. **Prefer layered/Clean Architecture when:** long-term maintainability and strict dependency rules matter. **2025 trend:** Clean Architecture outer layers + vertical slice inner organization.
+
+### Event-Driven vs Event Sourcing (critical distinction)
+
+| | Event-Driven (EDA) | Event Sourcing |
+|---|---|---|
+| Purpose | Service communication | How state is stored |
+| Complexity | Medium | High |
+| Use when | Crossing bounded context boundaries | Audit history, time-travel, regulatory compliance |
+
+**Rule**: Use EDA broadly. Use Event Sourcing only when you have a genuine need for complete audit history or replay. Event Sourcing requires a separate read model (CQRS) and is a fundamentally different programming model.
 
 ---
 

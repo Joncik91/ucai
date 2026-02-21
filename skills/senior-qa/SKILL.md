@@ -328,21 +328,37 @@ await waitFor(() => {
 });
 ```
 
-### Mocking with MSW
+### Mocking with MSW v2
+
+MSW v2 uses `http` + `HttpResponse` — the v1 `rest`/`ctx` API is removed.
 
 ```typescript
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 
 const server = setupServer(
-  rest.get('/api/users', (req, res, ctx) => {
-    return res(ctx.json([{ id: 1, name: 'John' }]));
-  })
+  http.get('/api/users', () => {
+    return HttpResponse.json([{ id: 1, name: 'John' }]);
+  }),
+  http.post('/api/users', async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({ id: 2, ...body }, { status: 201 });
+  }),
+  http.get('/api/users/:id', ({ params }) => {
+    return HttpResponse.json({ id: params.id, name: 'John' });
+  }),
 );
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+afterEach(() => server.resetHandlers());  // prevent handler bleed between tests
 afterAll(() => server.close());
+
+// Per-test override
+server.use(
+  http.get('/api/users', () =>
+    HttpResponse.json({ error: 'Server error' }, { status: 500 })
+  )
+);
 ```
 
 ### Playwright Locators
@@ -355,6 +371,82 @@ page.getByText('Welcome')
 
 // Chaining
 page.getByRole('listitem').filter({ hasText: 'Product' })
+```
+
+### userEvent v14 — Async Pattern
+
+userEvent v14 methods are **async**. Always call `setup()` and `await` every interaction.
+
+```typescript
+import userEvent from '@testing-library/user-event';
+
+test('form submission', async () => {
+  const user = userEvent.setup();  // call once, before render
+
+  render(<SearchForm onSubmit={vi.fn()} />);
+
+  await user.type(screen.getByRole('textbox', { name: /search/i }), 'react');
+  await user.click(screen.getByRole('button', { name: /submit/i }));
+  await user.keyboard('{Escape}');
+});
+```
+
+### Vitest Config (preferred over Jest for Vite projects)
+
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./vitest.setup.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
+    exclude: ['tests/e2e/**', 'node_modules'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      thresholds: { lines: 80, branches: 75 },
+    },
+  },
+});
+
+// vitest.setup.ts
+import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/react';
+import { afterEach } from 'vitest';
+afterEach(() => cleanup());
+```
+
+### Next.js App Router Testing
+
+```typescript
+// Mock next/navigation (vitest.setup.ts or per-test)
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(() => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() })),
+  usePathname: vi.fn(() => '/current-path'),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
+  useParams: vi.fn(() => ({ id: '123' })),
+}));
+
+// Test route handlers with next-test-api-route-handler
+import { testApiHandler } from 'next-test-api-route-handler';
+import * as usersRoute from '../app/api/users/route';
+
+test('GET /api/users', async () => {
+  await testApiHandler({
+    appHandler: usersRoute,
+    async test({ fetch }) {
+      const res = await fetch({ method: 'GET' });
+      expect(res.status).toBe(200);
+      const data = await res.json();
+      expect(Array.isArray(data)).toBe(true);
+    },
+  });
+});
 ```
 
 ### Coverage Thresholds (jest.config.js)

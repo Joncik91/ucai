@@ -23,6 +23,145 @@ Backend development patterns, API design, database optimization, and security pr
 
 ---
 
+## Framework Selection (2025)
+
+| Framework | When to use |
+|-----------|-------------|
+| **Hono** | Edge/serverless, cross-runtime (Cloudflare Workers, Bun, Node), new projects |
+| **Fastify** | Node-only with rich plugin ecosystem (Mercurius/GraphQL, etc.) |
+| **NestJS** | Enterprise, DI, strong opinionated structure, large teams |
+| **Express** | Legacy maintenance only — do not start new projects |
+
+### Hono — Modern Default
+
+```typescript
+import { Hono } from 'hono';
+import { logger } from 'hono/logger';
+import { cors } from 'hono/cors';
+import { zValidator } from '@hono/zod-validator';
+import { serve } from '@hono/node-server';
+import { z } from 'zod';
+
+const app = new Hono();
+app.use('*', logger());
+app.use('/api/*', cors());
+
+const CreateUserSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+});
+
+app.post('/api/users',
+  zValidator('json', CreateUserSchema),
+  async (c) => {
+    const body = c.req.valid('json'); // fully typed, no cast needed
+    const user = await db.insert(users).values(body).returning();
+    return c.json(user[0], 201);
+  }
+);
+
+app.onError((err, c) => c.json({ error: err.message }, 500));
+serve({ fetch: app.fetch, port: 3000 });
+```
+
+### Drizzle ORM — SQL-level control with TypeScript safety
+
+```typescript
+// db/schema.ts
+import { pgTable, text, uuid, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+
+export const users = pgTable('users', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  email: text('email').notNull(),
+  name: text('name').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [
+  uniqueIndex('users_email_idx').on(t.email),
+]);
+
+// db/index.ts
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+export const db = drizzle(new Pool({ connectionString: process.env.DATABASE_URL }), { schema });
+
+// For serverless (Neon HTTP driver — fastest for cold starts)
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
+export const db = drizzle(neon(process.env.DATABASE_URL!), { schema });
+
+// Queries
+import { eq, desc } from 'drizzle-orm';
+const user = await db.query.users.findFirst({
+  where: eq(users.id, userId),
+  with: { posts: { orderBy: desc(posts.createdAt) } },
+});
+const [newUser] = await db.insert(users).values({ email, name }).returning();
+await db.transaction(async (tx) => { /* atomic operations */ });
+```
+
+```bash
+# Migrations
+npx drizzle-kit generate    # diff schema → SQL migration
+npx drizzle-kit migrate     # apply migrations
+npx drizzle-kit push        # push directly to dev DB (no migration file)
+```
+
+**Drizzle vs Prisma**: Drizzle is ~7KB vs Prisma's 2MB+ binary engine. No code generation step. 1:1 SQL mapping. Better serverless cold start performance. Prefer Drizzle for new projects; Prisma for teams that value the Prisma Studio and want a higher-level abstraction.
+
+### better-auth — Modern Authentication
+
+```typescript
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { twoFactor } from 'better-auth/plugins';
+
+export const auth = betterAuth({
+  database: drizzleAdapter(db, { provider: 'pg' }),
+  emailAndPassword: { enabled: true, requireEmailVerification: true },
+  socialProviders: {
+    github: { clientId: process.env.GITHUB_CLIENT_ID!, clientSecret: process.env.GITHUB_CLIENT_SECRET! },
+    google: { clientId: process.env.GOOGLE_CLIENT_ID!, clientSecret: process.env.GOOGLE_CLIENT_SECRET! },
+  },
+  session: { expiresIn: 60 * 60 * 24 * 7, updateAge: 60 * 60 * 24 },
+  plugins: [twoFactor()],
+});
+
+// Mount in Hono
+app.on(['GET', 'POST'], '/api/auth/*', (c) => auth.handler(c.req.raw));
+
+// Session middleware
+const authMiddleware = createMiddleware(async (c, next) => {
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  if (!session) return c.json({ error: 'Unauthorized' }, 401);
+  c.set('user', session.user);
+  await next();
+});
+```
+
+**Note**: Lucia auth was archived in late 2024. better-auth is its recommended successor.
+
+### Node.js 22+ Features
+
+```bash
+# Load .env without dotenv package
+node --env-file=.env server.js
+```
+
+```javascript
+// Native fetch is global (stable in v22)
+const data = await fetch('https://api.example.com').then(r => r.json());
+
+// ESM equivalents of __dirname/__filename
+import.meta.dirname   // equivalent of __dirname
+import.meta.filename  // equivalent of __filename
+
+// Built-in test runner (no external deps)
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+```
+
+---
+
 ## Quick Start
 
 ```bash

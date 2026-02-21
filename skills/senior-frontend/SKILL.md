@@ -83,6 +83,168 @@ See `references/ui_design_system.md` for the full design system with detailed ru
 
 ---
 
+## React 19 — Key APIs
+
+### `useActionState` — Unified form state (replaces manual isPending + error state)
+
+```tsx
+import { useActionState } from 'react';
+
+function UpdateName() {
+  const [error, submitAction, isPending] = useActionState(
+    async (prev: string | null, formData: FormData) => {
+      const err = await updateName(formData.get('name') as string);
+      if (err) return err;
+      redirect('/profile');
+      return null;
+    },
+    null
+  );
+  return (
+    <form action={submitAction}>
+      <input type="text" name="name" />
+      <button type="submit" disabled={isPending}>Update</button>
+      {error && <p>{error}</p>}
+    </form>
+  );
+}
+```
+
+### `useFormStatus` — Read parent form state without prop drilling
+
+```tsx
+import { useFormStatus } from 'react-dom';
+
+function SubmitButton() {
+  const { pending } = useFormStatus();  // reads nearest ancestor <form>
+  return <button type="submit" disabled={pending}>Save</button>;
+}
+```
+
+### `useOptimistic` — Optimistic UI with auto-rollback
+
+```tsx
+import { useOptimistic } from 'react';
+
+function MessageList({ messages, sendMessage }) {
+  const [optimistic, addOptimistic] = useOptimistic(
+    messages,
+    (state, newMsg) => [...state, { text: newMsg, sending: true }]
+  );
+  const action = async (formData: FormData) => {
+    const text = formData.get('message') as string;
+    addOptimistic(text);    // immediate
+    await sendMessage(text); // real call — rolls back on failure
+  };
+  return <form action={action}>...</form>;
+}
+```
+
+### `ref` as prop — `forwardRef` deprecated
+
+```tsx
+// BEFORE (deprecated)
+const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => (
+  <input {...props} ref={ref} />
+));
+
+// AFTER — ref is a plain prop
+function Input({ ref, ...props }: InputProps & { ref?: React.Ref<HTMLInputElement> }) {
+  return <input {...props} ref={ref} />;
+}
+```
+
+### `use()` — Read promises and context in render
+
+```tsx
+import { use, Suspense } from 'react';
+
+// Wrap in Suspense — suspends until resolved
+function Comments({ commentsPromise }: { commentsPromise: Promise<Comment[]> }) {
+  const comments = use(commentsPromise);
+  return comments.map(c => <p key={c.id}>{c.body}</p>);
+}
+// Promise must be created outside render (not inline — causes infinite loop)
+```
+
+### Next.js 15 — Breaking Changes
+
+```typescript
+// params and searchParams are now async (breaking change from 14)
+// BEFORE (Next.js 14)
+export default function Page({ params }: { params: { slug: string } }) {
+  const { slug } = params; // sync
+}
+
+// AFTER (Next.js 15)
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params; // must await
+}
+
+// For Client Components: use() to unwrap
+'use client';
+export default function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+}
+```
+
+```typescript
+// Fetch caching flipped: no longer cached by default (Next.js 15)
+// Opt in explicitly:
+const data = await fetch('/api/data', { next: { revalidate: 3600 } });
+
+// next/after: run work after response is sent (non-blocking)
+import { after } from 'next/server';
+after(async () => { await analytics.track({ event: 'page_view' }); });
+
+// Turbopack stable: add --turbo flag
+// next dev --turbo
+```
+
+### Tailwind CSS v4 — Key Changes
+
+```css
+/* BEFORE (v3) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* AFTER (v4) */
+@import "tailwindcss";
+```
+
+```css
+/* Config is CSS-first — tailwind.config.js is gone */
+@import "tailwindcss";
+
+@theme {
+  --color-brand-500: oklch(0.48 0.21 276);
+  --font-display: "Satoshi", sans-serif;
+}
+```
+
+Renamed utilities: `bg-gradient-to-r` → `bg-linear-to-r`, `shadow-sm` → `shadow-xs`. Container queries built in (no plugin): `@container`, `@lg:flex`.
+
+### TanStack Query v5 — API Changes
+
+```typescript
+// v5: single object signature only (v4 positional args removed)
+const { data, isPending } = useQuery({  // isLoading renamed to isPending
+  queryKey: ['users'],
+  queryFn: fetchUsers,
+});
+
+// initialPageParam now required for infinite queries
+const { data } = useInfiniteQuery({
+  queryKey: ['posts'],
+  queryFn: ({ pageParam }) => fetchPosts(pageParam),
+  initialPageParam: 0,   // NEW — required in v5
+  getNextPageParam: (last) => last.nextCursor,
+});
+```
+
+---
+
 ## Project Scaffolding
 
 Generate a new Next.js or React project with TypeScript, Tailwind CSS, and best practice configurations.

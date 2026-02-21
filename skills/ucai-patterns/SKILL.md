@@ -42,7 +42,7 @@ For detailed patterns, see: `references/agent-patterns.md`
 
 Hooks are lifecycle event handlers. They are the primary extension point.
 
-**Five events**: SessionStart, PreToolUse, PostToolUse, Stop, UserPromptSubmit
+**Hook events**: SessionStart, PreToolUse, PostToolUse, PostToolUseFailure, Stop, UserPromptSubmit, SubagentStop, SubagentStart, PreCompact, SessionEnd, PermissionRequest
 
 **Key patterns**:
 - SessionStart: Inject project context
