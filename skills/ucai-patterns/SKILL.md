@@ -119,4 +119,19 @@ For detailed patterns, see: `references/hook-patterns.md`
 | "Exit code 2 might be too aggressive" | Exit code 2 is the designed block mechanism. Use it when blocking is correct. |
 | "I'll skip the Stop hook iteration check" | The iterate loop depends on the Stop hook. Skipping breaks the loop. |
 
+## Anti-Patterns
+
+Named mistakes to avoid. Each has a symptom and a fix.
+
+For the full catalogue, see: `references/anti-patterns.md`
+
+**Red Flags — Anti-Patterns**
+
+| Thought | Reality |
+|---------|---------|
+| "This agent needs Write + Edit for safety" | Read-only agents can't accidentally break things. Restrict tools. |
+| "I'll use console.log to debug my hook" | console.log corrupts hook JSON output. Use console.error for debug. |
+| "The command will implement this directly" | Commands coordinate. Agents execute. Keep the separation. |
+| "I'll build the path with string concatenation" | Use path.resolve() or path.join(). String concat breaks on Windows. |
+
 For skill and command authoring principles (persuasion techniques, gate functions, enforcement language), see: `references/skill-design-principles.md`

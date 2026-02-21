@@ -24,8 +24,7 @@ process.stdin.on("end", () => {
     }
 
     const frontmatter = fmMatch[1]
-    const rawBody = fmMatch[2] ? fmMatch[2].trim() : ""
-    const taskBody = rawBody.length > 200 ? rawBody.slice(0, 200) + "..." : rawBody
+    const taskBody = fmMatch[2] ? fmMatch[2].trim() : ""
 
     function getField(name) {
       const m = frontmatter.match(new RegExp("^" + name + ":\\s*(.*)$", "m"))
@@ -40,16 +39,22 @@ process.stdin.on("end", () => {
     }
 
     const maxDisplay = maxIterations && maxIterations !== "0" ? maxIterations : "unlimited"
-    let msg = "Ucai iterate loop is active (iteration " + iteration + "/" + maxDisplay + ")"
-    if (completionPromise && completionPromise !== "null") {
-      msg += " | Completion promise: <promise>" + completionPromise + "</promise>"
-    }
-    msg += " — state preserved in .claude/ucai-iterate.local.md"
-    if (taskBody) {
-      msg += " | Task: " + taskBody
-    }
 
-    process.stdout.write(JSON.stringify({ systemMessage: msg }))
+    const lines = ["[Ucai iterate loop — pre-compaction recovery context]"]
+    lines.push("Iteration: " + iteration + "/" + maxDisplay)
+    if (completionPromise && completionPromise !== "null") {
+      lines.push("Completion promise: <promise>" + completionPromise + "</promise>")
+    }
+    lines.push("State file: .claude/ucai-iterate.local.md")
+    if (taskBody) {
+      lines.push("")
+      lines.push("Task:")
+      lines.push(taskBody)
+    }
+    lines.push("")
+    lines.push("Continue the iterate loop after compaction. The task and iteration state are preserved on disk.")
+
+    process.stdout.write(JSON.stringify({ systemMessage: lines.join("\n") }))
     process.exit(0)
   } catch {
     process.exit(0)
