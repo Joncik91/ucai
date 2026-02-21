@@ -1,7 +1,5 @@
   name: senior-frontend
-  description: Frontend development and design skill for building distinctive, production-grade interfaces. Use when building React components, optimizing performance, analyzing bundle sizes,
-  scaffolding projects, implementing accessibility, reviewing frontend code quality, performing visual overhauls, or designing UI/UX systems. Generates creative, polished code that avoids generic AI
-   aesthetics.
+  description: Use when building React components, optimizing performance, analyzing bundle sizes, scaffolding projects, implementing accessibility, reviewing frontend code quality, performing visual overhauls, or designing UI/UX systems.
   ---
 
   # Senior Frontend Engineer

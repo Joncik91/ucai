@@ -24,6 +24,14 @@ The context window is a shared resource. Protect it.
 
 For detailed patterns, see: `references/context-management.md`
 
+**Red Flags — Context Management**
+
+| Thought | Reality |
+|---------|---------|
+| "CLAUDE.md is the right place for this framework pattern" | CLAUDE.md is for project facts only. Framework conventions belong in skills. |
+| "I'll load all context upfront to be safe" | Upfront loading burns context before it's needed. Load on demand. |
+| "The context window is large enough" | Large ≠ infinite. Shared resource. Protect it. |
+
 ## Agent Patterns
 
 Agents are focused workers, not personas.
@@ -37,6 +45,14 @@ Agents are focused workers, not personas.
 - Consolidate results in the orchestrating command, not in another agent
 
 For detailed patterns, see: `references/agent-patterns.md`
+
+**Red Flags — Agent Patterns**
+
+| Thought | Reality |
+|---------|---------|
+| "I'll spawn agents one at a time for clarity" | Serial spawning wastes 2-3 seconds per round-trip. Batch in one message. |
+| "This agent needs all tools available" | Restrict tools to what the agent actually needs. Scope matters. |
+| "I'll have one agent do everything" | Focused agents outperform generalist agents on complex tasks. |
 
 ## Batch Operations
 
@@ -57,6 +73,15 @@ The golden rule: **1 message = ALL related operations**. Every round-trip to Cla
 
 For detailed patterns, see: `references/agent-patterns.md`
 
+**Red Flags — Batch Operations**
+
+| Thought | Reality |
+|---------|---------|
+| "I'll read this file, then decide what to read next" | Speculatively read everything potentially useful in one message. |
+| "I'll update todos one at a time as I finish each" | Batch all TodoWrite updates in a single call. |
+| "Let me spawn this agent first, then spawn the next" | All parallel agents go in one message. Always. |
+| "Sequential is safer" | Sequential adds latency with zero safety benefit for independent tasks. |
+
 ## Hook Patterns
 
 Hooks are lifecycle event handlers. They are the primary extension point.
@@ -70,3 +95,11 @@ Hooks are lifecycle event handlers. They are the primary extension point.
 - Exit code 2 blocks the operation
 
 For detailed patterns, see: `references/hook-patterns.md`
+
+**Red Flags — Hook Patterns**
+
+| Thought | Reality |
+|---------|---------|
+| "The hook will handle this automatically" | Hooks run on lifecycle events. Read the handler to confirm scope. |
+| "Exit code 2 might be too aggressive" | Exit code 2 is the designed block mechanism. Use it when blocking is correct. |
+| "I'll skip the Stop hook iteration check" | The iterate loop depends on the Stop hook. Skipping breaks the loop. |

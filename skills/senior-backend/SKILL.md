@@ -1,6 +1,6 @@
 ---
 name: senior-backend
-description: This skill should be used when the user asks to "design REST APIs", "optimize database queries", "implement authentication", "build microservices", "review backend code", "set up GraphQL", "handle database migrations", or "load test APIs". Use for backend development, API design, database optimization, authentication, and security patterns across any language or framework.
+description: This skill should be used when the user asks to "design REST APIs", "optimize database queries", "implement authentication", "build microservices", "review backend code", "set up GraphQL", "handle database migrations", or "load test APIs".
 ---
 
 # Senior Backend Engineer
