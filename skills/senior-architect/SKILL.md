@@ -1,405 +1,160 @@
 ---
 name: senior-architect
-description: This skill should be used when the user asks to "design system architecture", "evaluate microservices vs monolith", "create architecture diagrams", "analyze dependencies", "choose a database", "plan for scalability", "make technical decisions", or "review system design". Use for architecture decision records (ADRs), tech stack evaluation, system design reviews, dependency analysis, and generating architecture diagrams in Mermaid, PlantUML, or ASCII format.
+description: This skill should be used when the user asks to "design system architecture", "evaluate microservices vs monolith", "create architecture diagrams", "analyze dependencies", "choose a database", "plan for scalability", "make technical decisions", or "review system design". Use for architecture decision records (ADRs), tech stack evaluation, system design reviews, and generating architecture diagrams.
 ---
 
 # Senior Architect
 
-Architecture design and analysis tools for making informed technical decisions.
-
-## Table of Contents
-
-- [Quick Start](#quick-start)
-- [Tools Overview](#tools-overview)
-  - [Architecture Diagram Generator](#1-architecture-diagram-generator)
-  - [Dependency Analyzer](#2-dependency-analyzer)
-  - [Project Architect](#3-project-architect)
-- [Decision Workflows](#decision-workflows)
-  - [Database Selection](#database-selection-workflow)
-  - [Architecture Pattern Selection](#architecture-pattern-selection-workflow)
-  - [Monolith vs Microservices](#monolith-vs-microservices-decision)
-- [Reference Documentation](#reference-documentation)
-- [Tech Stack Coverage](#tech-stack-coverage)
-- [Common Commands](#common-commands)
+System design, architecture decisions, and technical strategy for any scale and any stack.
 
 ---
 
-## Quick Start
+## Step 1: Understand the Context
 
-```bash
-# Generate architecture diagram from project
-python scripts/architecture_diagram_generator.py ./my-project --format mermaid
+Before designing or recommending anything, establish:
 
-# Analyze dependencies for issues
-python scripts/dependency_analyzer.py ./my-project --output json
+- **Stage**: prototype / startup / growth / enterprise?
+- **Team size**: solo / small (2-5) / medium (6-20) / large (20+)?
+- **Traffic**: requests/day? peak load? geographic distribution?
+- **Data**: volume? sensitivity? compliance requirements (GDPR, HIPAA, SOC2)?
+- **Constraints**: cloud provider, existing stack, budget, timeline?
 
-# Get architecture assessment
-python scripts/project_architect.py ./my-project --verbose
-```
-
----
-
-## Tools Overview
-
-### 1. Architecture Diagram Generator
-
-Generates architecture diagrams from project structure in multiple formats.
-
-**Solves:** "I need to visualize my system architecture for documentation or team discussion"
-
-**Input:** Project directory path
-**Output:** Diagram code (Mermaid, PlantUML, or ASCII)
-
-**Supported diagram types:**
-- `component` - Shows modules and their relationships
-- `layer` - Shows architectural layers (presentation, business, data)
-- `deployment` - Shows deployment topology
-
-**Usage:**
-```bash
-# Mermaid format (default)
-python scripts/architecture_diagram_generator.py ./project --format mermaid --type component
-
-# PlantUML format
-python scripts/architecture_diagram_generator.py ./project --format plantuml --type layer
-
-# ASCII format (terminal-friendly)
-python scripts/architecture_diagram_generator.py ./project --format ascii
-
-# Save to file
-python scripts/architecture_diagram_generator.py ./project -o architecture.md
-```
-
-**Example output (Mermaid):**
-```mermaid
-graph TD
-    A[API Gateway] --> B[Auth Service]
-    A --> C[User Service]
-    B --> D[(PostgreSQL)]
-    C --> D
-```
+Ask or infer from project files: `CLAUDE.md`, `README.md`, `package.json`, `docker-compose.yml`, `terraform/`, `.github/workflows/`.
 
 ---
 
-### 2. Dependency Analyzer
+## Step 2: Research Current Options
 
-Analyzes project dependencies for coupling, circular dependencies, and outdated packages.
+For any significant technology decision, search before recommending:
 
-**Solves:** "I need to understand my dependency tree and identify potential issues"
-
-**Input:** Project directory path
-**Output:** Analysis report (JSON or human-readable)
-
-**Analyzes:**
-- Dependency tree (direct and transitive)
-- Circular dependencies between modules
-- Coupling score (0-100)
-- Outdated packages
-
-**Supported package managers:**
-- npm/yarn (`package.json`)
-- Python (`requirements.txt`, `pyproject.toml`)
-- Go (`go.mod`)
-- Rust (`Cargo.toml`)
-
-**Usage:**
-```bash
-# Human-readable report
-python scripts/dependency_analyzer.py ./project
-
-# JSON output for CI/CD integration
-python scripts/dependency_analyzer.py ./project --output json
-
-# Check only for circular dependencies
-python scripts/dependency_analyzer.py ./project --check circular
-
-# Verbose mode with recommendations
-python scripts/dependency_analyzer.py ./project --verbose
+```
+WebSearch: "<decision area> best practices 2025"
+WebSearch: "<option A> vs <option B> 2025 comparison"
+WebSearch: "<database type> use cases trade-offs 2025"
+WebSearch: "<architecture pattern> when to use 2025"
 ```
 
-**Example output:**
-```
-Dependency Analysis Report
-==========================
-Total dependencies: 47 (32 direct, 15 transitive)
-Coupling score: 72/100 (moderate)
-
-Issues found:
-- CIRCULAR: auth → user → permissions → auth
-- OUTDATED: lodash 4.17.15 → 4.17.21 (security)
-
-Recommendations:
-1. Extract shared interface to break circular dependency
-2. Update lodash to fix CVE-2020-8203
-```
+This grounds recommendations in current community consensus, not stale knowledge.
 
 ---
 
-### 3. Project Architect
+## Step 3: Architecture Decision Records (ADRs)
 
-Analyzes project structure and detects architectural patterns, code smells, and improvement opportunities.
-
-**Solves:** "I want to understand the current architecture and identify areas for improvement"
-
-**Input:** Project directory path
-**Output:** Architecture assessment report
-
-**Detects:**
-- Architectural patterns (MVC, layered, hexagonal, microservices indicators)
-- Code organization issues (god classes, mixed concerns)
-- Layer violations
-- Missing architectural components
-
-**Usage:**
-```bash
-# Full assessment
-python scripts/project_architect.py ./project
-
-# Verbose with detailed recommendations
-python scripts/project_architect.py ./project --verbose
-
-# JSON output
-python scripts/project_architect.py ./project --output json
-
-# Check specific aspect
-python scripts/project_architect.py ./project --check layers
-```
-
-**Example output:**
-```
-Architecture Assessment
-=======================
-Detected pattern: Layered Architecture (confidence: 85%)
-
-Structure analysis:
-  ✓ controllers/  - Presentation layer detected
-  ✓ services/     - Business logic layer detected
-  ✓ repositories/ - Data access layer detected
-  ⚠ models/       - Mixed domain and DTOs
-
-Issues:
-- LARGE FILE: UserService.ts (1,847 lines) - consider splitting
-- MIXED CONCERNS: PaymentController contains business logic
-
-Recommendations:
-1. Split UserService into focused services
-2. Move business logic from controllers to services
-3. Separate domain models from DTOs
-```
-
----
-
-## Decision Workflows
-
-### Database Selection Workflow
-
-Use when choosing a database for a new project or migrating existing data.
-
-**Step 1: Identify data characteristics**
-| Characteristic | Points to SQL | Points to NoSQL |
-|----------------|---------------|-----------------|
-| Structured with relationships | ✓ | |
-| ACID transactions required | ✓ | |
-| Flexible/evolving schema | | ✓ |
-| Document-oriented data | | ✓ |
-| Time-series data | | ✓ (specialized) |
-
-**Step 2: Evaluate scale requirements**
-- <1M records, single region → PostgreSQL or MySQL
-- 1M-100M records, read-heavy → PostgreSQL with read replicas
-- >100M records, global distribution → CockroachDB, Spanner, or DynamoDB
-- High write throughput (>10K/sec) → Cassandra or ScyllaDB
-
-**Step 3: Check consistency requirements**
-- Strong consistency required → SQL or CockroachDB
-- Eventual consistency acceptable → DynamoDB, Cassandra, MongoDB
-
-**Step 4: Document decision**
-Create an ADR (Architecture Decision Record) with:
-- Context and requirements
-- Options considered
-- Decision and rationale
-- Trade-offs accepted
-
-**Quick reference:**
-```
-PostgreSQL → Default choice for most applications
-MongoDB    → Document store, flexible schema
-Redis      → Caching, sessions, real-time features
-DynamoDB   → Serverless, auto-scaling, AWS-native
-TimescaleDB → Time-series data with SQL interface
-```
-
----
-
-### Architecture Pattern Selection Workflow
-
-Use when designing a new system or refactoring existing architecture.
-
-**Step 1: Assess team and project size**
-| Team Size | Recommended Starting Point |
-|-----------|---------------------------|
-| 1-3 developers | Modular monolith |
-| 4-10 developers | Modular monolith or service-oriented |
-| 10+ developers | Consider microservices |
-
-**Step 2: Evaluate deployment requirements**
-- Single deployment unit acceptable → Monolith
-- Independent scaling needed → Microservices
-- Mixed (some services scale differently) → Hybrid
-
-**Step 3: Consider data boundaries**
-- Shared database acceptable → Monolith or modular monolith
-- Strict data isolation required → Microservices with separate DBs
-- Event-driven communication fits → Event-sourcing/CQRS
-
-**Step 4: Match pattern to requirements**
-
-| Requirement | Recommended Pattern |
-|-------------|-------------------|
-| Rapid MVP development | Modular Monolith |
-| Independent team deployment | Microservices |
-| Complex domain logic | Domain-Driven Design |
-| High read/write ratio difference | CQRS |
-| Audit trail required | Event Sourcing |
-| Third-party integrations | Hexagonal/Ports & Adapters |
-
-See `references/architecture_patterns.md` for detailed pattern descriptions.
-
----
-
-### Monolith vs Microservices Decision
-
-**2025 consensus: default to modular monolith.** Amazon and Shopify both reversed microservices-first approaches. Microservices add distributed systems complexity with no benefit until you have stable domain boundaries and teams large enough to own services end-to-end.
-
-| Team size | Recommended |
-|-----------|-------------|
-| < 10 developers | Simple monolith — Docker adds complexity with no benefit |
-| 10-50 developers | Modular monolith — structure without distribution overhead |
-| 50+ developers | Microservices viable — coordination costs justify it |
-
-**Modular monolith structure:**
-- Each module maps to a bounded context with its own language
-- Modules communicate through public interfaces only — never by directly accessing another module's DB tables
-- One database schema per module (or separate schemas for hard boundaries)
-- Module-internal code is private; cross-module = defined contracts
-
-**Extract to microservice only when:**
-1. A module has significantly different scaling needs
-2. A team needs genuinely independent deployment
-3. Technology constraints require separation
-
-**Warning**: Skipping the modular monolith step and going straight to microservices without stable domain boundaries produces a **distributed monolith** — distributed systems overhead with monolithic coupling.
-
-### Architecture Decision Records (ADRs)
-
-Use **MADR format** (`docs/decisions/NNNN-title.md`):
+Document every significant decision as a MADR (Markdown Any Decision Record):
 
 ```markdown
-# ADR-0001: Use Drizzle ORM over Prisma
+# ADR-NNN: <Title>
 
-## Status
-Accepted
+**Status**: Proposed | Accepted | Deprecated | Superseded by ADR-NNN
 
-## Context and Problem Statement
-We need an ORM for the new API. Cold start performance matters (serverless deployment).
+## Context
+What is the situation forcing this decision?
 
-## Decision Drivers
-- Serverless cold start time < 100ms
-- TypeScript type safety without code generation step
-- SQL transparency for the team
+## Decision
+What are we choosing to do?
 
-## Considered Options
-- Drizzle ORM
-- Prisma
+## Options Considered
+| Option | Pros | Cons |
+|--------|------|------|
+| A | ... | ... |
+| B | ... | ... |
 
-## Decision Outcome
-Chosen: **Drizzle ORM** — 7KB vs 2MB+ binary engine eliminates cold start penalty.
-No `prisma generate` step required. 1:1 SQL mapping suits team's SQL familiarity.
+## Consequences
+What becomes easier? What becomes harder?
 
-### Consequences
-- Good: fast cold starts, direct SQL control, no generation step
-- Bad: less abstraction, Prisma Studio not available
-- Neutral: migrations require `drizzle-kit generate` instead of `prisma migrate dev`
+## References
+- Link to relevant documentation or prior art
 ```
 
-Tooling: **Log4brains** converts the `docs/decisions/` folder into a navigable static site with search and timelines.
-
-### Vertical Slice Architecture
-
-Alternative to layered (controllers/services/repositories) — organize by **feature**, not technical layer:
-
-```
-features/
-  create-order/
-    CreateOrderController.ts
-    CreateOrderHandler.ts    # business logic
-    CreateOrderRepository.ts
-    create-order.test.ts
-  cancel-order/
-    ...
-```
-
-**Prefer vertical slices when:** teams own features end-to-end, development speed is primary. **Prefer layered/Clean Architecture when:** long-term maintainability and strict dependency rules matter. **2025 trend:** Clean Architecture outer layers + vertical slice inner organization.
-
-### Event-Driven vs Event Sourcing (critical distinction)
-
-| | Event-Driven (EDA) | Event Sourcing |
-|---|---|---|
-| Purpose | Service communication | How state is stored |
-| Complexity | Medium | High |
-| Use when | Crossing bounded context boundaries | Audit history, time-travel, regulatory compliance |
-
-**Rule**: Use EDA broadly. Use Event Sourcing only when you have a genuine need for complete audit history or replay. Event Sourcing requires a separate read model (CQRS) and is a fundamentally different programming model.
+Store in `docs/decisions/` or `adr/`.
 
 ---
 
-## Reference Documentation
+## Step 4: Universal Architecture Principles
 
-Load these files for detailed information:
+### Start Simple, Evolve Deliberately
 
-| File | Contains | Load when user asks about |
-|------|----------|--------------------------|
-| `references/architecture_patterns.md` | 9 architecture patterns with trade-offs, code examples, and when to use | "which pattern?", "microservices vs monolith", "event-driven", "CQRS" |
-| `references/system_design_workflows.md` | 6 step-by-step workflows for system design tasks | "how to design?", "capacity planning", "API design", "migration" |
-| `references/tech_decision_guide.md` | Decision matrices for technology choices | "which database?", "which framework?", "which cloud?", "which cache?" |
+- **Monolith first**: a well-structured monolith is easier to operate, debug, and evolve than premature microservices
+- **Extract when**: a team boundary exists, independent scaling is needed, or a module has a clearly different change rate
+- **Strangler fig**: migrate incrementally — route traffic to new services while old ones still run
+- **"What would we need to change this decision?"** — design for reversibility, not permanence
+
+### Scalability Patterns
+
+- **Stateless services**: store session in external cache, not in-process memory
+- **Database read replicas**: separate read-heavy reporting from write path
+- **Async by default**: queue slow work (email, PDF generation, webhooks) — don't block the request
+- **Cache aggressively**: CDN -> reverse proxy -> app -> DB; set explicit TTLs; invalidate on write
+- **Horizontal scaling**: design services to run as N identical instances behind a load balancer
+
+### Data Architecture
+
+- **Single source of truth**: one system owns each piece of data; others query or subscribe
+- **Event sourcing**: consider when audit trail, time-travel, or replay is a requirement
+- **CQRS**: separate read and write models when read patterns differ significantly from write patterns
+- **Database per service**: in microservices, each service owns its data store; no shared DB
+- **Schema migrations**: always backward-compatible during rollout; support zero-downtime deploys
+
+### API Design
+
+- **Contracts first**: define the API contract (OpenAPI, Protobuf, GraphQL schema) before implementation
+- **Backward compatibility**: additive changes only (add fields, never remove); version breaking changes
+- **Idempotency**: all mutating operations should be safe to retry with the same input
+- **Timeouts everywhere**: set timeouts on all network calls; use circuit breakers for downstream services
+
+### Security as Cross-Cutting Concern
+
+- **Defense in depth**: multiple independent security controls — not one perimeter
+- **Least privilege**: services, roles, and users get only the permissions they need
+- **Secrets management**: no secrets in code or config files; use vault/secret manager
+- **mTLS in production**: service-to-service calls should be authenticated and encrypted
+- **Threat model early**: identify trust boundaries, data flows, and attack surfaces at design time
+
+### Observability
+
+- **The three pillars**: logs (what happened), metrics (how often / how long), traces (where in the call graph)
+- **Structured logs**: JSON with consistent fields (`requestId`, `userId`, `service`, `duration`, `error`)
+- **SLOs over SLAs**: define Service Level Objectives for latency and error rate; alert on error budget burn
+- **Runbooks**: every alert has a runbook — what is it, why does it fire, what do I do?
 
 ---
 
-## Tech Stack Coverage
+## Diagram Templates
 
-**Languages:** TypeScript, JavaScript, Python, Go, Swift, Kotlin, Rust
-**Frontend:** React, Next.js, Vue, Angular, React Native, Flutter
-**Backend:** Node.js, Express, FastAPI, Go, GraphQL, REST
-**Databases:** PostgreSQL, MySQL, MongoDB, Redis, DynamoDB, Cassandra
-**Infrastructure:** Docker, Kubernetes, Terraform, AWS, GCP, Azure
-**CI/CD:** GitHub Actions, GitLab CI, CircleCI, Jenkins
+### System Context (C4 Level 1)
 
----
+```
+[User] --> [Your System] --> [External Service A]
+                        --> [External Service B]
+                        <-- [Database]
+```
 
-## Common Commands
+### Container Diagram (C4 Level 2) — Mermaid
 
-```bash
-# Architecture visualization
-python scripts/architecture_diagram_generator.py . --format mermaid
-python scripts/architecture_diagram_generator.py . --format plantuml
-python scripts/architecture_diagram_generator.py . --format ascii
-
-# Dependency analysis
-python scripts/dependency_analyzer.py . --verbose
-python scripts/dependency_analyzer.py . --check circular
-python scripts/dependency_analyzer.py . --output json
-
-# Architecture assessment
-python scripts/project_architect.py . --verbose
-python scripts/project_architect.py . --check layers
-python scripts/project_architect.py . --output json
+```mermaid
+graph TD
+  User --> Frontend
+  Frontend --> API
+  API --> DB[(Database)]
+  API --> Cache[(Cache)]
+  API --> Queue[Message Queue]
+  Queue --> Worker
+  Worker --> DB
 ```
 
 ---
 
-## Getting Help
+## Review Checklist
 
-1. Run any script with `--help` for usage information
-2. Check reference documentation for detailed patterns and workflows
-3. Use `--verbose` flag for detailed explanations and recommendations
+Before presenting any architecture recommendation:
+
+- [ ] Context established: stage, team, traffic, data, constraints
+- [ ] Current options researched with WebSearch
+- [ ] Simplest solution considered first (monolith before microservices)
+- [ ] Decision documented as ADR
+- [ ] Security threat model included
+- [ ] Observability plan included
+- [ ] Migration path defined (not greenfield-only)
+- [ ] Failure modes considered: what happens when each dependency is unavailable?
+- [ ] Cost implications estimated
+- [ ] Diagram provided (Mermaid or ASCII)
