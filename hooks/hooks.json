@@ -40,7 +40,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/stop-handler.js\" || true"
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/stop-handler.js\" || true",
+            "timeout": 10
           }
         ]
       }

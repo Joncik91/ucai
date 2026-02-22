@@ -7,15 +7,16 @@ const fs = require("fs")
 
 const STATE_FILE = ".claude/ucai-iterate.local.md"
 
+// Early exit before stdin if no iterate loop is active
+if (!fs.existsSync(STATE_FILE)) {
+  process.exit(0)
+}
+
 let input = ""
 process.stdin.setEncoding("utf8")
 process.stdin.on("data", (chunk) => (input += chunk))
 process.stdin.on("end", () => {
   try {
-    if (!fs.existsSync(STATE_FILE)) {
-      process.exit(0)
-    }
-
     const stateContent = fs.readFileSync(STATE_FILE, "utf8")
     const fmMatch = stateContent.match(/^---\r?\n([\s\S]*?)\r?\n---/)
     if (!fmMatch) {

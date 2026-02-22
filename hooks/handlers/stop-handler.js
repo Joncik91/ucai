@@ -5,7 +5,6 @@
 // Feeds the task back as input to continue the loop
 
 const fs = require("fs");
-const readline = require("readline");
 
 const STATE_FILE = ".claude/ucai-iterate.local.md";
 
@@ -115,8 +114,17 @@ function run(hookInput) {
     transcriptPath &&
     fs.existsSync(transcriptPath)
   ) {
-    const transcript = fs.readFileSync(transcriptPath, "utf8");
-    const lines = transcript.trim().split("\n");
+    // Read only the tail of the transcript (last 64KB) instead of the full file
+    // to avoid loading multi-MB transcripts into memory for long sessions
+    const TAIL_SIZE = 65536;
+    const stat = fs.statSync(transcriptPath);
+    const readStart = Math.max(0, stat.size - TAIL_SIZE);
+    const fd = fs.openSync(transcriptPath, "r");
+    const buf = Buffer.alloc(Math.min(TAIL_SIZE, stat.size));
+    fs.readSync(fd, buf, 0, buf.length, readStart);
+    fs.closeSync(fd);
+    const tail = buf.toString("utf8");
+    const lines = tail.split("\n");
 
     // Find last assistant message (JSONL format)
     let lastAssistantLine = null;
