@@ -17,9 +17,9 @@ No build step. Validation only:
 claude --plugin-dir ./ucai
 
 # JSON syntax
-node -e "JSON.parse(require('fs').readFileSync('plugin.json', 'utf8'))"
+node -e "JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json', 'utf8'))"
 node -e "JSON.parse(require('fs').readFileSync('hooks/hooks.json', 'utf8'))"
-node -e "JSON.parse(require('fs').readFileSync('.claude-plugin/marketplace.json', 'utf8'))"
+# marketplace.json removed — was causing "plugin failed to install" conflict
 
 # JS syntax (all handlers + scripts)
 for file in hooks/handlers/*.js scripts/*.js; do node -c "$file" || exit 1; done
@@ -77,7 +77,7 @@ Stop hook reads state → feeds task back → checks limits → continues or exi
 - SessionStart announces `[plugin]` and `[project]` skills; Claude decides which to load
 
 ### Config Protection
-PreToolUse guards: `plugin.json`, `hooks/hooks.json`, `.claude-plugin/marketplace.json`,
+PreToolUse guards: `.claude-plugin/plugin.json`, `hooks/hooks.json`,
 `CLAUDE.md`, and all skill `.md` files. Emits `permissionDecision: "ask"`.
 
 ## Conventions
@@ -111,8 +111,7 @@ All files `kebab-case`. Exception: `SKILL.md` is uppercase.
 ## Key Files
 | File | Purpose |
 |------|---------|
-| `plugin.json` | Plugin manifest (name, version 1.1.0, keywords) |
-| `.claude-plugin/marketplace.json` | Marketplace listing metadata |
+| `.claude-plugin/plugin.json` | Plugin manifest (name, version 1.1.0, keywords) |
 | `hooks/hooks.json` | Hook registration (7 events, timeouts, matchers) |
 | `hooks/handlers/sessionstart-handler.js` | Most complex handler (7.8 KB): git, iterate, skills |
 | `hooks/handlers/stop-handler.js` | Iteration control (5.4 KB, uses semicolons) |

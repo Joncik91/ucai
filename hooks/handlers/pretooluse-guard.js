@@ -9,8 +9,7 @@
 const path = require("path")
 
 const PROTECTED_FILES = [
-  "plugin.json",
-  ".claude-plugin/marketplace.json",
+  ".claude-plugin/plugin.json",
   "hooks/hooks.json"
 ]
 
