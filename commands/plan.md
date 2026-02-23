@@ -362,38 +362,44 @@ Feature request: $ARGUMENTS
    - A solo dev who skips this builds the wrong screens or misses states
 
 3. Present requirements (and user flows if applicable) to user for validation
-4. **DO NOT PROCEED TO ARCHITECTURE WITHOUT APPROVAL**
+4. **DO NOT PROCEED TO MILESTONE SCOPING WITHOUT APPROVAL**
 
 If the user says "whatever you think is best", provide your recommendation and get explicit confirmation.
 
 ---
 
-## Phase 3F.5: Milestone Scoping (Agile Mode — Conditional)
+## Phase 3F.5: Milestone Scoping — MANDATORY
 
-**Condition**: Enter this phase only if:
-- The feature has ≥4 Must Have requirements, OR spans ≥3 distinct user flows
-- The user has not already indicated they want a single build
+**Goal**: Break the feature into small, independently-buildable milestones to minimize context usage per `/build` session.
 
-**Goal**: Optionally break the feature into independently-buildable milestones.
+**CRITICAL**: Every FRD must have milestones. This is not optional. Even a "small" feature should be split into 2+ milestones to keep each `/build` session focused and avoid context overflow.
+
+**Why milestones matter**:
+- Each `/build` session runs with a fresh context window
+- Long sessions hit context limits → compaction → lost context → bugs
+- Small milestones = short sessions = reliable implementation
 
 **Actions**:
-1. Count the Must Have requirements and user flows from Phase 3F
-2. Present the suggestion:
-   > "I found [N] Must Have requirements and [M] user flows — this is a large feature.
-   > Would you like **agile mode**? I'll group these into milestones you can build one at a time
-   > with separate `/build` runs. Or we can keep it as a single FRD and build it all at once."
-3. **Wait for user decision.** If "No", "skip", or "single build" → proceed directly to Phase 4F.
-4. If "Yes":
-   - Group the Must Have requirements into 2–6 milestones, sequenced in a logical build order
-   - Each milestone must be independently deployable (no circular dependencies)
-   - For each milestone draft:
-     - **Name**: short and descriptive (e.g., "Secret Detail Panel")
-     - **Scope**: which functional requirements from Phase 3F this milestone covers
-     - **Depends on**: prior milestone(s) by number, or "None"
-     - **Acceptance criteria**: 2–5 testable bullet points, more specific than the FRD requirements
-   - Should Have items may be assigned to any milestone or collected as a final "Stretch" milestone
-   - Present the full milestone breakdown for user approval
-   - **DO NOT PROCEED WITHOUT APPROVAL** — incorporate feedback, then continue to Phase 4F with agile mode confirmed
+1. Review the requirements from Phase 3F and identify natural boundaries for splitting:
+   - **By layer**: data model → API → UI → polish
+   - **By user flow**: happy path → error handling → edge cases
+   - **By component**: core functionality → secondary features → refinement
+   - **By file scope**: new files → modifications to existing files → tests
+
+2. Create **as many milestones as makes sense**. Guidelines:
+   - Minimum 2 milestones (even for small features)
+   - Each milestone should be completable in one focused `/build` session
+   - Prefer more smaller milestones over fewer larger ones
+   - A milestone that touches 5+ files or has 5+ acceptance criteria is probably too big
+
+3. For each milestone, define:
+   - **Name**: short and descriptive (e.g., "Data Layer", "Core API", "Basic UI", "Error Handling")
+   - **Scope**: specific files/functions/behaviors this milestone covers
+   - **Depends on**: prior milestone(s) by number, or "None"
+   - **Acceptance criteria**: 2-4 testable bullet points, specific enough to verify in one test pass
+
+4. Present the milestone breakdown to the user
+5. **DO NOT PROCEED WITHOUT APPROVAL** — ask: "Does this breakdown make sense? Should we split further or combine any milestones?"
 
 ---
 
@@ -485,12 +491,11 @@ feature: [Feature name]
 slug: [feature-slug]
 created: [ISO 8601 date]
 status: draft
-mode: agile    # omit this line for standard (non-agile) FRDs
 ---
 
 # FRD: [Feature Name]
 
-> **For Claude:** To implement this FRD, run `/build [feature]`. The build command will auto-load this file and any project specs as context.
+> **For Claude:** To implement this FRD, run `/build [feature]`. The build command will auto-load this file and ask which milestone to build. Each milestone runs in a fresh context window.
 
 ## Overview
 [1-2 paragraphs: what the feature is, why it's needed]
@@ -563,10 +568,11 @@ mode: agile    # omit this line for standard (non-agile) FRDs
 - [Bullet points on what to watch for]
 
 ## Milestones
-<!-- Only include if mode: agile — output from Phase 3F.5. Remove this section entirely for standard FRDs. -->
+
+> **Each milestone is one `/build` session with a fresh context window. Keep them small and focused.**
 
 ### M1: [Name]
-**Scope**: [Which Must Have requirements from the list above this milestone covers]
+**Scope**: [Specific files/functions/behaviors this milestone covers]
 **Depends on**: None
 
 **Acceptance criteria**:
@@ -574,12 +580,22 @@ mode: agile    # omit this line for standard (non-agile) FRDs
 - [ ] [Specific testable criterion]
 
 ### M2: [Name]
-**Scope**: [Which requirements]
+**Scope**: [Specific files/functions/behaviors]
 **Depends on**: M1
 
 **Acceptance criteria**:
 - [ ] [Specific testable criterion]
 - [ ] [Specific testable criterion]
+
+### M3: [Name]
+**Scope**: [Specific files/functions/behaviors]
+**Depends on**: M2
+
+**Acceptance criteria**:
+- [ ] [Specific testable criterion]
+- [ ] [Specific testable criterion]
+
+<!-- Add more milestones as needed. Aim for many small milestones rather than few large ones. -->
 
 ## References
 - [URL with description]
@@ -592,6 +608,4 @@ mode: agile    # omit this line for standard (non-agile) FRDs
    </HARD-GATE>
 4. Create `.claude/frds/` directory if it does not exist
 5. Write `.claude/frds/<slug>.md`
-6. Confirm with an appropriate message based on mode:
-   - **Standard**: "FRD written to `.claude/frds/<slug>.md`. Run `/build [feature]` to implement — the build command will auto-load this FRD and any project specs as context."
-   - **Agile**: "FRD written to `.claude/frds/<slug>.md` with [N] milestones. Run `/build [feature]` to start — it will detect agile mode and ask which milestone to build. Suggested starting point: M1 ([name])."
+6. Confirm: "FRD written to `.claude/frds/<slug>.md` with [N] milestones. Run `/build [feature]` to start — it will ask which milestone to build. Suggested starting point: M1 ([name])."

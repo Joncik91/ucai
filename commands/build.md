@@ -46,11 +46,10 @@ Feature request: $ARGUMENTS
    - First: `.claude/frds/<slug>.md`
    - Fallback: `.claude/prd.md` (legacy single-file format)
    - If found, read and summarize it to the user.
-4. **Agile mode check**: If an FRD was found and loaded, check its YAML frontmatter for `mode: agile`.
-   - If `mode: agile` is present, find the `## Milestones` section in the FRD
+4. **Milestone selection**: If an FRD was found, find the `## Milestones` section.
    - List all milestones with their name, scope summary, and completion status (`- [ ]` = pending, `- [x]` = done)
    - Skip milestones that are already fully complete (all criteria checked)
-   - Ask: "This FRD uses agile mode. Which milestone do you want to build next? [list remaining milestones]"
+   - Ask: "Which milestone do you want to build? [list remaining milestones with scope]"
    - **Wait for user to select a milestone**
    - Note the selected milestone's name, scope, and acceptance criteria — throughout phases 2–8, scope all work to this milestone only. Do not implement or review code outside its defined scope.
 5. Ask: "I found [list specs found]. Should I use these as context for this build?"
@@ -272,7 +271,7 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
      - Replace the `updated:` value in the YAML frontmatter with today's date
    - Confirm: "Requirements updated in `.claude/requirements.md`"
    - If no matching lines are found, tell the user and skip silently
-4. **Milestone update**: If the FRD had `mode: agile` and a milestone was selected in Phase 1:
+4. **Milestone update**: If a milestone was selected in Phase 1:
    - Re-read the FRD file in full (do not rely on memory — the file may have changed)
    - Find the selected milestone's `**Acceptance criteria**:` block
    - Collect all `- [ ]` criteria in that block

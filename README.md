@@ -24,7 +24,7 @@ Ucai is built from the inside out — using Claude Code's native systems exactly
 ## ✨ What Ucai Gives You
 
 - Project planning with discovery agents
-- Feature-level FRDs with optional agile milestone breakdown
+- Feature-level FRDs with milestone breakdown (each milestone = one fresh context window)
 - 8-phase build workflow with parallel agents
 - Native autonomous iteration (`/ucai:iterate`)
 - Multi-agent code review
@@ -86,7 +86,7 @@ Run `/help` to see them listed.
 | Command | What it does |
 |---------|-------------|
 | `/ucai:init` | Analyze codebase with parallel agents → generate real CLAUDE.md |
-| `/ucai:plan` | No args: project spec + requirements backlog. With args: feature FRD (agile mode for large features) |
+| `/ucai:plan` | No args: project spec + requirements backlog. With args: feature FRD with milestones |
 | `/ucai:build` | 8-phase build workflow — explore, clarify, design, implement, verify, test |
 | `/ucai:iterate` | Controlled autonomous iteration via native Stop hooks |
 | `/ucai:review` | Parallel agent code review — bugs, security, conventions |
@@ -95,7 +95,7 @@ Run `/help` to see them listed.
 | `/ucai:release` | Changelog from git history, version bump, git tag |
 | `/ucai:cancel-iterate` | Stop an active iteration loop |
 
-→ **[Full workflow guide](docs/workflow-guide.md)** — getting started patterns, agile milestone mode, command deep-dives, context chain reference.
+→ **[Full workflow guide](docs/workflow-guide.md)** — getting started patterns, milestone-based builds, command deep-dives, context chain reference.
 
 ## 🚀 Typical E2E Workflow
 

@@ -60,21 +60,23 @@ With arguments = feature-level FRD. Takes you through discovery, requirements, a
 - Small, well-understood features
 - You already know the design
 
-#### Agile mode (large features)
+#### Milestones (all features)
 
-If `/plan` detects ≥4 Must Have requirements or ≥3 distinct user flows, it suggests **agile mode**:
+**Every FRD has milestones.** This is not optional. Even a "small" feature should be split into 2+ milestones to keep each `/build` session focused and avoid context overflow.
 
-> "I found 6 Must Have requirements and 5 user flows — this is a large feature. Would you like agile mode?"
+**Why milestones matter:**
+- Each `/build` session runs with a fresh context window
+- Long sessions hit context limits → compaction → lost context → bugs
+- Small milestones = short sessions = reliable implementation
 
-If you accept, `/plan` defines milestones (M1..MN), each independently buildable. The FRD gets a `mode: agile` flag and a `## Milestones` section with per-milestone scope, dependencies, and acceptance criteria.
+`/plan` breaks features into small, independently-buildable milestones. Each milestone has:
+- **Scope**: specific files/functions/behaviors
+- **Depends on**: prior milestone(s) or "None"
+- **Acceptance criteria**: 2-4 testable bullet points
 
-Example FRD structure in agile mode:
+Example FRD structure:
 
 ```markdown
----
-mode: agile
----
-
 ## Milestones
 
 ### M1: Secret Detail Panel
@@ -91,6 +93,12 @@ mode: agile
 - [ ] Tab bar renders per Project.environments
 - [ ] resolve_env() called on tab switch
 ```
+
+**Guidelines:**
+- Minimum 2 milestones (even for small features)
+- Each milestone should be completable in one focused `/build` session
+- Prefer more smaller milestones over fewer larger ones
+- A milestone touching 5+ files or having 5+ acceptance criteria is probably too big
 
 ---
 
@@ -112,12 +120,12 @@ mode: agile
 | **5 Build** | Implements the chosen design. Approval-gated — does not start without your go-ahead. |
 | **6 Verify** | Verifier + reviewer agents check correctness, conventions, and quality. |
 | **7 Test** | Generates a concrete manual test checklist. Waits for you to confirm it passes. |
-| **8 Done** | Marks requirements done in requirements.md. Updates milestone in FRD if agile. |
+| **8 Done** | Marks requirements done in requirements.md. Updates milestone acceptance criteria in FRD. |
 
-**With an agile FRD**, Phase 1 shows the milestone list and asks which to build:
+Phase 1 shows the milestone list and asks which to build:
 
 ```
-This FRD uses agile mode. Which milestone do you want to build next?
+Which milestone do you want to build?
 
   M1: Secret Detail Panel — pending
   M2: Environment Switcher — pending
@@ -236,11 +244,10 @@ Reads git history since the last tag, cross-references `requirements.md` to conn
 /ucai:build Fix the broken auth flow    # jump straight to building
 ```
 
-### Large feature in agile mode
+### Feature with milestones
 
 ```
-/ucai:plan Desktop app advanced features   # detects 6 requirements → suggests agile
-# Accept → defines M1..M6 milestones
+/ucai:plan Desktop app advanced features   # breaks into M1..M6 milestones
 # Approve → FRD written
 
 /ucai:build Desktop app advanced features  # shows milestone list → pick M1
