@@ -84,7 +84,7 @@ If the user declines, proceed with $ARGUMENTS only.
 **Actions**:
 1. Read the FRD's `## Discovery` section (you already loaded it in Phase 1)
 2. Launch 1 `ucai:explorer-haiku` agent for validation:
-   - "[haiku] Level: quick. Validate these FRD findings for [feature]: [list 3-5 key patterns/files from FRD Discovery]. Confirm they still exist and note any discrepancies."
+   - "[haiku] Level: quick. Do NOT use WebSearch. Validate these FRD findings for [feature]: [list 3-5 key patterns/files from FRD Discovery]. Confirm they still exist in the codebase and note any discrepancies."
 3. If validation finds discrepancies → report them, ask user whether to proceed or re-run full discovery
 4. If validation passes → compile **Codebase Map** from FRD findings:
    ```
