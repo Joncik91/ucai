@@ -56,9 +56,9 @@ Feature request: $ARGUMENTS
 5. Ask: "I found [list specs found]. Should I use these as context for this build?"
 
 If the user confirms:
-- Phase 2 (Explore): Use FRD's Discovery section as a starting point — focus agents on areas not already covered
-- Phase 3 (Clarify): Use FRD's Requirements as the baseline — only clarify gaps or changes since the FRD was written
-- Phase 4 (Design): Present FRD's Architecture as one option alongside architect-generated alternatives
+- Phase 2 (Explore): Light validation (1 haiku explorer) if FRD has Discovery section
+- Phase 3 (Clarify): Only clarify gaps not covered by FRD Requirements
+- Phase 4 (Design): Skip architect agents if FRD has Architecture section
 - Phase 6 (Verify): Use FRD's Acceptance Criteria for verification
 
 If the user declines, proceed with $ARGUMENTS only.
@@ -76,6 +76,27 @@ If the user declines, proceed with $ARGUMENTS only.
 ## Phase 2: Explore
 
 **Goal**: Map the relevant codebase.
+
+### If FRD Exists with Discovery Section
+
+**LIGHT VALIDATION** — run 1 quick explorer to spot-check FRD findings, not full discovery.
+
+**Actions**:
+1. Read the FRD's `## Discovery` section (you already loaded it in Phase 1)
+2. Launch 1 `ucai:explorer-haiku` agent for validation:
+   - "[haiku] Level: quick. Validate these FRD findings for [feature]: [list 3-5 key patterns/files from FRD Discovery]. Confirm they still exist and note any discrepancies."
+3. If validation finds discrepancies → report them, ask user whether to proceed or re-run full discovery
+4. If validation passes → compile **Codebase Map** from FRD findings:
+   ```
+   Codebase Map:
+   - Key files: [file:line — role], [file:line — role], ...
+   - Architecture: [patterns, layers, abstractions]
+   - Integration points: [where new code connects to existing code]
+   - Testing: [framework, test file locations, conventions]
+   - Conventions: [naming, structure, error handling rules]
+   ```
+
+### If No FRD or FRD Lacks Discovery
 
 **MANDATORY**: You MUST use the Task tool to launch explorer agents. Do NOT skip agents and read files yourself — agents provide parallel, thorough exploration that you cannot replicate in a single pass.
 
@@ -109,6 +130,21 @@ If the user declines, proceed with $ARGUMENTS only.
 
 **CRITICAL**: Do not skip this phase.
 
+### If FRD Exists with Requirements Section
+
+**Only clarify gaps** — the FRD already defines requirements.
+
+**Actions**:
+1. Review the FRD's `## Requirements` section
+2. Identify any gaps or changes since the FRD was written:
+   - New edge cases discovered during exploration
+   - Requirements that seem incomplete or contradictory
+   - Implementation details the FRD left unspecified
+3. If no gaps: "The FRD covers requirements. No clarifications needed — proceeding to design."
+4. If gaps exist: present only those questions, not a full requirements review
+
+### If No FRD or FRD Lacks Requirements
+
 **Actions**:
 1. Review codebase findings and feature request
 2. Identify underspecified aspects: edge cases, error handling, integration points, scope, design preferences, backward compatibility, performance
@@ -122,6 +158,20 @@ If the user says "whatever you think is best", provide your recommendation and g
 ## Phase 4: Design
 
 **Goal**: Present architecture options with trade-offs.
+
+### If FRD Exists with Architecture Section
+
+**SKIP ARCHITECT AGENTS** — the FRD already contains architecture decisions.
+
+**Actions**:
+1. Review the FRD's `## Architecture` section (already loaded in Phase 1)
+2. Verify it covers: key components, data flow, integration points, files to create/modify
+3. Check if Data Model, API Surface, UI Structure, or Security Notes sections apply (they're conditional in the FRD)
+4. Present the architecture summary to the user:
+   - "The FRD defines this architecture: [brief summary]. Key decisions: [list 2-3]. Proceed with this design?"
+5. **Wait for user confirmation** — if they want alternatives, fall back to spawning architects below
+
+### If No FRD or FRD Lacks Architecture
 
 **Actions**:
 1. Launch 2-3 `ucai:architect` agents in parallel using the Task tool. Prefix each Task description with `[opus]`. Include the Codebase Map compiled in Phase 2 in each prompt:
