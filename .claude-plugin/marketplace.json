@@ -1,0 +1,18 @@
+{
+  "name": "ucai-marketplace",
+  "metadata": {
+    "version": "1.1.0",
+    "description": "Ucai — Use Claude Code As Is. Native plugin leveraging built-in architecture."
+  },
+  "owner": {
+    "name": "Ucai"
+  },
+  "plugins": [
+    {
+      "name": "ucai-plugin",
+      "description": "Structured workflows, parallel agents, hooks, and skills using Claude Code's native architecture.",
+      "version": "1.1.0",
+      "source": "./"
+    }
+  ]
+}

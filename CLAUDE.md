@@ -19,7 +19,7 @@ claude --plugin-dir ./ucai
 # JSON syntax
 node -e "JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json', 'utf8'))"
 node -e "JSON.parse(require('fs').readFileSync('hooks/hooks.json', 'utf8'))"
-# marketplace.json removed — was causing "plugin failed to install" conflict
+node -e "JSON.parse(require('fs').readFileSync('.claude-plugin/marketplace.json', 'utf8'))"
 
 # JS syntax (all handlers + scripts)
 for file in hooks/handlers/*.js scripts/*.js; do node -c "$file" || exit 1; done
@@ -77,8 +77,8 @@ Stop hook reads state → feeds task back → checks limits → continues or exi
 - SessionStart announces `[plugin]` and `[project]` skills; Claude decides which to load
 
 ### Config Protection
-PreToolUse guards: `.claude-plugin/plugin.json`, `hooks/hooks.json`,
-`CLAUDE.md`, and all skill `.md` files. Emits `permissionDecision: "ask"`.
+PreToolUse guards: `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`,
+`hooks/hooks.json`, `CLAUDE.md`, and all skill `.md` files. Emits `permissionDecision: "ask"`.
 
 ## Conventions
 

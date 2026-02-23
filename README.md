@@ -52,7 +52,7 @@ Inside an interactive Claude Code session:
 
 ```
 /plugin marketplace add Joncik91/ucai
-/plugin install ucai@ucai-marketplace
+/plugin install ucai-plugin@ucai-marketplace
 ```
 
 This installs Ucai globally — available in every project and every session.
@@ -166,8 +166,9 @@ You can also add project-level custom skills under `.claude/skills/`.
 
 ```
 ucai/
-├── plugin.json
-├── marketplace.json
+├── .claude-plugin/
+│   ├── plugin.json
+│   └── marketplace.json
 ├── CLAUDE.md
 ├── commands/
 ├── agents/
