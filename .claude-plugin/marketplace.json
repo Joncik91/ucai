@@ -9,7 +9,7 @@
   },
   "plugins": [
     {
-      "name": "ucai-plugin",
+      "name": "ucai",
       "description": "Structured workflows, parallel agents, hooks, and skills using Claude Code's native architecture.",
       "version": "1.1.0",
       "source": "./"
