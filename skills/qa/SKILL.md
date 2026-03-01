@@ -1,9 +1,9 @@
 ---
-name: senior-qa
+name: qa
 description: This skill should be used when the user asks to "generate tests", "write unit tests", "analyze test coverage", "scaffold E2E tests", "set up Playwright", "configure Jest", "implement testing patterns", or "improve test quality".
 ---
 
-# Senior QA Engineer
+# QA Engineer
 
 Testing patterns, test design, coverage strategy, and quality automation for any language or framework.
 

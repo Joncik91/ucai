@@ -1,8 +1,8 @@
-  name: senior-frontend
+  name: frontend
   description: Use when building React components, optimizing performance, analyzing bundle sizes, scaffolding projects, implementing accessibility, reviewing frontend code quality, performing visual overhauls, or designing UI/UX systems.
   ---
 
-  # Senior Frontend Engineer
+  # Frontend Engineer
 
   Frontend development patterns, performance optimization, accessibility, and distinctive UI design for any framework.
 

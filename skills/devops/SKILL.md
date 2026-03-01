@@ -1,9 +1,9 @@
 ---
-name: senior-devops
+name: devops
 description: Use when setting up CI/CD pipelines, deploying applications, managing cloud infrastructure (AWS, GCP, Azure), implementing monitoring, containerizing services, or automating deployments with infrastructure as code.
 ---
 
-# Senior DevOps Engineer
+# DevOps Engineer
 
 CI/CD, containers, Kubernetes, IaC, and observability patterns for production systems.
 

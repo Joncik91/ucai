@@ -1,4 +1,4 @@
-# Senior QA Testing Engineer Skill
+# QA Testing Engineer Skill
 
 Production-ready quality assurance and test automation skill for React/Next.js applications.
 
@@ -184,9 +184,9 @@ jobs:
 
 ## Related Skills
 
-- **senior-frontend** - React/Next.js component development
-- **senior-fullstack** - Full application architecture
-- **senior-devops** - CI/CD pipeline setup
+- **frontend** - React/Next.js component development
+- **fullstack** - Full application architecture
+- **devops** - CI/CD pipeline setup
 - **code-reviewer** - Code review with testing focus
 
 ---
