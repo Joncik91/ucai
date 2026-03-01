@@ -290,4 +290,4 @@ Reads git history since the last tag, cross-references `requirements.md` to conn
 
 **Phase 7 is mandatory.** Agent review is not a substitute for running the software. `/build` won't proceed to Phase 8 until you confirm the manual test checklist passes.
 
-**Skills load automatically.** Ucai ships with 7 senior-level skills (backend, frontend, architect, QA, DevOps, code-reviewer, ucai-patterns). Commands load them at the start of each relevant session. You don't need to manage this manually.
+**Skills load automatically.** Ucai ships with 7 skills (backend, frontend, architect, QA, DevOps, code-reviewer, ucai-patterns). Commands load them at the start of each relevant session. You don't need to manage this manually.

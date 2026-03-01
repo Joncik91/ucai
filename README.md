@@ -32,7 +32,7 @@ Ucai is built from the inside out — using Claude Code's native systems exactly
 - Documentation generation
 - Release automation
 - Hook lifecycle coverage — session context injection, config guardrails, subagent quality gates, and iterate-state preservation across compaction
-- Built-in senior-level skills (backend, frontend, QA, DevOps, architecture)
+- Built-in skills (backend, frontend, QA, DevOps, architecture)
 
 All using native Claude Code commands, agents, hooks, and skills.
 
@@ -151,16 +151,12 @@ Ucai ships with 7 curated skills auto-loaded by Claude Code:
 | Skill | Activates when |
 |-------|---------------|
 | **ucai-patterns** | Working with Claude Code plugins, hooks, agents |
-| **senior-backend** | Building APIs, databases, authentication |
-| **senior-frontend** | React, Next.js, Tailwind, component design |
-| **senior-architect** | System design, architecture decisions, ADRs |
+| **backend** | Building APIs, databases, authentication |
+| **frontend** | React, Next.js, Tailwind, component design |
+| **architect** | System design, architecture decisions, ADRs |
 | **code-reviewer** | Reviewing code quality, PRs, anti-patterns |
-| **senior-qa** | Testing strategies, coverage, E2E testing |
-| **senior-devops** | CI/CD pipelines, deployment, infrastructure |
-
-Engineering skills sourced from [alirezarezvani/claude-skills](https://github.com/alirezarezvani/claude-skills) (MIT). Browse [skillsmp.com](https://skillsmp.com) for 200,000+ community skills.
-
-You can also add project-level custom skills under `.claude/skills/`.
+| **qa** | Testing strategies, coverage, E2E testing |
+| **devops** | CI/CD pipelines, deployment, infrastructure |
 
 ## 🏗 Architecture
 
