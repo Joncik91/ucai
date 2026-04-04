@@ -59,10 +59,13 @@ Input: $ARGUMENTS
 
 **Goal**: Understand the project deeply enough to write accurate documentation.
 
+**Lessons loading**: If `tasks/lessons.md` exists, read it and extract gotchas, non-obvious behaviors, and past corrections that should be documented. These are high-value documentation candidates — real pain points the team has encountered. If the file doesn't exist, skip silently.
+
 **MANDATORY**: You MUST use the Task tool to launch agents. Do NOT skip agents and analyze yourself.
 
 **Actions**:
-1. Launch 2-3 agents in parallel using the Task tool:
+1. If `tasks/lessons.md` exists, load it and extract gotchas worth documenting — real pain points from past sessions are high-value doc candidates
+2. Launch 2-3 agents in parallel using the Task tool:
 
    - **Project scanner** (`ucai:project-scanner`, haiku): "[haiku] Analyze the codebase structure for documentation purposes. Identify: public APIs and their signatures, CLI commands and their options, entry points, exported modules, configuration options, environment variables, data models, and key abstractions. Return a structured inventory of what should be documented."
 
@@ -72,9 +75,9 @@ Input: $ARGUMENTS
 
    Include project context (tech stack, constraints) in each agent's prompt if available.
 
-2. **Wait for all agents to complete** before proceeding
-3. Read key files identified by agents
-4. Determine which doc types apply based on what exists:
+3. **Wait for all agents to complete** before proceeding
+4. Read key files identified by agents
+5. Determine which doc types apply based on what exists:
 
    | Project has | Generate |
    |-------------|----------|
@@ -86,7 +89,7 @@ Input: $ARGUMENTS
    | `.claude/requirements.md` | Use completed features for feature list |
    | Multiple contributors or open source | Contributing guide |
 
-5. Present analysis summary: what the project has, what docs are recommended, and why
+6. Present analysis summary: what the project has, what docs are recommended, and why
 
 ---
 

@@ -204,10 +204,10 @@ Body: `## YYYY-MM-DD — Title` entries with `**Context**:`, `**Root cause**:`, 
 **Depends on**: M1
 
 **Acceptance criteria**:
-- [ ] `/review` Phase 1 reads lessons, feeds patterns to reviewer agents
-- [ ] `/docs` Phase 2 reads lessons, extracts gotchas to document
-- [ ] Both handle missing lessons file gracefully
-- [ ] All CI tests pass
+- [x] `/review` Phase 1 reads lessons, feeds patterns to reviewer agents
+- [x] `/docs` Phase 2 reads lessons, extracts gotchas to document
+- [x] Both handle missing lessons file gracefully
+- [x] All CI tests pass
 
 ## References
 - [How the Creator of Claude Code Actually Uses Claude Code](https://getpushtoprod.substack.com/p/how-the-creator-of-claude-code-actually)
