@@ -57,12 +57,12 @@ node -e "const o=JSON.parse(process.argv[1]); if(!o.hookSpecificOutput) process.
 ### Hooks (7 lifecycle handlers, all in `hooks/handlers/`)
 | Hook | Handler | Purpose |
 |------|---------|---------|
-| SessionStart | `sessionstart-handler.js` | Git branch, iterate status, spec files, skills |
+| SessionStart | `sessionstart-handler.js` | Git branch, iterate status, task progress, lessons count, spec files, skills |
 | PreToolUse (Write\|Edit) | `pretooluse-guard.js` | Guard config files (ask before modifying) |
-| UserPromptSubmit | `userpromptsubmit-handler.js` | Inject iterate context when loop active |
+| UserPromptSubmit | `userpromptsubmit-handler.js` | Inject iterate context + active task from todo.md |
 | Stop | `stop-handler.js` | Block exit to continue iterate loop |
 | SubagentStop | `subagent-stop-handler.js` | Block on empty output; inject 1-line preview |
-| PreCompact | `precompact-handler.js` | Surface iterate state before compaction |
+| PreCompact | `precompact-handler.js` | Surface iterate state, task progress, latest lesson before compaction |
 | SessionEnd | `session-end-handler.js` | Delete stale iterate state on termination |
 
 ### Iterate Loop
@@ -73,7 +73,9 @@ Stop hook reads state → feeds task back → checks limits → continues or exi
 ### Context Chain
 - `/plan` → `.claude/project.md` + `.claude/requirements.md` (with build order)
 - `/plan <feature>` → `.claude/frds/<slug>.md` (never overwritten)
+- `/build`, `/debug` → `tasks/todo.md` (overwritten per session), `tasks/lessons.md` (append-only)
 - All commands auto-load whatever spec files exist in `.claude/`
+- `/build`, `/debug`, `/review`, `/docs` load `tasks/lessons.md` for known patterns
 - SessionStart announces `[plugin]` and `[project]` skills; Claude decides which to load
 
 ### Config Protection

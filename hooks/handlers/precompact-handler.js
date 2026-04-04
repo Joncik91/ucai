@@ -1,60 +1,117 @@
 #!/usr/bin/env node
 
 // Ucai PreCompact Hook
-// If an iterate loop is active, surfaces loop state in systemMessage
-// before context compaction runs
+// Surfaces iterate loop state, task progress, and latest lesson
+// in systemMessage before context compaction runs
 
 const fs = require("fs")
 
 const STATE_FILE = ".claude/ucai-iterate.local.md"
+const TODO_FILE = "tasks/todo.md"
+const LESSONS_FILE = "tasks/lessons.md"
 
 let input = ""
 process.stdin.setEncoding("utf8")
 process.stdin.on("data", (chunk) => (input += chunk))
 process.stdin.on("end", () => {
   try {
-    if (!fs.existsSync(STATE_FILE)) {
+    const hasIterate = fs.existsSync(STATE_FILE)
+    const hasTodo = fs.existsSync(TODO_FILE)
+    const hasLessons = fs.existsSync(LESSONS_FILE)
+
+    if (!hasIterate && !hasTodo && !hasLessons) {
       process.exit(0)
     }
 
-    const stateContent = fs.readFileSync(STATE_FILE, "utf8")
-    const fmMatch = stateContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
-    if (!fmMatch) {
-      process.exit(0)
+    const lines = []
+
+    // Iterate state
+    if (hasIterate) {
+      const stateContent = fs.readFileSync(STATE_FILE, "utf8")
+      const fmMatch = stateContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
+      if (fmMatch) {
+        const frontmatter = fmMatch[1]
+        const taskBody = fmMatch[2] ? fmMatch[2].trim() : ""
+
+        function getField(name) {
+          const m = frontmatter.match(new RegExp("^" + name + ":\\s*(.*)$", "m"))
+          return m ? m[1].trim() : null
+        }
+
+        const iteration = getField("iteration")
+        const maxIterations = getField("max_iterations")
+        let completionPromise = getField("completion_promise")
+        if (completionPromise && completionPromise.startsWith('"') && completionPromise.endsWith('"')) {
+          completionPromise = completionPromise.slice(1, -1)
+        }
+
+        const maxDisplay = maxIterations && maxIterations !== "0" ? maxIterations : "unlimited"
+
+        lines.push("[Ucai iterate loop — pre-compaction recovery context]")
+        lines.push("Iteration: " + iteration + "/" + maxDisplay)
+        if (completionPromise && completionPromise !== "null") {
+          lines.push("Completion promise: <promise>" + completionPromise + "</promise>")
+        }
+        lines.push("State file: .claude/ucai-iterate.local.md")
+        if (taskBody) {
+          lines.push("")
+          lines.push("Task:")
+          lines.push(taskBody)
+        }
+        lines.push("")
+        lines.push("Continue the iterate loop after compaction. The task and iteration state are preserved on disk.")
+      }
     }
 
-    const frontmatter = fmMatch[1]
-    const taskBody = fmMatch[2] ? fmMatch[2].trim() : ""
-
-    function getField(name) {
-      const m = frontmatter.match(new RegExp("^" + name + ":\\s*(.*)$", "m"))
-      return m ? m[1].trim() : null
+    // Task progress
+    if (hasTodo) {
+      try {
+        const todoContent = fs.readFileSync(TODO_FILE, "utf8")
+        const done = (todoContent.match(/- \[x\]/g) || []).length
+        const todo = (todoContent.match(/- \[ \]/g) || []).length
+        const total = done + todo
+        if (total > 0) {
+          lines.push("[Ucai task progress — pre-compaction recovery context]")
+          lines.push("Tasks: " + done + "/" + total + " done")
+          // Find first unchecked item
+          const uncheckedMatch = todoContent.match(/- \[ \] (.+)/)
+          if (uncheckedMatch) {
+            lines.push("Active task: " + uncheckedMatch[1].trim())
+          }
+        }
+      } catch {}
     }
 
-    const iteration = getField("iteration")
-    const maxIterations = getField("max_iterations")
-    let completionPromise = getField("completion_promise")
-    if (completionPromise && completionPromise.startsWith('"') && completionPromise.endsWith('"')) {
-      completionPromise = completionPromise.slice(1, -1)
+    // Latest lesson
+    if (hasLessons) {
+      try {
+        const lessonsContent = fs.readFileSync(LESSONS_FILE, "utf8")
+        const fmMatch = lessonsContent.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+        let count = 0
+        if (fmMatch) {
+          const countMatch = fmMatch[1].match(/^count:\s*(\d+)/m)
+          if (countMatch) {
+            count = parseInt(countMatch[1], 10)
+          }
+        }
+        if (count === 0) {
+          count = (lessonsContent.match(/^## \d{4}-\d{2}-\d{2}/gm) || []).length
+        }
+        if (count > 0) {
+          lines.push("[Ucai lessons — pre-compaction recovery context]")
+          lines.push("Lessons: " + count + " entries")
+          // Extract latest lesson title (last ## heading)
+          const headings = lessonsContent.match(/^## \d{4}-\d{2}-\d{2} .+$/gm)
+          if (headings && headings.length > 0) {
+            lines.push("Latest: " + headings[headings.length - 1].replace(/^## /, ""))
+          }
+        }
+      } catch {}
     }
 
-    const maxDisplay = maxIterations && maxIterations !== "0" ? maxIterations : "unlimited"
-
-    const lines = ["[Ucai iterate loop — pre-compaction recovery context]"]
-    lines.push("Iteration: " + iteration + "/" + maxDisplay)
-    if (completionPromise && completionPromise !== "null") {
-      lines.push("Completion promise: <promise>" + completionPromise + "</promise>")
+    if (lines.length > 0) {
+      process.stdout.write(JSON.stringify({ systemMessage: lines.join("\n") }))
     }
-    lines.push("State file: .claude/ucai-iterate.local.md")
-    if (taskBody) {
-      lines.push("")
-      lines.push("Task:")
-      lines.push(taskBody)
-    }
-    lines.push("")
-    lines.push("Continue the iterate loop after compaction. The task and iteration state are preserved on disk.")
-
-    process.stdout.write(JSON.stringify({ systemMessage: lines.join("\n") }))
     process.exit(0)
   } catch {
     process.exit(0)

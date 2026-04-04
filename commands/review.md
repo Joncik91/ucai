@@ -19,7 +19,7 @@ You are performing a thorough code review using parallel agents for independent 
 Before starting Phase 2, you MUST load the `ucai:code-reviewer` skill — this is a code review workflow.
 
 1. Load: `Skill(ucai:code-reviewer)`
-2. Also load the domain skill matching the code being reviewed: `Skill(ucai:senior-backend)`, `Skill(ucai:senior-frontend)`, etc.
+2. Also load the domain skill matching the code being reviewed: `Skill(ucai:backend)`, `Skill(ucai:frontend)`, etc.
 3. Apply the skill's guidance when evaluating code quality and conventions
 
 **You MUST load at least one skill before proceeding. State which skill(s) you loaded and why.**
@@ -30,6 +30,8 @@ Before starting Phase 2, you MUST load the `ucai:code-reviewer` skill — this i
 
 **Goal**: Determine what to review.
 
+**Lessons loading**: If `tasks/lessons.md` exists, read it and note any patterns relevant to the code being reviewed. Feed known patterns (common mistakes, project-specific gotchas, past corrections) as context to Phase 2 reviewer agents so they can watch for recurrence. If the file doesn't exist, skip silently.
+
 **Actions**:
 1. Create todo list
 2. If $ARGUMENTS specifies files or a PR, use that scope
@@ -37,6 +39,7 @@ Before starting Phase 2, you MUST load the `ucai:code-reviewer` skill — this i
 4. If no changes found, tell the user and stop
 5. Find any CLAUDE.md files in the project for guideline reference
 6. Check for `.claude/project.md` and `.claude/requirements.md`. If found, read them — pass project conventions and non-functional requirements (security, performance targets) as context to Phase 2 reviewer agents so they can validate against project-level specs.
+7. If `tasks/lessons.md` exists, load it and extract patterns relevant to the review scope — include these in Phase 2 agent prompts
 
 ---
 

@@ -20,7 +20,7 @@ You are helping a developer prepare a release. This command reads git history si
 
 Before starting, load the DevOps skill.
 
-1. Load `Skill(ucai:senior-devops)` — releasing is DevOps work
+1. Load `Skill(ucai:devops)` — releasing is DevOps work
 
 **State that you loaded the skill before proceeding.**
 

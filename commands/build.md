@@ -23,7 +23,7 @@ You are helping a developer implement a new feature. Follow a systematic approac
 Before starting Phase 2, you MUST identify and load relevant skills. This is not optional.
 
 1. Determine the type of work: backend/API, frontend/UI, architecture, testing, DevOps, code review
-2. Load the matching skill using the Skill tool: `Skill(ucai:senior-backend)`, `Skill(ucai:senior-frontend)`, `Skill(ucai:senior-architect)`, `Skill(ucai:senior-qa)`, `Skill(ucai:senior-devops)`, `Skill(ucai:code-reviewer)`
+2. Load the matching skill using the Skill tool: `Skill(ucai:backend)`, `Skill(ucai:frontend)`, `Skill(ucai:architect)`, `Skill(ucai:qa)`, `Skill(ucai:devops)`, `Skill(ucai:code-reviewer)`
 3. Apply the skill's guidance throughout all subsequent phases
 4. If the work spans multiple domains (e.g., full-stack), load multiple skills
 
@@ -62,19 +62,43 @@ If the user confirms:
 
 If the user declines, proceed with $ARGUMENTS only.
 
+**Persistent task tracking**: Write `tasks/todo.md` with the build plan:
+```yaml
+---
+updated: YYYY-MM-DD
+command: /build
+feature: <feature-name>
+---
+```
+Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/` directory if it doesn't exist. Overwrite any previous `tasks/todo.md`.
+
+**Lessons loading**: If `tasks/lessons.md` exists, read it and note any patterns relevant to the current feature. Apply known patterns proactively throughout the build. If the file doesn't exist, skip silently.
+
 **Actions**:
 1. Create todo list with all phases
-2. If the feature is unclear, ask:
+2. Write `tasks/todo.md` with YAML frontmatter and checkable phase items (one `- [ ]` per phase)
+3. If `tasks/lessons.md` exists, load it and note relevant patterns
+4. If the feature is unclear, ask:
    - What problem does this solve?
    - What should it do?
    - Any constraints or requirements?
-3. Summarize understanding and confirm with user
+5. Summarize understanding and confirm with user
 
 ---
 
 ## Phase 2: Explore
 
 **Goal**: Map the relevant codebase.
+
+**Output**: Compile a **Codebase Map** — you will paste this into Phase 4 and Phase 6 agent prompts:
+```
+Codebase Map:
+- Key files: [file:line — role], [file:line — role], ...
+- Architecture: [patterns, layers, abstractions]
+- Integration points: [where new code connects to existing code]
+- Testing: [framework, test file locations, conventions]
+- Conventions: [naming, structure, error handling rules]
+```
 
 ### If FRD Exists with Discovery Section
 
@@ -85,15 +109,7 @@ If the user declines, proceed with $ARGUMENTS only.
 2. Launch 1 `ucai:explorer-haiku` agent for validation:
    - "[haiku] Level: quick. Do NOT use WebSearch. Validate these FRD findings for [feature]: [list 3-5 key patterns/files from FRD Discovery]. Confirm they still exist in the codebase and note any discrepancies."
 3. If validation finds discrepancies → report them, ask user whether to proceed or re-run full discovery
-4. If validation passes → compile **Codebase Map** from FRD findings:
-   ```
-   Codebase Map:
-   - Key files: [file:line — role], [file:line — role], ...
-   - Architecture: [patterns, layers, abstractions]
-   - Integration points: [where new code connects to existing code]
-   - Testing: [framework, test file locations, conventions]
-   - Conventions: [naming, structure, error handling rules]
-   ```
+4. If validation passes → compile Codebase Map from FRD findings
 
 ### If No FRD or FRD Lacks Discovery
 
@@ -111,15 +127,7 @@ If the user declines, proceed with $ARGUMENTS only.
 3. **Wait for all agents to complete** before proceeding
 4. After agents return, read all identified files yourself
 5. Present comprehensive summary of findings
-6. Compile a **Codebase Map** from agent findings — you will paste this into Phase 4 and Phase 6 agent prompts:
-   ```
-   Codebase Map:
-   - Key files: [file:line — role], [file:line — role], ...
-   - Architecture: [patterns, layers, abstractions]
-   - Integration points: [where new code connects to existing code]
-   - Testing: [framework, test file locations, conventions]
-   - Conventions: [naming, structure, error handling rules]
-   ```
+6. Compile Codebase Map from agent findings
 
 ---
 
@@ -195,9 +203,12 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
 **Actions**:
 1. Wait for explicit user approval of the chosen approach
 2. Read all relevant files identified in previous phases
-3. Implement following the chosen architecture
-4. Follow codebase conventions strictly
-5. Update todos as you progress
+3. Implement following the chosen architecture, strictly following codebase conventions
+4. **Elegance checkpoint** (non-trivial changes only — >50 lines of new code OR >3 files modified):
+   - Pause and ask: "Is there a more elegant way? Could this be simpler?"
+   - Challenge your own implementation before proceeding
+   - Skip this checkpoint for simple, obvious fixes — don't over-engineer
+5. Update todos and `tasks/todo.md` as you progress (mark phases complete)
 
 ---
 
@@ -206,32 +217,62 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
 **Goal**: Ensure the implementation meets requirements.
 
 **Actions**:
-1. Launch all 3 agents simultaneously in a single Task tool message (not sequentially):
+1. **Staff engineer self-check** — before launching agents, honestly assess your own work:
+   - **Abstraction level**: Is this the right level? Too clever? Too flat?
+   - **Shortcuts**: Did I take any? Are they justified or lazy?
+   - **Integration quality**: Does this fit naturally into the existing codebase? Any rough edges?
+   - **Error paths**: Are failure modes handled? What happens when things go wrong?
+   - If you find issues, fix them before running agents — don't waste agent cycles on known problems.
+2. Launch all 3 agents simultaneously in a single Task tool message (not sequentially):
    - `ucai:verifier`: acceptance criteria from Phase 1 (or FRD if loaded). Include the Codebase Map from Phase 2.
    - `ucai:reviewer`: focus on bugs and functional correctness. Include the Codebase Map from Phase 2.
    - `ucai:reviewer-opus`: focus on conventions, code quality, SOLID principle adherence, and DRY violations. Include the Codebase Map from Phase 2.
-2. **Wait for all 3 to complete**, then consolidate findings and identify issues worth fixing
-3. **Present findings to user**: fix now, fix later, or proceed as-is
-4. Address issues based on user decision
-5. **If fixes were applied, re-run all 3 agents in parallel on the changed files** — fixes can introduce new issues. Repeat steps 1-4 until clean or user approves remaining items.
+3. **Wait for all 3 to complete**, then consolidate findings and identify issues worth fixing
+4. **Present findings to user**: fix now, fix later, or proceed as-is
+5. Address issues based on user decision
+6. **If fixes were applied, re-run all 3 agents in parallel on the changed files** — fixes can introduce new issues. Repeat steps 2-5 until clean or user approves remaining items.
 
 ---
 
 ## Phase 7: Test
 
-**Goal**: The user manually verifies the feature works.
+**Goal**: Write automated tests AND have the user manually verify.
 
-**CRITICAL**: This phase is mandatory. No agent review can replace a human testing the actual software.
+**CRITICAL**: This phase is mandatory. No agent review can replace a human testing the actual software. Automated tests ensure the feature stays working after future changes.
+
+**MANDATORY**: Load `Skill(ucai:qa)` at the start of this phase — it provides testing patterns, framework guidance, and coverage strategy.
+
+### Step A: Automated Tests
+
+**Actions**:
+1. Load `Skill(ucai:qa)` — apply its guidance for test type selection and patterns
+2. Determine the right test type(s) for this feature:
+   - **Unit tests**: Pure logic, utilities, data transformations
+   - **Integration tests**: API endpoints, database queries, service interactions
+   - **E2E tests**: User-facing workflows, critical paths
+   - Match test type to what was built — don't write unit tests for glue code or E2E tests for a utility function
+3. Check for existing test infrastructure:
+   - Test framework already in use? (Jest, Vitest, Playwright, pytest, etc.)
+   - Test file conventions? (`*.test.ts`, `*.spec.ts`, `__tests__/`, etc.)
+   - If no test infrastructure exists, set it up following the project's tech stack
+4. Write tests that cover:
+   - Happy path for each new behavior
+   - Edge cases identified in Phase 3 (Clarify)
+   - Error paths from the implementation
+5. Run the tests — they must pass before proceeding
+6. If tests fail, fix the implementation or tests until green
+
+### Step B: Manual Testing
 
 **Actions**:
 1. Based on what was built, generate a **concrete test checklist**:
    - The exact command(s) to start or run the app
    - Specific actions to perform with expected results (e.g., "Run `bm add https://example.com` — should print confirmation with auto-fetched title")
-   - Edge cases worth trying manually
+   - Edge cases worth trying manually (things hard to automate)
 2. If acceptance criteria exist (from FRD or Phase 3), map each criterion to a specific test action
 3. Present the checklist to the user
 4. **WAIT for the user to test and confirm it works**
-5. If the user reports issues: fix them, re-run agent review on changed files (Phase 6 step 2), then return here with an updated checklist
+5. If the user reports issues: fix them, update tests, re-run agent review on changed files (Phase 6 step 2), then return here with an updated checklist
 6. Only proceed to Phase 8 after the user confirms testing passed
 
 **Checklist principles**:
@@ -253,7 +294,19 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
    - Key decisions made
    - Files modified/created
    - Suggested next steps
-3. **Requirements update**: If `.claude/requirements.md` exists:
+3. **Lessons capture**: If corrections or non-obvious decisions occurred during this build:
+   - Append to `tasks/lessons.md` with format:
+     ```
+     ## YYYY-MM-DD — <short title>
+
+     **Context**: What were you working on?
+     **Root cause**: Why did the issue arise or why was the decision non-obvious?
+     **Rule**: What should you remember for future builds?
+     ```
+   - Increment the `count` field in the YAML frontmatter (if `count` is missing, add `count: 1` before incrementing)
+   - If `tasks/lessons.md` doesn't exist, create it with frontmatter (`count: 1`) and the entry
+   - If no corrections occurred and no non-obvious decisions were made, skip silently
+4. **Requirements update**: If `.claude/requirements.md` exists:
    - Re-read `.claude/requirements.md` in full (do not rely on memory from earlier phases)
    - In the `## Build Order` section, find the step matching this build (match by step name or feature argument)
    - From the matching step's `covers:` field, extract each feature name (comma-separated after `covers:`)
@@ -271,7 +324,7 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
      - Replace the `updated:` value in the YAML frontmatter with today's date
    - Confirm: "Requirements updated in `.claude/requirements.md`"
    - If no matching lines are found, tell the user and skip silently
-4. **Milestone update**: If a milestone was selected in Phase 1:
+5. **Milestone update**: If a milestone was selected in Phase 1:
    - Re-read the FRD file in full (do not rely on memory — the file may have changed)
    - Find the selected milestone's `**Acceptance criteria**:` block
    - Collect all `- [ ]` criteria in that block
@@ -287,7 +340,7 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
    - If milestones remain: "M[N+1]: [name] is next. Run `/build [feature]` to continue."
    - If all milestones are complete: "All milestones complete — feature is done."
    - If no matching criteria are found, tell the user and skip silently
-5. **CLAUDE.md refresh**: If a CLAUDE.md exists, check whether this feature introduced changes that should be reflected:
+6. **CLAUDE.md refresh**: If a CLAUDE.md exists, check whether this feature introduced changes that should be reflected:
    - New architecture patterns or layers
    - New development commands (build, test, lint)
    - New key files or entry points

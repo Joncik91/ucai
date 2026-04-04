@@ -108,6 +108,56 @@ function scanInstalledPlugins(cacheDir) {
   return skills
 }
 
+function getTaskStatus() {
+  const todoFile = "tasks/todo.md"
+  if (!fs.existsSync(todoFile)) return null
+
+  try {
+    var content = fs.readFileSync(todoFile, "utf8")
+    var done = (content.match(/- \[x\]/g) || []).length
+    var todo = (content.match(/- \[ \]/g) || []).length
+    var total = done + todo
+    if (total > 0) {
+      return done + "/" + total + " tasks done"
+    }
+  } catch {}
+
+  return null
+}
+
+function getLessonsStatus() {
+  const lessonsFile = "tasks/lessons.md"
+  if (!fs.existsSync(lessonsFile)) return null
+
+  try {
+    var content = fs.readFileSync(lessonsFile, "utf8")
+    var fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+    var count = 0
+
+    if (fmMatch) {
+      var countMatch = fmMatch[1].match(/^count:\s*(\d+)/m)
+      if (countMatch) {
+        count = parseInt(countMatch[1], 10)
+      }
+    }
+
+    // Fallback: count ## headings in body
+    if (count === 0) {
+      count = (content.match(/^## \d{4}-\d{2}-\d{2}/gm) || []).length
+    }
+
+    if (count > 0) {
+      var msg = count + " lessons"
+      if (count > 100) {
+        msg += " (WARNING: >100 entries — consider consolidation)"
+      }
+      return msg
+    }
+  } catch {}
+
+  return null
+}
+
 function getSpecStatus() {
   const parts = []
 
@@ -220,6 +270,16 @@ function main() {
   const specStatus = getSpecStatus()
   if (specStatus) {
     parts.push(specStatus)
+  }
+
+  const taskStatus = getTaskStatus()
+  if (taskStatus) {
+    parts.push("Tasks: " + taskStatus)
+  }
+
+  const lessonsStatus = getLessonsStatus()
+  if (lessonsStatus) {
+    parts.push("Lessons: " + lessonsStatus)
   }
 
   const skills = getAvailableSkills()
