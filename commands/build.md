@@ -62,19 +62,43 @@ If the user confirms:
 
 If the user declines, proceed with $ARGUMENTS only.
 
+**Persistent task tracking**: Write `tasks/todo.md` with the build plan:
+```yaml
+---
+updated: YYYY-MM-DD
+command: /build
+feature: <feature-name>
+---
+```
+Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/` directory if it doesn't exist. Overwrite any previous `tasks/todo.md`.
+
+**Lessons loading**: If `tasks/lessons.md` exists, read it and note any patterns relevant to the current feature. Apply known patterns proactively throughout the build. If the file doesn't exist, skip silently.
+
 **Actions**:
 1. Create todo list with all phases
-2. If the feature is unclear, ask:
+2. Write `tasks/todo.md` with YAML frontmatter and checkable phase items (one `- [ ]` per phase)
+3. If `tasks/lessons.md` exists, load it and note relevant patterns
+4. If the feature is unclear, ask:
    - What problem does this solve?
    - What should it do?
    - Any constraints or requirements?
-3. Summarize understanding and confirm with user
+5. Summarize understanding and confirm with user
 
 ---
 
 ## Phase 2: Explore
 
 **Goal**: Map the relevant codebase.
+
+**Output**: Compile a **Codebase Map** — you will paste this into Phase 4 and Phase 6 agent prompts:
+```
+Codebase Map:
+- Key files: [file:line — role], [file:line — role], ...
+- Architecture: [patterns, layers, abstractions]
+- Integration points: [where new code connects to existing code]
+- Testing: [framework, test file locations, conventions]
+- Conventions: [naming, structure, error handling rules]
+```
 
 ### If FRD Exists with Discovery Section
 
@@ -85,15 +109,7 @@ If the user declines, proceed with $ARGUMENTS only.
 2. Launch 1 `ucai:explorer-haiku` agent for validation:
    - "[haiku] Level: quick. Do NOT use WebSearch. Validate these FRD findings for [feature]: [list 3-5 key patterns/files from FRD Discovery]. Confirm they still exist in the codebase and note any discrepancies."
 3. If validation finds discrepancies → report them, ask user whether to proceed or re-run full discovery
-4. If validation passes → compile **Codebase Map** from FRD findings:
-   ```
-   Codebase Map:
-   - Key files: [file:line — role], [file:line — role], ...
-   - Architecture: [patterns, layers, abstractions]
-   - Integration points: [where new code connects to existing code]
-   - Testing: [framework, test file locations, conventions]
-   - Conventions: [naming, structure, error handling rules]
-   ```
+4. If validation passes → compile Codebase Map from FRD findings
 
 ### If No FRD or FRD Lacks Discovery
 
@@ -111,15 +127,7 @@ If the user declines, proceed with $ARGUMENTS only.
 3. **Wait for all agents to complete** before proceeding
 4. After agents return, read all identified files yourself
 5. Present comprehensive summary of findings
-6. Compile a **Codebase Map** from agent findings — you will paste this into Phase 4 and Phase 6 agent prompts:
-   ```
-   Codebase Map:
-   - Key files: [file:line — role], [file:line — role], ...
-   - Architecture: [patterns, layers, abstractions]
-   - Integration points: [where new code connects to existing code]
-   - Testing: [framework, test file locations, conventions]
-   - Conventions: [naming, structure, error handling rules]
-   ```
+6. Compile Codebase Map from agent findings
 
 ---
 
@@ -195,9 +203,12 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
 **Actions**:
 1. Wait for explicit user approval of the chosen approach
 2. Read all relevant files identified in previous phases
-3. Implement following the chosen architecture
-4. Follow codebase conventions strictly
-5. Update todos as you progress
+3. Implement following the chosen architecture, strictly following codebase conventions
+4. **Elegance checkpoint** (non-trivial changes only — >50 lines of new code OR >3 files modified):
+   - Pause and ask: "Is there a more elegant way? Could this be simpler?"
+   - Challenge your own implementation before proceeding
+   - Skip this checkpoint for simple, obvious fixes — don't over-engineer
+5. Update todos and `tasks/todo.md` as you progress (mark phases complete)
 
 ---
 
@@ -206,14 +217,20 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
 **Goal**: Ensure the implementation meets requirements.
 
 **Actions**:
-1. Launch all 3 agents simultaneously in a single Task tool message (not sequentially):
+1. **Staff engineer self-check** — before launching agents, honestly assess your own work:
+   - **Abstraction level**: Is this the right level? Too clever? Too flat?
+   - **Shortcuts**: Did I take any? Are they justified or lazy?
+   - **Integration quality**: Does this fit naturally into the existing codebase? Any rough edges?
+   - **Error paths**: Are failure modes handled? What happens when things go wrong?
+   - If you find issues, fix them before running agents — don't waste agent cycles on known problems.
+2. Launch all 3 agents simultaneously in a single Task tool message (not sequentially):
    - `ucai:verifier`: acceptance criteria from Phase 1 (or FRD if loaded). Include the Codebase Map from Phase 2.
    - `ucai:reviewer`: focus on bugs and functional correctness. Include the Codebase Map from Phase 2.
    - `ucai:reviewer-opus`: focus on conventions, code quality, SOLID principle adherence, and DRY violations. Include the Codebase Map from Phase 2.
-2. **Wait for all 3 to complete**, then consolidate findings and identify issues worth fixing
-3. **Present findings to user**: fix now, fix later, or proceed as-is
-4. Address issues based on user decision
-5. **If fixes were applied, re-run all 3 agents in parallel on the changed files** — fixes can introduce new issues. Repeat steps 1-4 until clean or user approves remaining items.
+3. **Wait for all 3 to complete**, then consolidate findings and identify issues worth fixing
+4. **Present findings to user**: fix now, fix later, or proceed as-is
+5. Address issues based on user decision
+6. **If fixes were applied, re-run all 3 agents in parallel on the changed files** — fixes can introduce new issues. Repeat steps 2-5 until clean or user approves remaining items.
 
 ---
 
@@ -253,7 +270,19 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
    - Key decisions made
    - Files modified/created
    - Suggested next steps
-3. **Requirements update**: If `.claude/requirements.md` exists:
+3. **Lessons capture**: If corrections or non-obvious decisions occurred during this build:
+   - Append to `tasks/lessons.md` with format:
+     ```
+     ## YYYY-MM-DD — <short title>
+
+     **Context**: What were you working on?
+     **Root cause**: Why did the issue arise or why was the decision non-obvious?
+     **Rule**: What should you remember for future builds?
+     ```
+   - Increment the `count` field in the YAML frontmatter (if `count` is missing, add `count: 1` before incrementing)
+   - If `tasks/lessons.md` doesn't exist, create it with frontmatter (`count: 1`) and the entry
+   - If no corrections occurred and no non-obvious decisions were made, skip silently
+4. **Requirements update**: If `.claude/requirements.md` exists:
    - Re-read `.claude/requirements.md` in full (do not rely on memory from earlier phases)
    - In the `## Build Order` section, find the step matching this build (match by step name or feature argument)
    - From the matching step's `covers:` field, extract each feature name (comma-separated after `covers:`)
@@ -271,7 +300,7 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
      - Replace the `updated:` value in the YAML frontmatter with today's date
    - Confirm: "Requirements updated in `.claude/requirements.md`"
    - If no matching lines are found, tell the user and skip silently
-4. **Milestone update**: If a milestone was selected in Phase 1:
+5. **Milestone update**: If a milestone was selected in Phase 1:
    - Re-read the FRD file in full (do not rely on memory — the file may have changed)
    - Find the selected milestone's `**Acceptance criteria**:` block
    - Collect all `- [ ]` criteria in that block
@@ -287,7 +316,7 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
    - If milestones remain: "M[N+1]: [name] is next. Run `/build [feature]` to continue."
    - If all milestones are complete: "All milestones complete — feature is done."
    - If no matching criteria are found, tell the user and skip silently
-5. **CLAUDE.md refresh**: If a CLAUDE.md exists, check whether this feature introduced changes that should be reflected:
+6. **CLAUDE.md refresh**: If a CLAUDE.md exists, check whether this feature introduced changes that should be reflected:
    - New architecture patterns or layers
    - New development commands (build, test, lint)
    - New key files or entry points
