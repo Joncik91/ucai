@@ -21,8 +21,8 @@ You are helping a developer trace and fix a bug. This command uses parallel inve
 Before starting investigation, you MUST load relevant skills based on the bug's domain.
 
 1. Determine where the bug lives: backend, frontend, infrastructure, etc.
-2. Load the matching skill: `Skill(ucai:senior-backend)`, `Skill(ucai:senior-frontend)`, `Skill(ucai:senior-devops)`, etc.
-3. If unclear, load `Skill(ucai:senior-architect)` as a general-purpose choice
+2. Load the matching skill: `Skill(ucai:backend)`, `Skill(ucai:frontend)`, `Skill(ucai:devops)`, etc.
+3. If unclear, load `Skill(ucai:architect)` as a general-purpose choice
 
 **You MUST load at least one skill before proceeding. State which skill(s) you loaded and why.**
 
@@ -132,19 +132,27 @@ Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/
 
 ## Phase 5: Verify & Capture
 
-**Goal**: Confirm the fix is correct, clean, and capture lessons learned.
+**Goal**: Confirm the fix is correct, write regression tests, and capture lessons learned.
+
+**MANDATORY**: Load `Skill(ucai:qa)` — every bug fix should have a regression test that prevents recurrence.
 
 **Actions**:
-1. Launch 2 agents in parallel using the Task tool:
+1. Load `Skill(ucai:qa)` — apply its guidance for regression test design
+2. **Write regression test(s)** before launching review agents:
+   - Write a test that would have caught this bug (fails without fix, passes with fix)
+   - Match the project's existing test framework and conventions
+   - If no test infrastructure exists, set it up following the tech stack
+   - Run the test(s) — they must pass before proceeding
+3. Launch 2 agents in parallel using the Task tool:
 
    - **Verifier** (`ucai:verifier`, sonnet): "[sonnet] Verify that this fix resolves the bug without introducing regressions. The bug was: [description]. The root cause was: [diagnosis]. The fix was: [changes made]. Check the changed files, trace the execution path, and confirm the fix addresses the root cause. Look for edge cases the fix might miss."
 
    - **Reviewer** (`ucai:reviewer`, sonnet): "[sonnet] Review this debug fix for code quality, conventions compliance, and potential side effects. The changed files are: [list]. Check for: correctness, style consistency with the codebase, error handling, and any unintended consequences."
 
-2. **Wait for all agents to complete**
-3. Present findings to user
-4. If issues found, ask user which to address
-5. Apply any agreed fixes
+4. **Wait for all agents to complete**
+5. Present findings to user
+6. If issues found, ask user which to address
+7. Apply any agreed fixes
 6. **Lessons capture**: If the root cause was non-obvious or corrections occurred during this debug session:
    - Append to `tasks/lessons.md` with format:
      ```

@@ -23,8 +23,8 @@ You are helping a developer plan before building. This command works at two leve
 
 Before starting discovery phases, you MUST identify and load relevant skills. This is not optional.
 
-1. Always load `Skill(ucai:senior-architect)` — planning is architecture work
-2. For feature-level planning, also load the domain skill: `Skill(ucai:senior-backend)`, `Skill(ucai:senior-frontend)`, etc.
+1. Always load `Skill(ucai:architect)` — planning is architecture work
+2. For feature-level planning, also load the domain skill: `Skill(ucai:backend)`, `Skill(ucai:frontend)`, etc.
 3. Apply the skill's guidance throughout all subsequent phases
 
 **You MUST load at least one skill before proceeding. State which skill(s) you loaded and why.**
@@ -114,7 +114,7 @@ Use this mode when starting a new project or defining project scope for the firs
 **Condition**: Only enter this phase if the project has a user-facing UI (web app, dashboard, landing page, mobile). Skip to Phase 5P if the project is a CLI, API, background service, or library.
 
 **Actions**:
-1. Load `Skill(ucai:senior-frontend)` — apply its UI Design System guidance throughout this phase
+1. Load `Skill(ucai:frontend)` — apply its UI Design System guidance throughout this phase
 2. Determine whether the project has a UI: infer from the tech stack (Phase 3P) or ask the user directly
 3. If UI confirmed, draft each decision below and present as a block for user approval:
 
@@ -458,7 +458,7 @@ If project.md exists, include tech stack and constraints in the agent's prompt.
 - Component tree: parent → children hierarchy
 - Rough layout sketch (ASCII) showing spatial arrangement — not pixels, just structure
 - If project.md defines a design direction (fonts, palette, aesthetic), reference it here
-- Load `Skill(ucai:senior-frontend)` if not already loaded for design system guidance
+- Load `Skill(ucai:frontend)` if not already loaded for design system guidance
 - Key states: loading, empty, error, populated
 
 **Security notes** (conditional — feature touches auth, payments, PII, external APIs, or any input that reaches storage or execution):

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This reference guide provides comprehensive information for senior devops.
+This reference guide provides comprehensive information for devops engineers.
 
 ## Patterns and Practices
 
@@ -37,7 +37,7 @@ export class Example {
 ### Pattern 2: Advanced Technique
 
 **Description:**
-Another important pattern for senior devops.
+Another important pattern for devops engineers.
 
 **Implementation:**
 ```typescript

@@ -20,11 +20,11 @@ You are helping a developer generate or update project documentation. This comma
 
 Before starting analysis, you MUST load relevant skills.
 
-1. Always load `Skill(ucai:senior-architect)` — documentation is architecture communication
+1. Always load `Skill(ucai:architect)` — documentation is architecture communication
 2. If scope is specific, also load the domain skill:
-   - API docs → `Skill(ucai:senior-backend)`
-   - Component/UI docs → `Skill(ucai:senior-frontend)`
-   - Deployment docs → `Skill(ucai:senior-devops)`
+   - API docs → `Skill(ucai:backend)`
+   - Component/UI docs → `Skill(ucai:frontend)`
+   - Deployment docs → `Skill(ucai:devops)`
 3. Apply the skill's guidance throughout all subsequent phases
 
 **You MUST load at least one skill before proceeding. State which skill(s) you loaded and why.**

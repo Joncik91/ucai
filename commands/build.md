@@ -23,7 +23,7 @@ You are helping a developer implement a new feature. Follow a systematic approac
 Before starting Phase 2, you MUST identify and load relevant skills. This is not optional.
 
 1. Determine the type of work: backend/API, frontend/UI, architecture, testing, DevOps, code review
-2. Load the matching skill using the Skill tool: `Skill(ucai:senior-backend)`, `Skill(ucai:senior-frontend)`, `Skill(ucai:senior-architect)`, `Skill(ucai:senior-qa)`, `Skill(ucai:senior-devops)`, `Skill(ucai:code-reviewer)`
+2. Load the matching skill using the Skill tool: `Skill(ucai:backend)`, `Skill(ucai:frontend)`, `Skill(ucai:architect)`, `Skill(ucai:qa)`, `Skill(ucai:devops)`, `Skill(ucai:code-reviewer)`
 3. Apply the skill's guidance throughout all subsequent phases
 4. If the work spans multiple domains (e.g., full-stack), load multiple skills
 
@@ -236,19 +236,43 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
 
 ## Phase 7: Test
 
-**Goal**: The user manually verifies the feature works.
+**Goal**: Write automated tests AND have the user manually verify.
 
-**CRITICAL**: This phase is mandatory. No agent review can replace a human testing the actual software.
+**CRITICAL**: This phase is mandatory. No agent review can replace a human testing the actual software. Automated tests ensure the feature stays working after future changes.
+
+**MANDATORY**: Load `Skill(ucai:qa)` at the start of this phase — it provides testing patterns, framework guidance, and coverage strategy.
+
+### Step A: Automated Tests
+
+**Actions**:
+1. Load `Skill(ucai:qa)` — apply its guidance for test type selection and patterns
+2. Determine the right test type(s) for this feature:
+   - **Unit tests**: Pure logic, utilities, data transformations
+   - **Integration tests**: API endpoints, database queries, service interactions
+   - **E2E tests**: User-facing workflows, critical paths
+   - Match test type to what was built — don't write unit tests for glue code or E2E tests for a utility function
+3. Check for existing test infrastructure:
+   - Test framework already in use? (Jest, Vitest, Playwright, pytest, etc.)
+   - Test file conventions? (`*.test.ts`, `*.spec.ts`, `__tests__/`, etc.)
+   - If no test infrastructure exists, set it up following the project's tech stack
+4. Write tests that cover:
+   - Happy path for each new behavior
+   - Edge cases identified in Phase 3 (Clarify)
+   - Error paths from the implementation
+5. Run the tests — they must pass before proceeding
+6. If tests fail, fix the implementation or tests until green
+
+### Step B: Manual Testing
 
 **Actions**:
 1. Based on what was built, generate a **concrete test checklist**:
    - The exact command(s) to start or run the app
    - Specific actions to perform with expected results (e.g., "Run `bm add https://example.com` — should print confirmation with auto-fetched title")
-   - Edge cases worth trying manually
+   - Edge cases worth trying manually (things hard to automate)
 2. If acceptance criteria exist (from FRD or Phase 3), map each criterion to a specific test action
 3. Present the checklist to the user
 4. **WAIT for the user to test and confirm it works**
-5. If the user reports issues: fix them, re-run agent review on changed files (Phase 6 step 2), then return here with an updated checklist
+5. If the user reports issues: fix them, update tests, re-run agent review on changed files (Phase 6 step 2), then return here with an updated checklist
 6. Only proceed to Phase 8 after the user confirms testing passed
 
 **Checklist principles**:

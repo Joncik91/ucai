@@ -14,10 +14,10 @@ CLAUDE.md should contain **project facts** that Claude doesn't already know: con
 
 ## Skill Loading — MANDATORY
 
-Before starting Phase 2A, you MUST load the `ucai:senior-architect` skill — project initialization is architecture analysis work.
+Before starting Phase 2A, you MUST load the `ucai:architect` skill — project initialization is architecture analysis work.
 
-1. Load the skill using the Skill tool: `Skill(ucai:senior-architect)`
-2. If the project is clearly a specific domain (backend API, frontend app, etc.), also load the matching skill: `Skill(ucai:senior-backend)`, `Skill(ucai:senior-frontend)`, etc.
+1. Load the skill using the Skill tool: `Skill(ucai:architect)`
+2. If the project is clearly a specific domain (backend API, frontend app, etc.), also load the matching skill: `Skill(ucai:backend)`, `Skill(ucai:frontend)`, etc.
 3. Apply the skill's guidance when analyzing the project and drafting CLAUDE.md
 
 **You MUST load at least one skill before proceeding. State which skill(s) you loaded and why.**

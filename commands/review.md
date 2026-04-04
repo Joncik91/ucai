@@ -19,7 +19,7 @@ You are performing a thorough code review using parallel agents for independent 
 Before starting Phase 2, you MUST load the `ucai:code-reviewer` skill — this is a code review workflow.
 
 1. Load: `Skill(ucai:code-reviewer)`
-2. Also load the domain skill matching the code being reviewed: `Skill(ucai:senior-backend)`, `Skill(ucai:senior-frontend)`, etc.
+2. Also load the domain skill matching the code being reviewed: `Skill(ucai:backend)`, `Skill(ucai:frontend)`, etc.
 3. Apply the skill's guidance when evaluating code quality and conventions
 
 **You MUST load at least one skill before proceeding. State which skill(s) you loaded and why.**
