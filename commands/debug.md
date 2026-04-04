@@ -6,14 +6,14 @@ disable-model-invocation: true
 
 # Debugging
 
-You are helping a developer trace and fix a bug. This command uses parallel investigation agents to find the root cause, then proposes a targeted fix with an approval gate.
+You are helping a developer trace and fix a bug. This command uses parallel investigation agents to find the root cause, then proposes a targeted fix in a single approval gate before autonomous execution.
 
 ## Core Principles
 
 - **Investigate before guessing**: Launch agents to trace the error, not assume the cause
 - **Evidence-based diagnosis**: Every root cause claim needs file:line references
 - **Minimal fix**: Address the root cause, not symptoms. Keep changes small
-- **Approval before fixing**: Never modify code without user sign-off
+- **Single approval gate**: Diagnosis and fix plan are approved together; execution is autonomous after approval
 - **Track progress**: Use TodoWrite throughout
 
 ## Skill Loading — MANDATORY
@@ -34,21 +34,35 @@ Before starting investigation, you MUST load relevant skills based on the bug's 
 
 Input: $ARGUMENTS
 
+**Persistent task tracking**: Write `tasks/todo.md` with the debug plan:
+```yaml
+---
+updated: YYYY-MM-DD
+command: /debug
+feature: <bug-description>
+---
+```
+Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/` directory if it doesn't exist. Overwrite any previous `tasks/todo.md`.
+
+**Lessons loading**: If `tasks/lessons.md` exists, read it and note any patterns relevant to the current bug. Apply known patterns proactively throughout the debug session. If the file doesn't exist, skip silently.
+
 **Actions**:
 1. Create todo list with all phases (1–5)
-2. **Load project context** (if available):
+2. Write `tasks/todo.md` with YAML frontmatter and checkable phase items (one `- [ ]` per phase)
+3. If `tasks/lessons.md` exists, load it and note relevant patterns
+4. **Load project context** (if available):
    - Check `.claude/project.md` — read for tech stack and constraints
    - Check `CLAUDE.md` — read for project conventions
-3. Parse the bug report from `$ARGUMENTS`:
+5. Parse the bug report from `$ARGUMENTS`:
    - Is there a stack trace or error message?
    - Is there a specific file or function mentioned?
    - Is this a runtime error, wrong behavior, or performance issue?
-4. If the bug is vague, ask:
+6. If the bug is vague, ask:
    - When does it happen? (always, sometimes, specific conditions)
    - Steps to reproduce?
    - Expected vs actual behavior?
    - Any recent changes that might have caused it?
-5. Summarize understanding and confirm with user
+7. Summarize understanding and confirm with user
 
 ---
 
@@ -75,9 +89,9 @@ Input: $ARGUMENTS
 
 ---
 
-## Phase 3: Diagnose
+## Phase 3: Diagnose & Propose Fix
 
-**Goal**: Identify the root cause with evidence.
+**Goal**: Identify the root cause with evidence AND propose the fix — single approval gate.
 
 **Actions**:
 1. Consolidate agent findings into a diagnosis:
@@ -86,39 +100,39 @@ Input: $ARGUMENTS
    - **Mechanism**: Why this root cause produces the observed behavior
    - **Security impact**: Does this bug have security implications? (e.g., exposes sensitive data, bypasses auth, enables injection — if yes, flag it explicitly)
 2. If multiple potential causes exist, rank by likelihood and explain the reasoning
-3. Present the diagnosis to the user:
+3. Propose the fix alongside the diagnosis:
+   - Which files to change
+   - What the change is (conceptually)
+   - Why this fixes the root cause
+   - Any risks or side effects
+4. Present the diagnosis AND fix plan together:
    - Root cause explanation (clear, non-technical where possible)
    - Evidence trail (file:line references, git commits)
    - Why this causes what the user is seeing
-4. Ask: "Does this diagnosis match what you're seeing?"
-5. **DO NOT PROCEED TO FIX WITHOUT USER CONFIRMATION**
+   - Proposed fix and its rationale
+5. **THIS IS THE ONLY APPROVAL GATE** — ask: "Does this diagnosis match, and shall I proceed with the fix?"
+6. **DO NOT PROCEED WITHOUT USER CONFIRMATION**
 
 ---
 
 ## Phase 4: Fix
 
-**Goal**: Apply a targeted fix.
+**Goal**: Apply the approved fix autonomously.
 
-**DO NOT START WITHOUT USER APPROVAL OF THE DIAGNOSIS**
+**PREREQUISITE**: User approved the diagnosis and fix plan in Phase 3. No second approval gate — execute.
 
 **Actions**:
-1. Propose the fix before implementing:
-   - Which files to change
-   - What the change is (conceptually)
-   - Why this fixes the root cause
-   - Any risks or side effects
+1. Implement the fix as proposed in Phase 3
 2. Keep the fix minimal — address the root cause, not symptoms
    - If the bug had security implications, confirm the fix closes the vector and does not introduce a new one
 3. Follow codebase conventions from CLAUDE.md
-4. **Wait for user approval of the proposed fix**
-5. Implement the fix
-6. Update todos as you progress
+4. Update todos and `tasks/todo.md` as you progress (mark phases complete)
 
 ---
 
-## Phase 5: Verify
+## Phase 5: Verify & Capture
 
-**Goal**: Confirm the fix is correct and clean.
+**Goal**: Confirm the fix is correct, clean, and capture lessons learned.
 
 **Actions**:
 1. Launch 2 agents in parallel using the Task tool:
@@ -131,5 +145,17 @@ Input: $ARGUMENTS
 3. Present findings to user
 4. If issues found, ask user which to address
 5. Apply any agreed fixes
-6. Mark todos complete
-7. Summarize: what was broken, why, what was fixed, files changed
+6. **Lessons capture**: If the root cause was non-obvious or corrections occurred during this debug session:
+   - Append to `tasks/lessons.md` with format:
+     ```
+     ## YYYY-MM-DD — <short title>
+
+     **Context**: What were you debugging?
+     **Root cause**: Why was the bug non-obvious or what correction was needed?
+     **Rule**: What should you remember for future debug sessions?
+     ```
+   - Increment the `count` field in the YAML frontmatter (if `count` is missing, add `count: 1` before incrementing)
+   - If `tasks/lessons.md` doesn't exist, create it with frontmatter (`count: 1`) and the entry
+   - If the root cause was straightforward and no corrections occurred, skip silently
+7. Mark todos and `tasks/todo.md` complete
+8. Summarize: what was broken, why, what was fixed, files changed
