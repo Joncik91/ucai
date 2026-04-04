@@ -6,7 +6,7 @@ A practical walkthrough of every command, when to use each one, and how they con
 
 ## The Context Chain
 
-Every command reads and writes files in `.claude/`. This is how state persists across sessions — no external memory, just files.
+Every command reads and writes files in `.claude/` and `tasks/`. This is how state persists across sessions — no external memory, just files.
 
 ```
 .claude/
@@ -15,9 +15,13 @@ Every command reads and writes files in `.claude/`. This is how state persists a
 └── frds/
     ├── auth.md         ← written by /plan <feature>
     └── payments.md
+
+tasks/
+├── todo.md             ← written by /build, /debug (overwritten per session)
+└── lessons.md          ← appended by /build, /debug (persistent across sessions)
 ```
 
-Commands auto-load whatever exists. Start a new session and `/build` already knows your project vision, backlog status, and feature architecture.
+Commands auto-load whatever exists. Start a new session and `/build` already knows your project vision, backlog status, feature architecture, and lessons from past sessions.
 
 ---
 
@@ -113,14 +117,14 @@ Example FRD structure:
 
 | Phase | What happens |
 |-------|-------------|
-| **1 Understand** | Loads project.md, requirements.md, FRD (if any). Checks build order dependencies. |
+| **1 Understand** | Loads specs, writes `tasks/todo.md`, loads `tasks/lessons.md` for relevant patterns. Checks build order dependencies. |
 | **2 Explore** | Parallel agents map the codebase — similar features, architecture, testing patterns |
 | **3 Clarify** | Resolves ambiguities before any design. You answer questions. |
 | **4 Design** | Architect agents generate 3 approaches (minimal / clean / pragmatic). You choose. |
-| **5 Build** | Implements the chosen design. Approval-gated — does not start without your go-ahead. |
-| **6 Verify** | Verifier + reviewer agents check correctness, conventions, and quality. |
-| **7 Test** | Generates a concrete manual test checklist. Waits for you to confirm it passes. |
-| **8 Done** | Marks requirements done in requirements.md. Updates milestone acceptance criteria in FRD. |
+| **5 Build** | Implements the chosen design. Approval-gated. Elegance checkpoint for non-trivial changes (>50 lines or >3 files). |
+| **6 Verify** | Staff engineer self-check, then verifier + reviewer agents check correctness, conventions, and quality. |
+| **7 Test** | Writes automated tests (unit/integration/E2E as appropriate), then generates a manual test checklist. Waits for you to confirm. |
+| **8 Done** | Marks requirements done. Updates milestone criteria. Captures lessons from corrections. |
 
 Phase 1 shows the milestone list and asks which to build:
 
@@ -162,7 +166,7 @@ For brownfield (existing) projects, `/init` is the starting point — run it bef
 
 Uses native Stop hooks. Claude works autonomously, reviews its own output, and continues until the completion promise is met or the iteration limit is reached.
 
-**Context compaction is handled automatically.** If the context window fills during a long iteration run, the PreCompact hook reads the iterate state and injects it into the compaction summary — so the loop continues without losing track of where it is.
+**Context compaction is handled automatically.** If the context window fills during a long iteration run, the PreCompact hook reads the iterate state, task progress, and latest lesson, then injects them into the compaction summary — so the loop continues without losing track of where it is.
 
 Stop at any time:
 
@@ -179,7 +183,7 @@ Stop at any time:
 /ucai:review src/auth/
 ```
 
-Parallel agents check for bugs, security issues, convention violations, and code quality. Pass a path to scope the review.
+Parallel agents check for bugs, security issues, convention violations, and code quality. If `tasks/lessons.md` exists, known patterns are fed to reviewer agents so they catch project-specific issues.
 
 ---
 
@@ -190,7 +194,7 @@ Parallel agents check for bugs, security issues, convention violations, and code
 /ucai:debug Login fails silently after session timeout
 ```
 
-Parallel agents investigate in different directions — recent changes, execution paths, similar patterns in the codebase. Converge on a root cause, propose a fix.
+Parallel agents investigate in different directions — recent changes, execution paths, similar patterns in the codebase. Diagnosis and fix plan are presented in a **single approval gate**. After you approve, execution is **autonomous** — no second gate. Verification includes writing **regression tests** to prevent recurrence, then captures lessons for non-obvious root causes.
 
 ---
 
@@ -202,7 +206,7 @@ Parallel agents investigate in different directions — recent changes, executio
 /ucai:docs api
 ```
 
-Reads codebase + spec files, generates appropriate documentation. Adapts to project type — API service gets API reference, web app gets user-facing README, library gets usage guide.
+Reads codebase + spec files + lessons, generates appropriate documentation. Extracts gotchas from `tasks/lessons.md` for documentation. Adapts to project type — API service gets API reference, web app gets user-facing README, library gets usage guide.
 
 Output goes to the project root or `docs/`, not `.claude/`.
 
@@ -217,6 +221,28 @@ Output goes to the project root or `docs/`, not `.claude/`.
 ```
 
 Reads git history since the last tag, cross-references `requirements.md` to connect features to the release, generates a changelog, bumps version, creates a git tag.
+
+---
+
+## Self-Improvement Loop
+
+Ucai learns from your corrections across sessions. This is not a gimmick — it's the highest-ROI practice from [Boris Cherny's methodology](https://getpushtoprod.substack.com/p/how-the-creator-of-claude-code-actually).
+
+**How it works:**
+
+1. During `/build` or `/debug`, if you correct Claude or a non-obvious decision is made, the pattern is captured in `tasks/lessons.md`
+2. Each entry has: Context, Root cause, Rule — structured so future sessions can apply it
+3. On session start, hooks announce lessons count and task progress
+4. Commands load lessons in Phase 1 and apply relevant patterns proactively
+5. When lessons exceed 100 entries, SessionStart warns that consolidation is needed
+
+**What hooks surface:**
+
+| Hook | What it injects |
+|------|----------------|
+| **SessionStart** | "Tasks: X/Y done" + "Lessons: N entries" (+ warning if >100) |
+| **UserPromptSubmit** | "Active task: ..." from first unchecked item in `tasks/todo.md` |
+| **PreCompact** | Task progress + latest lesson title (survives context compaction) |
 
 ---
 
@@ -262,13 +288,14 @@ Reads git history since the last tag, cross-references `requirements.md` to conn
 ```
 /ucai:debug Payment webhook returns 500 after third retry
 # Parallel agents trace the bug
-# Root cause identified
-# Fix proposed → you approve → applied
+# Root cause + fix plan presented in single gate
+# You approve → fix applied autonomously
+# Regression test written → lessons captured
 ```
 
 ---
 
-## `.claude/` File Reference
+## `.claude/` and `tasks/` File Reference
 
 | File | Written by | Read by | Purpose |
 |------|-----------|---------|---------|
@@ -277,6 +304,8 @@ Reads git history since the last tag, cross-references `requirements.md` to conn
 | `frds/<slug>.md` | `/plan <feature>` | `/build` | Per-feature requirements + architecture + milestones |
 | `CLAUDE.md` | `/init`, `/build` | All commands | Codebase conventions and project facts |
 | `*.local.md` | Internal | Internal | Session state (gitignored) |
+| `tasks/todo.md` | `/build`, `/debug` | Hooks (SessionStart, PreCompact, UserPromptSubmit) | Persistent task tracking per session |
+| `tasks/lessons.md` | `/build`, `/debug` | Hooks + `/build`, `/debug`, `/review`, `/docs` | Self-improvement loop — corrections and patterns |
 
 ---
 
@@ -286,8 +315,10 @@ Reads git history since the last tag, cross-references `requirements.md` to conn
 
 **FRDs are optional but valuable.** `/build` works without a FRD. But for features with non-obvious architecture or multiple approaches, running `/plan <feature>` first saves rework in Phase 4.
 
-**Agile mode is for features, not projects.** Use it when a single feature is too large to build in one session. Don't use it to replace project-level planning.
+**Milestones keep sessions focused.** Use them for features, not projects. Each milestone = one fresh context window = reliable implementation.
 
-**Phase 7 is mandatory.** Agent review is not a substitute for running the software. `/build` won't proceed to Phase 8 until you confirm the manual test checklist passes.
+**Phase 7 writes tests AND requires manual testing.** Automated tests (unit, integration, or E2E as appropriate) are written first, then a manual test checklist is generated. `/build` won't proceed to Phase 8 until you confirm both pass.
 
-**Skills load automatically.** Ucai ships with 7 skills (backend, frontend, architect, QA, DevOps, code-reviewer, ucai-patterns). Commands load them at the start of each relevant session. You don't need to manage this manually.
+**Lessons compound.** The more you correct Claude, the better it gets — corrections are captured in `tasks/lessons.md` and applied in future sessions. Don't hold back on corrections; they're the highest-ROI investment.
+
+**Skills load automatically.** Ucai ships with 8 skills (backend, frontend, architect, QA, DevOps, code-reviewer, receiving-code-review, ucai-patterns). Commands load them at the start of each relevant session. You don't need to manage this manually.

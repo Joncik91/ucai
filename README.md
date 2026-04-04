@@ -20,19 +20,23 @@ Ucai is built from the inside out — using Claude Code's native systems exactly
 | No iteration | External bash loops | Stop hooks (native, built-in) |
 | No planning | Manual PRD/FRD docs or skipped entirely | `/plan` with discovery agents + structured file output |
 | No onboarding | Template CLAUDE.md dumps | Agent-powered codebase analysis |
+| No learning | Same mistakes every session | Self-improvement loop — `tasks/lessons.md` persists corrections across sessions |
+| No task tracking | Manual or forgotten | Persistent `tasks/todo.md` — hooks inject active task into every prompt |
 
 ## ✨ What Ucai Gives You
 
 - Project planning with discovery agents
 - Feature-level FRDs with milestone breakdown (each milestone = one fresh context window)
-- 8-phase build workflow with parallel agents
+- 8-phase build workflow with parallel agents, elegance checkpoints, and staff engineer self-checks
+- Persistent task tracking (`tasks/todo.md`) and self-improvement loop (`tasks/lessons.md`)
+- Automated test writing (TDD) integrated into build and debug workflows
 - Native autonomous iteration (`/ucai:iterate`)
-- Multi-agent code review
-- Structured debugging
-- Documentation generation
+- Multi-agent code review with lessons-aware pattern detection
+- Structured debugging with single approval gate and autonomous execution
+- Documentation generation with gotcha extraction from lessons
 - Release automation
-- Hook lifecycle coverage — session context injection, config guardrails, subagent quality gates, and iterate-state preservation across compaction
-- Built-in skills (backend, frontend, QA, DevOps, architecture)
+- Hook lifecycle coverage — session context injection, task/lessons awareness, config guardrails, subagent quality gates, and iterate-state preservation across compaction
+- Built-in skills (backend, frontend, QA, DevOps, architecture, code review, and more)
 
 All using native Claude Code commands, agents, hooks, and skills.
 
@@ -87,11 +91,11 @@ Run `/help` to see them listed.
 |---------|-------------|
 | `/ucai:init` | Analyze codebase with parallel agents → generate real CLAUDE.md |
 | `/ucai:plan` | No args: project spec + requirements backlog. With args: feature FRD with milestones |
-| `/ucai:build` | 8-phase build workflow — explore, clarify, design, implement, verify, test |
+| `/ucai:build` | 8-phase build workflow — explore, clarify, design, implement, verify, test (automated + manual) |
 | `/ucai:iterate` | Controlled autonomous iteration via native Stop hooks |
-| `/ucai:review` | Parallel agent code review — bugs, security, conventions |
-| `/ucai:debug` | Structured debugging — parallel agents trace root cause |
-| `/ucai:docs` | Generate README, API docs, deployment guides from codebase + specs |
+| `/ucai:review` | Parallel agent code review — bugs, security, conventions, lessons-aware |
+| `/ucai:debug` | Structured debugging — single approval gate, autonomous fix, regression tests |
+| `/ucai:docs` | Generate README, API docs, deployment guides from codebase + specs + lessons |
 | `/ucai:release` | Changelog from git history, version bump, git tag |
 | `/ucai:cancel-iterate` | Stop an active iteration loop |
 
@@ -146,17 +150,29 @@ Run `/help` to see them listed.
 
 ## 🧠 Built-In Skills
 
-Ucai ships with 7 curated skills auto-loaded by Claude Code:
+Ucai ships with 8 curated skills auto-loaded by Claude Code:
 
 | Skill | Activates when |
 |-------|---------------|
-| **ucai-patterns** | Working with Claude Code plugins, hooks, agents |
+| **architect** | System design, architecture decisions, ADRs |
 | **backend** | Building APIs, databases, authentication |
 | **frontend** | React, Next.js, Tailwind, component design |
-| **architect** | System design, architecture decisions, ADRs |
-| **code-reviewer** | Reviewing code quality, PRs, anti-patterns |
-| **qa** | Testing strategies, coverage, E2E testing |
+| **qa** | Testing strategies, coverage, TDD, E2E testing |
 | **devops** | CI/CD pipelines, deployment, infrastructure |
+| **code-reviewer** | Reviewing code quality, PRs, anti-patterns |
+| **receiving-code-review** | Responding to reviewer feedback, deciding which suggestions to implement |
+| **ucai-patterns** | Working with Claude Code plugins, hooks, agents |
+
+## 🔄 Self-Improvement Loop
+
+Ucai learns from corrections. When you correct Claude during a `/build` or `/debug` session, the pattern is captured in `tasks/lessons.md`. Future sessions load these lessons and apply them proactively.
+
+- **SessionStart** announces lessons count and warns when consolidation is needed (>100 entries)
+- **`/build` Phase 1** and **`/debug` Phase 1** load relevant lessons before starting work
+- **`/review`** feeds known patterns to reviewer agents
+- **`/docs`** extracts gotchas from lessons for documentation
+
+This is inspired by [Boris Cherny's methodology](https://getpushtoprod.substack.com/p/how-the-creator-of-claude-code-actually) — persistent correction capture is the highest-ROI investment for AI-assisted development.
 
 ## 🏗 Architecture
 
@@ -170,7 +186,10 @@ ucai/
 ├── agents/
 ├── hooks/
 ├── scripts/
-└── skills/
+├── skills/
+└── tasks/                  ← created at runtime by commands
+    ├── todo.md             ← persistent task tracking (overwritten per session)
+    └── lessons.md          ← self-improvement loop (append-only)
 ```
 
 Every component is a native Claude Code system. Nothing invented.
@@ -184,6 +203,8 @@ Every component is a native Claude Code system. Nothing invented.
 5. **Explicit approval gates** — Never proceed without user decision
 6. **Parallel by default** — Spawn focused agents simultaneously
 7. **CLAUDE.md is for project facts** — Not framework config
+8. **Learn from corrections** — Capture patterns in lessons, apply them proactively
+9. **Verify before done** — Automated tests + manual confirmation, never just agent review
 
 ## ⭐ Support the Project
 
