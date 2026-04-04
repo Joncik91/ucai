@@ -2,8 +2,9 @@
 
 ## Overview
 A Claude Code plugin that leverages native architecture — commands, agents, hooks,
-and skills — exactly as Anthropic designed them. v1.1 delivers full hook lifecycle
-coverage and a PreToolUse guard that protects plugin config files.
+and skills — exactly as Anthropic designed them. v1.2 adds the Cherny methodology upgrade — persistent task tracking,
+self-improvement loop, TDD integration, elegance checkpoints, and
+autonomous debug execution.
 
 ## Tech Stack
 - **Runtime**: Node.js 18+ (CommonJS, zero external dependencies)
@@ -113,7 +114,7 @@ All files `kebab-case`. Exception: `SKILL.md` is uppercase.
 ## Key Files
 | File | Purpose |
 |------|---------|
-| `.claude-plugin/plugin.json` | Plugin manifest (name, version 1.1.0, keywords) |
+| `.claude-plugin/plugin.json` | Plugin manifest (name, version 1.2.0, keywords) |
 | `hooks/hooks.json` | Hook registration (7 events, timeouts, matchers) |
 | `hooks/handlers/sessionstart-handler.js` | Most complex handler (7.8 KB): git, iterate, skills |
 | `hooks/handlers/stop-handler.js` | Iteration control (5.4 KB, uses semicolons) |

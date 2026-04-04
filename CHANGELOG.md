@@ -2,6 +2,51 @@
 
 All notable changes to Ucai are documented here.
 
+## [v1.2.0] - 2026-04-04
+
+### Added
+- **Persistent task tracking**: `/build` and `/debug` write `tasks/todo.md`
+  with YAML frontmatter and checkable phase items, overwritten per session
+- **Self-improvement loop**: `/build` Phase 8 and `/debug` Phase 5 append
+  corrections and non-obvious decisions to `tasks/lessons.md` (append-only,
+  `count` in frontmatter for O(1) hook reads)
+- **Lessons loading**: `/build` Phase 1, `/debug` Phase 1, `/review` Phase 1,
+  and `/docs` Phase 2 load `tasks/lessons.md` and apply relevant patterns
+- **Elegance checkpoint**: `/build` Phase 5 pauses for non-trivial changes
+  (>50 lines new code or >3 files modified) to challenge implementation quality
+- **Staff engineer gate**: `/build` Phase 6 self-checks abstraction level,
+  shortcuts, integration quality, and error paths before launching review agents
+- **QA/TDD integration**: `/build` Phase 7 now writes automated tests
+  (unit/integration/E2E as appropriate) before manual testing, loading
+  `Skill(ucai:qa)` for framework guidance
+- **Debug regression tests**: `/debug` Phase 5 writes regression tests
+  before launching review agents, loading `Skill(ucai:qa)`
+- **SessionStart task/lessons awareness**: announces "Tasks: X/Y done" and
+  "Lessons: N entries" when files exist; warns when lessons exceed 100 entries
+- **PreCompact task/lessons awareness**: surfaces task progress and latest
+  lesson title before context compaction
+- **UserPromptSubmit active task injection**: injects "Active task: ..."
+  from first unchecked item in `tasks/todo.md`
+
+### Changed
+- `/debug` Phase 3: diagnosis and fix plan merged into single approval gate
+  (was two separate gates)
+- `/debug` Phase 4: autonomous execution after approval (no second gate)
+- `/review` Phase 1: feeds lessons patterns to reviewer agents
+- `/docs` Phase 2: extracts gotchas from lessons for documentation
+- Removed `senior-` prefix from all skill references across commands,
+  agents, and reference files (22 occurrences)
+- Plugin version bumped to 1.2.0
+
+### Documentation
+- README: added self-improvement loop section, updated feature list,
+  command descriptions, skill count (7 → 8), architecture diagram,
+  and principles (added #8 learn from corrections, #9 verify before done)
+- Workflow guide: updated phase table, debug/review/docs descriptions,
+  added self-improvement loop section with hook injection table,
+  added `tasks/` files to file reference
+- CLAUDE.md: updated hook descriptions, context chain, version references
+
 ## [v1.1.0] - 2026-02-20
 
 ### Added
