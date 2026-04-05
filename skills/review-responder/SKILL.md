@@ -1,5 +1,5 @@
 ---
-name: receiving-code-review
+name: review-responder
 description: Use when receiving feedback on code you implemented, responding to reviewer comments, deciding which review suggestions to implement, or pushing back on incorrect review feedback.
 ---
 

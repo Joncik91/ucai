@@ -1,5 +1,5 @@
 ---
-description: Feature development with exploration, design, and review
+description: Guided feature development with approval gates at each phase
 argument-hint: Feature description
 disable-model-invocation: true
 ---

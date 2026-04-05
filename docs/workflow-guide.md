@@ -408,7 +408,7 @@ Ucai learns from your corrections across sessions. This is not a gimmick — it'
 
 **Lessons compound.** The more you correct Claude, the better it gets — corrections are captured in `tasks/lessons.md` and applied in future sessions. Don't hold back on corrections; they're the highest-ROI investment.
 
-**Skills load automatically.** Ucai ships with 8 skills (backend, frontend, architect, QA, DevOps, code-reviewer, receiving-code-review, ucai-patterns). Commands load them at the start of each relevant session. You don't need to manage this manually.
+**Skills are loaded by commands.** Ucai ships with 8 skills (backend, frontend, architect, QA, DevOps, code-reviewer, review-responder, ucai-patterns). Each command loads relevant skills at the start of its workflow — you don't need to invoke them separately.
 
 **`/ship` vs `/build`.** Use `/build` when you want to review design choices, when requirements are unclear, or when you're building something for the first time. Use `/ship` when the spec is clear, patterns are established, and you want autonomous execution.
 

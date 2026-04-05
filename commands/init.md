@@ -1,5 +1,5 @@
 ---
-description: Analyze project and generate CLAUDE.md + setup
+description: Analyze codebase and generate CLAUDE.md with project conventions
 argument-hint: [project-path]
 disable-model-invocation: true
 ---

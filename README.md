@@ -186,7 +186,7 @@ Ucai ships with 8 curated skills auto-loaded by Claude Code:
 | **qa** | Testing strategies, coverage, TDD, E2E testing |
 | **devops** | CI/CD pipelines, deployment, infrastructure |
 | **code-reviewer** | Reviewing code quality, PRs, anti-patterns |
-| **receiving-code-review** | Responding to reviewer feedback, deciding which suggestions to implement |
+| **review-responder** | Responding to reviewer feedback, deciding which suggestions to implement |
 | **ucai-patterns** | Working with Claude Code plugins, hooks, agents |
 
 ## 🔄 Self-Improvement Loop
