@@ -25,23 +25,31 @@ function main() {
 
   const body = fmMatch[2]
 
-  // Parse entries: each starts with "## YYYY-MM-DD"
-  const entryRegex = /^## (\d{4}-\d{2}-\d{2})\s*[—–-]\s*(.*?)$/gm
+  // Parse entries: collect heading positions first to avoid regex g-flag mutation.
+  // The old code re-used a single g-flag regex for both the outer while-loop and an
+  // inner lookahead. When the inner exec() returned null it reset lastIndex to 0,
+  // sending the outer loop back to the start forever (infinite loop / OOM crash).
+  const headingRegex = /^## \d{4}-\d{2}-\d{2}/gm
+  const headingStarts = []
+  let hMatch
+  while ((hMatch = headingRegex.exec(body)) !== null) {
+    headingStarts.push(hMatch.index)
+  }
+
+  const detailRegex = /^## (\d{4}-\d{2}-\d{2})\s*[—–-]\s*(.*)/
   const entries = []
-  let match
 
-  while ((match = entryRegex.exec(body)) !== null) {
-    const date = match[1]
-    const title = match[2].trim()
-    const startIdx = match.index + match[0].length
+  for (let i = 0; i < headingStarts.length; i++) {
+    const start = headingStarts[i]
+    const end = i + 1 < headingStarts.length ? headingStarts[i + 1] : body.length
+    const entryText = body.slice(start, end)
 
-    // Find next entry or end of body
-    const nextMatch = entryRegex.exec(body)
-    const endIdx = nextMatch ? nextMatch.index : body.length
-    // Reset regex to continue from where nextMatch was found
-    if (nextMatch) entryRegex.lastIndex = nextMatch.index
+    const detailMatch = detailRegex.exec(entryText)
+    if (!detailMatch) continue
 
-    const entryBody = body.slice(startIdx, endIdx).trim()
+    const date = detailMatch[1]
+    const title = detailMatch[2].trim()
+    const entryBody = entryText.slice(detailMatch[0].length).trim()
 
     // Extract rule if present
     let rule = null
