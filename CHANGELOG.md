@@ -2,6 +2,18 @@
 
 All notable changes to Ucai are documented here.
 
+## [v2.0.1] - 2026-04-05
+
+### Fixed
+- Remove semicolons from `stop-handler.js` to match project-wide no-semicolon convention
+- Rename `receiving-code-review` skill to `review-responder` for consistent agent-noun naming
+- Fix workflow guide claiming skills "load automatically" — clarified that commands load them
+- Update CLAUDE.md to remove stale "uses semicolons" note and bump version references
+
+### Changed
+- Command descriptions improved for clarity: `/build` ("guided... with approval gates"), `/init` ("analyze codebase... with project conventions"), `/iterate` ("autonomous loop... until done or max iterations")
+- Version bumped to 2.0.1 in plugin.json, marketplace.json, CLAUDE.md
+
 ## [v2.0.0] - 2026-04-05
 
 ### Added
