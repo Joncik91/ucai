@@ -2,6 +2,23 @@
 
 All notable changes to Ucai are documented here.
 
+## [v1.2.1] - 2026-04-05
+
+### Added
+- **Project scale assessment**: `/plan` Phase 1P classifies projects as
+  Mini/Small/Normal/Large based on scope signals, calibrating build order
+  step count and milestone granularity throughout the planning flow
+
+### Changed
+- `/plan` Phase 5P build order now references project scale classification
+  with explicit step count ranges; exceeding the upper bound requires justification
+- `/plan` Phase 3F.5 milestone scoping replaces "more is better" bias with
+  scale-calibrated counts: Mini/Small → 1-2, Normal → 2-3, Large → 3+
+
+### Fixed
+- Sequential todo.md updates — mark each phase complete individually
+  instead of batching (fixes progress tracking during multi-phase commands)
+
 ## [v1.2.0] - 2026-04-04
 
 ### Added

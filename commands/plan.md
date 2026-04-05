@@ -61,7 +61,18 @@ Use this mode when starting a new project or defining project scope for the firs
    - What are you building? (brief description)
    - What problem does it solve? Who is the target user?
    - Any known constraints? (tech stack preferences, deployment target, timeline)
-6. Summarize understanding and confirm with user
+6. **Classify project scale** — this calibrates build order (Phase 5P) and milestone scoping (Phase 3F.5):
+
+   | Scale | Signals | Build order guidance |
+   |-------|---------|---------------------|
+   | **Mini** | Plugin, CLI tool, single-purpose lib, <2k LOC expected | 2-3 build steps max. Combine related concerns aggressively. |
+   | **Small** | CRUD app, simple API, <10k LOC | 3-5 build steps. Group by user-facing flow, not by layer. |
+   | **Normal** | Multi-feature app, auth + data + UI, 10-50k LOC | 5-8 build steps. Vertical slices make sense. |
+   | **Large** | Platform, microservices, complex domain, >50k LOC | 8+ build steps. Layer-based splits justified. |
+
+   State the classification and reasoning. Carry it forward into Phase 5P and all feature-level planning.
+
+7. Summarize understanding and confirm with user
 
 ---
 
@@ -170,6 +181,7 @@ This design system is written into `project.md` and acts as the contract for all
    Each feature should be a concise line item: `- [ ] Feature name — brief description`
 
 2. **Build order** — This is critical. Do NOT just list features flat. You MUST:
+   - **Calibrate to project scale** (from Phase 1P step 6): Mini → 2-3 steps, Small → 3-5, Normal → 5-8, Large → 8+. Exceeding the upper bound needs justification.
    - Identify dependencies between features (what requires what)
    - Define a **vertical slice** as the first build target: the smallest set of features that proves the end-to-end flow works
    - Sequence the remaining Must Have features in logical build order after the vertical slice
@@ -386,10 +398,13 @@ If the user says "whatever you think is best", provide your recommendation and g
    - **By component**: core functionality → secondary features → refinement
    - **By file scope**: new files → modifications to existing files → tests
 
-2. Create **as many milestones as makes sense**. Guidelines:
-   - Minimum 2 milestones (even for small features)
+2. **Calibrate milestone count to project scale** (from Phase 1P step 6, or infer from codebase size if no project spec exists):
+   - **Mini/Small**: 1-2 milestones per feature. Don't split what fits in one focused session.
+   - **Normal**: 2-3 milestones per feature.
+   - **Large**: 3+ milestones per feature, layer-based splits justified.
+
+   Additional guidelines:
    - Each milestone should be completable in one focused `/build` session
-   - Prefer more smaller milestones over fewer larger ones
    - A milestone that touches 5+ files or has 5+ acceptance criteria is probably too big
 
 3. For each milestone, define:

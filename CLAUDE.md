@@ -114,7 +114,7 @@ All files `kebab-case`. Exception: `SKILL.md` is uppercase.
 ## Key Files
 | File | Purpose |
 |------|---------|
-| `.claude-plugin/plugin.json` | Plugin manifest (name, version 1.2.0, keywords) |
+| `.claude-plugin/plugin.json` | Plugin manifest (name, version 1.2.1, keywords) |
 | `hooks/hooks.json` | Hook registration (7 events, timeouts, matchers) |
 | `hooks/handlers/sessionstart-handler.js` | Most complex handler (7.8 KB): git, iterate, skills |
 | `hooks/handlers/stop-handler.js` | Iteration control (5.4 KB, uses semicolons) |
