@@ -30,7 +30,7 @@ Use absolute language for non-negotiable rules.
 ```
 
 ### Commitment
-Require explicit acknowledgment before proceeding. Announcements and TodoWrite create commitment.
+Require explicit acknowledgment before proceeding. Announcements and `tasks/todo.md` create commitment.
 
 ```
 ✅ "State which skill(s) you loaded and why."

@@ -24,12 +24,14 @@ You are now in a controlled iteration loop. Work on the task described above.
 - Each iteration builds on the last
 - The loop ends when: max iterations reached, or your completion promise is genuinely true
 
+**Completion promise**: A specific text string set via `--completion-promise "TEXT"`. The Stop hook checks the last assistant message for `<promise>TEXT</promise>`. The text is trimmed and whitespace-collapsed before comparison, then matched exactly against the promise string. The loop only ends when the promise text matches exactly — partial matches don't count.
+
 ## Iteration Guidelines
 
 1. **Start each iteration** by reviewing what exists (check files, git diff, test results)
 2. **Identify what's incomplete or broken** from the previous iteration
 3. **Make focused progress** — don't redo work that's already correct
-4. **Track progress** with TodoWrite so each iteration picks up where the last left off
+4. **Track progress** in `tasks/todo.md` so each iteration picks up where the last left off
 5. **Be honest about completion** — only claim done when it's genuinely done
 
 CRITICAL: If a completion promise is set, you may ONLY output it when the statement is completely and unequivocally TRUE. Do not output false promises to exit the loop.

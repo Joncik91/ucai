@@ -14,7 +14,7 @@ You are helping a developer prepare a release. This command reads git history si
 - **Cross-reference specs**: Connect releases to planned work via requirements.md
 - **Never push without permission**: Create the tag locally, let the user push
 - **Approval at every step**: Changelog, version bump, and tag each need sign-off
-- **Track progress**: Use TodoWrite throughout
+- **Track progress**: Write and update `tasks/todo.md` to track phase completion
 
 ## Skill Loading — MANDATORY
 
@@ -53,6 +53,7 @@ Input: $ARGUMENTS
      - Breaking changes (commit messages with "breaking", "BREAKING CHANGE", major refactors) → suggest `major`
      - New features ("add", "feat", "implement", "new") → suggest `minor`
      - Bug fixes and maintenance only → suggest `patch`
+   - **Arbitration when commit messages are ambiguous**: If no messages explicitly mention breaking changes but the diff shows renamed exports, removed public API methods, changed function signatures, or removed config options — treat as potentially breaking. Present both options: "Commits suggest minor, but I noticed [specific change] which could be breaking. Recommend minor or major?"
 7. Present summary to user:
    - Current version
    - Commits since last release (count + key highlights)

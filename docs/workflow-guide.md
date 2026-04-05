@@ -28,6 +28,20 @@ Commands auto-load whatever exists. Start a new session and `/build` already kno
 
 ---
 
+## Terminology
+
+Three scopes of work, from largest to smallest:
+
+| Term | Scope | Example |
+|------|-------|---------|
+| **Build order step** | A unit of work in `requirements.md` Build Order. May cover multiple features. Executed via `/build`. | "Step 2: Authentication — covers: login, registration, password reset" |
+| **Milestone** | A subdivision of a feature FRD. One `/build` session per milestone. | "M1: Data Layer", "M2: API Endpoints" |
+| **Phase** | A step within a single command execution. | "Phase 3: Clarify", "Phase 5: Build" |
+
+These are NOT interchangeable. A build order step may contain a feature with 3 milestones, and each milestone's `/build` run has 8 phases.
+
+---
+
 ## Full Workflow: New Project
 
 ### 1. Define the project spec
@@ -198,16 +212,19 @@ Stop at any time:
 | **Best for** | Unclear requirements, first-time architecture | Clear specs, proven patterns |
 | **Isolation** | Works in your directory | Worktree by default |
 
-**The 8 phases:**
+**The 9 phases (0-8):**
 
-1. **Setup** — Parse spec, enter worktree, load project context + lessons
-2. **Spec Resolution** — Auto-select next FRD milestone (or generate internal plan for inline specs)
-3. **Explore** — 2 fast explorer agents map the codebase
-4. **Detect Infrastructure** — Find test/lint/format commands. If missing, scaffold minimal infrastructure inline.
-5. **Implement** — Build milestone by milestone, commit per milestone
-6. **Verify Loop** — Run tests → if fail: fix + retry (up to N attempts). Run formatter. Run linter → if fail: fix + retry.
-7. **Light Review** — 1 reviewer agent catches critical bugs. Auto-fixes confidence >= 90 issues.
-8. **Create PR** — Push, create PR via `gh`, optionally watch CI and fix failures.
+0. **Setup** — Parse spec, enter worktree, load project context + lessons
+1. **Spec Resolution** — Auto-select next FRD milestone (or generate internal plan for inline specs)
+2. **Explore** — 2 fast explorer agents map the codebase
+3. **Detect Infrastructure** — Find test/lint/format commands. If missing, scaffold minimal infrastructure inline.
+4. **Implement** — Build milestone by milestone, commit per milestone
+5. **Verify Loop** — Run tests → if fail: fix + retry (up to N attempts). Run formatter. Run linter → if fail: fix + retry.
+6. **Light Review** — 1 reviewer agent catches critical bugs. Auto-fixes confidence >= 90 issues.
+7. **Create PR** — Push, create PR via `gh`, optionally watch CI and fix failures.
+8. **Cleanup & Report** — Update FRD milestones, mark requirements done, capture lessons, print summary.
+
+Stop at any time: `/ucai:cancel-ship`
 
 **Flags:**
 
@@ -307,9 +324,11 @@ Ucai learns from your corrections across sessions. This is not a gimmick — it'
 2. Each entry has: Context, Root cause, Rule — structured so future sessions can apply it
 3. On session start, hooks announce lessons count and task progress
 4. Commands load lessons in Phase 1 and apply relevant patterns proactively
-5. When lessons exceed 100 entries, SessionStart warns that consolidation is needed
-6. `/ship` Phase 8 auto-consolidates when entries exceed 100 (groups by rule, merges duplicates, keeps last 20 recent)
-7. Manual consolidation: `node scripts/consolidate-lessons.js` outputs consolidated content to stdout
+5. When lessons exceed 100 entries:
+   - **SessionStart hook** *warns*: "WARNING: >100 entries — consider consolidation"
+   - **`/ship` Phase 8** *auto-consolidates* (groups by rule, merges duplicates, keeps last 20 recent)
+   - **`/build` and `/debug` do NOT auto-consolidate** — heed the SessionStart warning and run the script manually
+   - **Manual consolidation**: `node scripts/consolidate-lessons.js` outputs consolidated content to stdout
 
 **What hooks surface:**
 
@@ -318,7 +337,7 @@ Ucai learns from your corrections across sessions. This is not a gimmick — it'
 | **SessionStart** | "Tasks: X/Y done" + "Lessons: N entries" (+ warning if >100) + ship/iterate status |
 | **PostToolUse** | Auto-formats files after Write/Edit (detects Prettier, Black, gofmt, rustfmt, etc.) |
 | **UserPromptSubmit** | "Active task: ..." + iterate/ship context from state files |
-| **PreCompact** | Task progress + latest lesson + iterate/ship state (survives context compaction) |
+| **PreCompact** | Task progress + latest lesson + iterate/ship state (survives context compaction). Fires for ALL commands, not just /ship and /iterate. |
 
 ---
 
@@ -413,3 +432,46 @@ Ucai learns from your corrections across sessions. This is not a gimmick — it'
 **`/ship` vs `/build`.** Use `/build` when you want to review design choices, when requirements are unclear, or when you're building something for the first time. Use `/ship` when the spec is clear, patterns are established, and you want autonomous execution.
 
 **Bootstrap first.** If your project has no tests, run `/ucai:bootstrap` before `/ucai:ship`. `/ship` can scaffold inline, but `/bootstrap` gives you a chance to review what gets created.
+
+---
+
+## Decision Guide
+
+Quick answers to common "which do I use?" questions.
+
+### Which explorer agent?
+
+| Agent | Model | Cost | Use when |
+|-------|-------|------|----------|
+| `ucai:explorer-haiku` | haiku | Low | Quick validation, structure scanning, FRD spot-checks (~8 tool calls) |
+| `ucai:explorer` | sonnet | Medium | Default for most exploration — balanced depth and cost (~15 tool calls) |
+| `ucai:explorer-opus` | opus | High | Complex debugging, security audits, tracing subtle call chains (~25 tool calls) |
+
+**Depth selection** (quick/medium/thorough):
+- **quick**: You already know roughly where the code is, just need file paths confirmed
+- **medium** (default): You know the general area but need patterns, conventions, and integration points
+- **thorough**: You have no idea how the codebase works, or the feature touches many subsystems
+
+### When to /plan first vs /build directly?
+
+- **`/plan` first** when: feature touches 3+ subsystems, architecture is unclear, you want milestones to break work across sessions
+- **`/build` directly** when: feature is small, design is obvious, you already know the approach
+
+### When to /build vs /ship?
+
+- **`/build`** when: requirements are unclear, first time building in this area, you want to review design choices at each phase
+- **`/ship`** when: FRD exists with clear milestones, patterns are established, you trust autonomous execution
+
+### When to run /init?
+
+- **After `/plan`**: if planning settled the tech stack, conventions, and folder structure
+- **After first `/build`**: if those decisions were deferred and only resolved during implementation
+- **Rule of thumb**: run `/init` when CLAUDE.md would have concrete facts to state, not just intentions
+
+### Can I re-run /plan after a partial build?
+
+Yes. `/plan <feature>` detects the existing FRD and asks: "Overwrite, refine, or abort?" Choose "refine" to update the FRD with lessons from implementation while preserving completed milestone status.
+
+### Is the review confidence threshold (80) a hard cutoff?
+
+No — it's a guideline. Agents may report security-related issues at 75-79. The validation phase exists to catch false positives. The threshold is a filter, not a wall.

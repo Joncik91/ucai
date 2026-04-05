@@ -99,15 +99,16 @@ Run `/help` to see them listed.
 |---------|-------------|
 | `/ucai:init` | Analyze codebase with parallel agents → generate real CLAUDE.md |
 | `/ucai:plan` | No args: project spec + requirements backlog. With args: feature FRD with milestones |
-| `/ucai:build` | 8-phase guided build — explore, clarify, design, implement, verify, test (with approval gates) |
-| `/ucai:ship` | Autonomous spec-to-PR — zero gates, worktree isolation, auto-test, auto-fix, auto-PR |
+| `/ucai:build` | 8-phase guided build with approval gates at each phase |
+| `/ucai:ship` | 9-phase autonomous spec-to-PR — zero gates, worktree isolation, auto-test, auto-fix, auto-PR |
 | `/ucai:bootstrap` | Scaffold test, lint, and CI infrastructure for projects that lack it |
-| `/ucai:iterate` | Controlled autonomous iteration via native Stop hooks |
+| `/ucai:iterate` | Autonomous loop: repeats a task until done or max iterations |
 | `/ucai:review` | Parallel agent code review — bugs, security, conventions, lessons-aware |
 | `/ucai:debug` | Structured debugging — single approval gate, autonomous fix, regression tests |
 | `/ucai:docs` | Generate README, API docs, deployment guides from codebase + specs + lessons |
 | `/ucai:release` | Changelog from git history, version bump, git tag |
 | `/ucai:cancel-iterate` | Stop an active iteration loop |
+| `/ucai:cancel-ship` | Stop an active ship pipeline |
 
 → **[Full workflow guide](docs/workflow-guide.md)** — getting started patterns, milestone-based builds, command deep-dives, context chain reference.
 

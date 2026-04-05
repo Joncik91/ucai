@@ -14,7 +14,7 @@ You are helping a developer trace and fix a bug. This command uses parallel inve
 - **Evidence-based diagnosis**: Every root cause claim needs file:line references
 - **Minimal fix**: Address the root cause, not symptoms. Keep changes small
 - **Single approval gate**: Diagnosis and fix plan are approved together; execution is autonomous after approval
-- **Track progress**: Use TodoWrite throughout
+- **Track progress**: Write and update `tasks/todo.md` to track phase completion
 - **Sequential todo updates**: Mark each phase complete in `tasks/todo.md` immediately when it finishes. Never batch-mark multiple phases at once.
 
 ## Skill Loading — MANDATORY
@@ -87,7 +87,8 @@ Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/
 
 2. **Wait for all agents to complete** before proceeding
 3. Read all key files identified by agents
-4. Present a consolidated investigation summary
+4. **Synthesize agent findings**: Cross-reference the three investigation threads. Where findings converge (multiple agents point to the same code/cause), treat as high confidence. Where they diverge, investigate the conflicting evidence further before presenting.
+5. Present a consolidated investigation summary
 5. Mark Phase 2 complete in `tasks/todo.md`
 
 ---

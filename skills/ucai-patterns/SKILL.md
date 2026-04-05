@@ -13,7 +13,7 @@ The context window is a shared resource. Protect it.
 
 **Native tools for context**:
 - **SessionStart hooks**: Inject project-specific context at session start
-- **TodoWrite**: Track progress so context compaction doesn't lose your place
+- **tasks/todo.md**: Write progress to `tasks/todo.md` so hooks can inject state and context compaction doesn't lose your place
 - **Skills with progressive disclosure**: Metadata always loaded, details on demand
 - **File system**: Use .local.md files for persistent state between iterations
 
@@ -62,13 +62,13 @@ The golden rule: **1 message = ALL related operations**. Every round-trip to Cla
 **Good patterns**:
 - Spawn ALL parallel agents in one message (multiple Task calls in one response)
 - Read ALL files you need in one message (multiple Read calls simultaneously)
-- Batch ALL TodoWrite updates in a single call, not one per item
+- Batch ALL `tasks/todo.md` updates in a single Write call, not one per item
 - Stage all writes for one phase before moving to the next
 
 **Anti-patterns**:
 - Spawning one agent, waiting for it, then spawning the next
 - Reading files one at a time in a loop across multiple messages
-- Calling TodoWrite once per todo item across separate turns
+- Writing to `tasks/todo.md` once per todo item across separate turns
 
 **Why it matters**: In a 5-agent parallel analysis, serial spawning adds 4 unnecessary round-trips. At 2-3 seconds per round-trip, that is 8-12 seconds of pure latency before any work begins. Batching collapses this to a single round-trip.
 
@@ -79,7 +79,7 @@ For detailed patterns, see: `references/agent-patterns.md`
 | Thought | Reality |
 |---------|---------|
 | "I'll read this file, then decide what to read next" | Speculatively read everything potentially useful in one message. |
-| "I'll update todos one at a time as I finish each" | Batch all TodoWrite updates in a single call. |
+| "I'll update todos one at a time as I finish each" | Batch all `tasks/todo.md` updates in a single Write call. |
 | "Let me spawn this agent first, then spawn the next" | All parallel agents go in one message. Always. |
 | "Sequential is safer" | Sequential adds latency with zero safety benefit for independent tasks. |
 

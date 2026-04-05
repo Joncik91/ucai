@@ -1,7 +1,7 @@
 ---
 name: explorer-haiku
 description: Quickly scans codebase structure, entry points, and key files to provide a fast overview of relevant code areas
-tools: Glob, Grep, Read, Bash, WebFetch, TodoWrite, WebSearch
+tools: Glob, Grep, Read, Bash, WebFetch, WebSearch
 model: haiku
 color: yellow
 ---

@@ -1,7 +1,7 @@
 ---
 name: verifier
 description: Validates completed work against acceptance criteria by checking that each criterion is genuinely met in the implementation, with evidence from the actual code
-tools: Glob, Grep, Read, Bash, WebFetch, TodoWrite, WebSearch
+tools: Glob, Grep, Read, Bash, WebFetch, WebSearch
 model: sonnet
 color: blue
 ---

@@ -25,11 +25,11 @@ Inject essential project context at the beginning of every session. This replace
 
 The handler reads your project's CLAUDE.md and injects it as `additionalContext`. Every session starts with the right context without manual setup.
 
-### 2. TodoWrite for Progress Tracking
+### 2. tasks/todo.md for Progress Tracking
 
-TodoWrite survives context compaction. When Claude's context gets compressed, your todo list remains intact. This means each phase of work knows what's been done and what's left.
+`tasks/todo.md` survives context compaction. When Claude's context gets compressed, hooks (SessionStart, PreCompact, UserPromptSubmit) re-inject your task progress. This means each phase of work knows what's been done and what's left.
 
-Use TodoWrite at the start of any multi-step task. Update it as you go. It's your progress ledger.
+Write `tasks/todo.md` at the start of any multi-step task. Update it as you go. It's your progress ledger.
 
 ### 3. Skills with Progressive Disclosure
 
@@ -55,4 +55,4 @@ Each agent spawned via the Task tool gets a fresh context window. This is the na
 - **Don't stuff CLAUDE.md with instructions for Claude** — it's for project facts
 - **Don't repeat what Claude knows** — React conventions, Python best practices, etc. are already in training
 - **Don't load everything upfront** — use progressive disclosure
-- **Don't build custom state management** — use TodoWrite, .local.md files, and git
+- **Don't build custom state management** — use `tasks/todo.md`, `.local.md` files, and git

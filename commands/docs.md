@@ -14,7 +14,7 @@ You are helping a developer generate or update project documentation. This comma
 - **Adapt to the project**: A CLI tool needs different docs than a web app
 - **Reference specs**: Use project.md and requirements.md as source material when available
 - **Approval before writing**: Never write documentation files without user sign-off
-- **Track progress**: Use TodoWrite throughout
+- **Track progress**: Write and update `tasks/todo.md` to track phase completion
 
 ## Skill Loading — MANDATORY
 
@@ -76,7 +76,8 @@ Input: $ARGUMENTS
    Include project context (tech stack, constraints) in each agent's prompt if available.
 
 3. **Wait for all agents to complete** before proceeding
-4. Read key files identified by agents
+4. **Synthesize agent findings**: Merge the project scanner inventory, docs auditor findings, and setup analyst flow into a unified picture of what the project has and what documentation it needs. (Note: "Docs auditor" and "Setup analyst" are task labels, not agent names — both use `ucai:explorer` with different prompts.)
+5. Read key files identified by agents
 5. Determine which doc types apply based on what exists:
 
    | Project has | Generate |

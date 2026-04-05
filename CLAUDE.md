@@ -41,9 +41,9 @@ node -e "const o=JSON.parse(process.argv[1]); if(!o.hookSpecificOutput) process.
 - **skills/** — Knowledge: progressive disclosure domain expertise, loaded on-demand.
 - **scripts/** — Utilities: `setup-iterate.js`, `setup-ship.js`, `detect-infra.js`, `run-tests.js`, `consolidate-lessons.js`.
 
-### Commands (11 slash commands)
-`/init`, `/plan`, `/build` (8-phase, guided), `/ship` (8-phase, autonomous), `/bootstrap`,
-`/debug`, `/review`, `/docs`, `/release`, `/iterate`, `/cancel-iterate`
+### Commands (12 slash commands)
+`/init`, `/plan`, `/build` (8-phase, guided), `/ship` (9-phase, autonomous), `/bootstrap`,
+`/debug`, `/review`, `/docs`, `/release`, `/iterate`, `/cancel-iterate`, `/cancel-ship`
 
 ### Agents (8, all read-only — no Write/Edit)
 | Agent | Model | Max Turns | Purpose |
@@ -126,7 +126,7 @@ All files `kebab-case`. Exception: `SKILL.md` is uppercase.
 ## Key Files
 | File | Purpose |
 |------|---------|
-| `.claude-plugin/plugin.json` | Plugin manifest (name, version 2.0.1, keywords) |
+| `.claude-plugin/plugin.json` | Plugin manifest (name, version 2.1.0, keywords) |
 | `hooks/hooks.json` | Hook registration (8 events, timeouts, matchers) |
 | `hooks/handlers/sessionstart-handler.js` | Most complex handler (7.8 KB): git, iterate, skills |
 | `hooks/handlers/stop-handler.js` | Iteration control (5.4 KB) |

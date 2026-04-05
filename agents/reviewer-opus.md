@@ -1,7 +1,7 @@
 ---
 name: reviewer-opus
 description: Deeply reviews code for bugs, logic errors, and security vulnerabilities using comprehensive reasoning to catch subtle, high-impact issues that require careful analysis
-tools: Glob, Grep, Read, Bash, WebFetch, TodoWrite, WebSearch
+tools: Glob, Grep, Read, Bash, WebFetch, WebSearch
 model: opus
 color: white
 ---

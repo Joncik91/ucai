@@ -1,7 +1,7 @@
 ---
 name: explorer-opus
 description: Deeply analyzes complex codebases with comprehensive reasoning to trace subtle execution paths, identify non-obvious root causes, and map intricate architectural dependencies
-tools: Glob, Grep, Read, Bash, WebFetch, TodoWrite, WebSearch
+tools: Glob, Grep, Read, Bash, WebFetch, WebSearch
 model: opus
 color: magenta
 ---

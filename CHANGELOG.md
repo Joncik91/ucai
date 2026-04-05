@@ -2,6 +2,34 @@
 
 All notable changes to Ucai are documented here.
 
+## [v2.1.0] - 2026-04-05
+
+### Added
+- **`/cancel-ship` command**: Cancel an active ship pipeline with cleanup warnings for worktrees, remote branches, and partial PRs
+- **Decision Guide** in workflow-guide.md: Quick answers for which explorer, /build vs /ship, /init timing, re-running /plan
+- **Terminology section** in workflow-guide.md: Defines "build order step" vs "milestone" vs "phase" — three scopes, not interchangeable
+- **Failure Recovery table** in `/build`: How to recover from interruption at each phase
+- **Build order sequencing algorithm** in `/plan` Phase 5P: Topological sort with concrete steps instead of vague "identify dependencies"
+- **Acceptance criteria capture** in `/build` Phase 1: Explicitly asks user for testable criteria when no FRD exists
+- **Agent synthesis steps** in `/debug`, `/plan`, `/docs`: Explicit consolidation of agent findings before proceeding
+- **Mood selection criteria** in `/plan` Phase 4P: Maps product interaction model to aesthetic direction
+- **Version bump arbitration** in `/release`: Flags ambiguous breaking changes from diff when commit messages are unclear
+- **Completion promise definition** in `/iterate`: Documents exact matching behavior (trim, collapse whitespace, exact comparison)
+
+### Changed
+- **TodoWrite → tasks/todo.md**: Standardized all references across 6 commands, 7 agents, 3 skill files. Agents no longer list TodoWrite in tools (read-only agents don't track progress)
+- **`/ship` phase count**: Docs now correctly say "9 phases (0-8)" and include Phase 8: Cleanup & Report
+- **`/build` Phase 5 approval gate**: Collapsed redundant HARD-GATE + action step into single clear gate
+- **`/build` Phase 5 QA skill**: Loaded early for testability guidance during implementation, not just Phase 7
+- **`/build` Phase 6 consolidation**: Agent findings merged into severity-ranked list with disagreement flagging
+- **`/build` Phase transitions**: Explicit carry-forward notes between Phase 3→4 and Phase 5→6
+- **`/plan` Phase 5P**: Restructured into 4 sub-steps (Prioritize, Sequence, Cross-cutting, Approve) separating MoSCoW from build order
+- **Lessons consolidation clarity**: Docs now explicitly state SessionStart warns, /ship auto-consolidates, /build and /debug don't
+- **PreCompact scope**: Docs clarify it fires for ALL commands, not just /ship and /iterate
+- **README**: Updated command count (12), descriptions, added /cancel-ship
+- **SessionStart hook**: Announces /cancel-ship alongside /cancel-iterate
+- Decision criteria centralized in workflow-guide.md (single source of truth, commands reference not duplicate)
+
 ## [v2.0.1] - 2026-04-05
 
 ### Fixed

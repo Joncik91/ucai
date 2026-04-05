@@ -17,7 +17,7 @@ You are helping a developer plan before building. This command works at two leve
 - **Research before requirements**: Understand the codebase and domain first
 - **Parallel discovery**: Launch multiple agents simultaneously for speed
 - **Approval before output**: Never write files without user sign-off
-- **Track progress**: Use TodoWrite throughout
+- **Track progress**: Write and update `tasks/todo.md` to track phase completion
 
 ## Skill Loading — MANDATORY
 
@@ -89,7 +89,8 @@ Use this mode when starting a new project or defining project scope for the firs
    - **Codebase analysis** (brownfield only, max_turns: 30): "[sonnet] Level: thorough. Analyze the existing codebase structure, tech stack, conventions, and patterns. Return 5-10 key files and architectural insights."
 
 2. **Wait for all agents to complete** before proceeding
-3. Present a consolidated discovery summary:
+3. **Synthesize agent findings**: Where agents agree, use as established fact. Where they disagree (e.g., conflicting architecture recommendations), note both perspectives and resolve during Phase 3P.
+4. Present a consolidated discovery summary:
    - Domain best practices and references
    - Recommended patterns and architecture approaches
    - Tech stack recommendations (if greenfield)
@@ -129,11 +130,13 @@ Use this mode when starting a new project or defining project scope for the firs
 2. Determine whether the project has a UI: infer from the tech stack (Phase 3P) or ask the user directly
 3. If UI confirmed, draft each decision below and present as a block for user approval:
 
-   **Aesthetic mood** — drives all other choices, pick one:
-   - **Editorial**: refined, content-first, long-form reading (Newsreader/Literata + warm off-white)
-   - **Startup / modern**: energetic, bold, product-focused (Bricolage Grotesque/Satoshi + clean white or dark)
-   - **Technical**: precise, data-dense, structured (IBM Plex Sans/Mono + cool gray or dark theme)
-   - **Warm / human**: approachable, friendly, community-oriented (DM Serif Display + DM Sans + off-white)
+   **Aesthetic mood** — drives all other choices, pick one based on the product's primary interaction model:
+   - **Editorial**: refined, content-first, long-form reading (Newsreader/Literata + warm off-white) — best for: blogs, docs, reading apps, content-heavy products
+   - **Startup / modern**: energetic, bold, product-focused (Bricolage Grotesque/Satoshi + clean white or dark) — best for: SaaS dashboards, tools, marketplaces, action-heavy products
+   - **Technical**: precise, data-dense, structured (IBM Plex Sans/Mono + cool gray or dark theme) — best for: analytics, admin panels, developer tools, data-heavy products
+   - **Warm / human**: approachable, friendly, community-oriented (DM Serif Display + DM Sans + off-white) — best for: social platforms, education, non-profit, community-heavy products
+
+   If the project spans categories, pick the one that describes 60%+ of the user's time.
 
    **Typography** (per skill guidelines — Inter, Roboto, Arial, system-ui are banned):
    - Heading font: [specific Google Font] — [why, one sentence]
@@ -171,25 +174,44 @@ This design system is written into `project.md` and acts as the contract for all
 **CRITICAL**: Do not skip this phase.
 
 **Actions**:
-1. Based on project definition and discovery, draft the complete feature backlog:
 
-   **Must Have**: Essential features for MVP
-   **Should Have**: Important but not launch-blocking
-   **Could Have**: Nice-to-have if time permits
-   **Won't Have (This Release)**: Explicitly out of scope
+### Step A: Prioritize (MoSCoW)
 
-   Each feature should be a concise line item: `- [ ] Feature name — brief description`
+Categorize ALL features by importance. This determines what ships, not what order it ships in.
 
-2. **Build order** — This is critical. Do NOT just list features flat. You MUST:
-   - **Calibrate to project scale** (from Phase 1P step 6): Mini → 2-3 steps, Small → 3-5, Normal → 5-8, Large → 8+. Exceeding the upper bound needs justification.
-   - Identify dependencies between features (what requires what)
-   - Define a **vertical slice** as the first build target: the smallest set of features that proves the end-to-end flow works
-   - Sequence the remaining Must Have features in logical build order after the vertical slice
-   - Add a `## Build Order` section to requirements.md with numbered steps and dependency notes
+- **Must Have**: Essential features for MVP — the product is broken without these
+- **Should Have**: Important but not launch-blocking — the product is usable without these
+- **Could Have**: Nice-to-have if time permits
+- **Won't Have (This Release)**: Explicitly out of scope
 
-3. Identify cross-cutting concerns (auth strategy, input validation, secrets management, error handling and what to expose vs hide, logging and what must never be logged, testing strategy, shared abstractions that prevent duplication across features)
-4. Present the backlog AND the build order to the user for validation
-5. **DO NOT PROCEED WITHOUT APPROVAL**
+Each feature should be a concise line item: `- [ ] Feature name — brief description`
+
+### Step B: Sequence (Build Order)
+
+Determine implementation order for Must Have features. This is a separate concern from priority.
+
+**Sequencing algorithm**:
+1. List all Must Have features
+2. For each feature, identify its **hard dependencies** (features that must exist first for this one to work — e.g., "user profiles" depends on "authentication")
+3. Topological sort: features with no dependencies come first; features with dependencies come after their prerequisites
+4. Among features at the same dependency level, prefer: (a) features that unblock the most other features, (b) features that touch shared infrastructure
+5. The FIRST build step is always the **vertical slice**: the smallest set of features that proves the end-to-end flow works (one user action from input to persisted output)
+6. Group remaining features into build steps of 1-3 features each, respecting dependency order
+
+**Calibrate step count to project scale** (from Phase 1P step 6):
+Mini → 2-3 steps, Small → 3-5, Normal → 5-8, Large → 8+. Exceeding the upper bound needs justification.
+
+Add a `## Build Order` section to requirements.md with numbered steps and dependency notes.
+
+### Step C: Cross-cutting concerns
+
+Identify concerns that span multiple features: auth strategy, input validation, secrets management, error handling and what to expose vs hide, logging and what must never be logged, testing strategy, shared abstractions that prevent duplication across features.
+
+### Step D: Present and approve
+
+Present the backlog (Step A) AND the build order (Step B) AND cross-cutting concerns (Step C) to the user for validation.
+
+**DO NOT PROCEED WITHOUT APPROVAL**
 
 If the user says "whatever you think is best", provide your recommendation and get explicit confirmation.
 
@@ -328,8 +350,9 @@ Feature request: $ARGUMENTS
    If project.md exists, include project context (tech stack, constraints) in each agent's prompt.
 
 3. **Wait for all agents to complete** before proceeding
-4. After agents return, read key files they identified
-5. Present a consolidated discovery summary
+4. **Synthesize agent findings**: Where agents agree, use as established fact. Where they disagree, note both perspectives and flag for resolution during architecture design.
+5. After agents return, read key files they identified
+6. Present a consolidated discovery summary
 6. Compile a **Discovery Summary** from agent findings — you will paste this into Phase 4F architect prompts:
    ```
    Discovery Summary:

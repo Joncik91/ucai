@@ -16,7 +16,7 @@ You are helping a developer implement a new feature. Follow a systematic approac
 - **Simple and elegant**: Prioritize readable, maintainable code.
 - **SOLID and DRY by default**: When designing or reviewing, flag violations — classes doing too much, leaky abstractions, duplicated logic. These are architecture concerns, not style preferences.
 - **Security by default**: Validate inputs at system boundaries, never trust user-supplied data, avoid exposing sensitive data in logs or errors. Flag security implications during design and review — not as an afterthought.
-- **Track progress**: Use TodoWrite throughout.
+- **Track progress**: Write and update `tasks/todo.md` to track phase completion.
 - **Sequential todo updates**: Mark each phase complete in `tasks/todo.md` immediately when it finishes. Never batch-mark multiple phases at once.
 
 ## Skill Loading — MANDATORY
@@ -53,7 +53,8 @@ Feature request: $ARGUMENTS
    - Ask: "Which milestone do you want to build? [list remaining milestones with scope]"
    - **Wait for user to select a milestone**
    - Note the selected milestone's name, scope, and acceptance criteria — throughout phases 2–8, scope all work to this milestone only. Do not implement or review code outside its defined scope.
-5. Ask: "I found [list specs found]. Should I use these as context for this build?"
+5. **Capture acceptance criteria**: If a milestone was selected, its acceptance criteria are the verification target for Phase 6. If no FRD exists, ask: "What would 'done' look like for this feature? List 2-4 testable criteria." Record them in `tasks/todo.md`.
+6. Ask: "I found [list specs found]. Should I use these as context for this build?"
 
 If the user confirms:
 - Phase 2 (Explore): Light validation (1 haiku explorer) if FRD has Discovery section
@@ -166,6 +167,8 @@ If the user says "whatever you think is best", provide your recommendation and g
 
 **On completion**: Mark Phase 3 complete in `tasks/todo.md`.
 
+**Transition to Phase 4**: Carry forward the Codebase Map (Phase 2) and all clarification answers (Phase 3). Both feed into architect agent prompts.
+
 ---
 
 ## Phase 4: Design
@@ -204,19 +207,22 @@ If the user says "whatever you think is best", provide your recommendation and g
 **Goal**: Implement the feature.
 
 <HARD-GATE>
-DO NOT start writing code until the user explicitly approves the chosen approach.
-Approval of the design in Phase 4 is NOT approval to begin implementation.
+DO NOT start writing code until the user says to proceed.
+Phase 4 design approval is NOT implementation approval — you must ask separately:
+"Ready to implement the [chosen approach] design? Say 'go' to start coding."
 </HARD-GATE>
 
 **Actions**:
-1. Wait for explicit user approval of the chosen approach
-2. Read all relevant files identified in previous phases
+1. Read all relevant files identified in previous phases
+2. If this feature will require tests (most do), load `Skill(ucai:qa)` now — its testing patterns inform how you structure the implementation for testability. This is not redundant with Phase 7; early loading ensures the code is test-friendly.
 3. Implement following the chosen architecture, strictly following codebase conventions
 4. **Elegance checkpoint** (non-trivial changes only — >50 lines of new code OR >3 files modified):
    - Pause and ask: "Is there a more elegant way? Could this be simpler?"
    - Challenge your own implementation before proceeding
    - Skip this checkpoint for simple, obvious fixes — don't over-engineer
 5. Mark Phase 5 complete in `tasks/todo.md`
+
+**Transition to Phase 6**: Implementation is complete. All changed files are candidates for verification. Carry forward the acceptance criteria (Phase 1) and Codebase Map (Phase 2).
 
 ---
 
@@ -235,7 +241,9 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
    - `ucai:verifier`: acceptance criteria from Phase 1 (or FRD if loaded). Include the Codebase Map from Phase 2.
    - `ucai:reviewer`: focus on bugs and functional correctness. Include the Codebase Map from Phase 2.
    - `ucai:reviewer-opus`: focus on conventions, code quality, SOLID principle adherence, and DRY violations. Include the Codebase Map from Phase 2.
-3. **Wait for all 3 to complete**, then consolidate findings and identify issues worth fixing
+3. **Wait for all 3 to complete**, then consolidate findings into a severity-ranked list:
+   - For each issue: note which agent(s) flagged it, file:line, severity (must-fix / should-fix / optional)
+   - Where agents disagree (e.g., one flags an issue, another doesn't), note the disagreement — these get elevated to the user for decision
 4. **Present findings to user**: fix now, fix later, or proceed as-is
 5. Address issues based on user decision
 6. **If fixes were applied, re-run all 3 agents in parallel on the changed files** — fixes can introduce new issues. Repeat steps 2-5 until clean or user approves remaining items.
@@ -249,12 +257,12 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
 
 **CRITICAL**: This phase is mandatory. No agent review can replace a human testing the actual software. Automated tests ensure the feature stays working after future changes.
 
-**MANDATORY**: Load `Skill(ucai:qa)` at the start of this phase — it provides testing patterns, framework guidance, and coverage strategy.
+**MANDATORY**: Ensure `Skill(ucai:qa)` is loaded (it should already be from Phase 5). Apply its guidance for test type selection and patterns.
 
 ### Step A: Automated Tests
 
 **Actions**:
-1. Load `Skill(ucai:qa)` — apply its guidance for test type selection and patterns
+1. Confirm `Skill(ucai:qa)` is loaded — if not, load it now
 2. Determine the right test type(s) for this feature:
    - **Unit tests**: Pure logic, utilities, data transformations
    - **Integration tests**: API endpoints, database queries, service interactions
@@ -358,3 +366,20 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
    - Changed conventions or dependencies
    - If updates are needed, present the proposed changes to the user and **wait for approval** before editing CLAUDE.md
    - If nothing meaningful changed, skip silently — do not update for trivial additions
+
+---
+
+## Failure Recovery
+
+If `/build` fails or is interrupted at any phase:
+
+| Failed at | Recovery |
+|-----------|----------|
+| Phase 1-3 (Understand/Explore/Clarify) | Re-run `/build <feature>`. No code was written yet. |
+| Phase 4 (Design) | Re-run `/build <feature>`. It will re-load the FRD and skip to the milestone you were on. |
+| Phase 5 (Build) | Re-run `/build <feature>`, select same milestone. Read the partially-written code and continue. |
+| Phase 6 (Verify) | Re-run `/build <feature>`, select same milestone. Skip to verification: "Code is already written — skip to Phase 6." |
+| Phase 7 (Test) | Re-run `/build <feature>`. Tests may already exist. Run them and continue. |
+| Phase 8 (Done) | Mark requirements manually in `.claude/requirements.md` if the auto-update didn't complete. |
+
+`tasks/todo.md` persists between sessions. When you re-run `/build`, Phase 1 reads it and can see which phases were completed.
