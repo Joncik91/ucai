@@ -17,6 +17,7 @@ You are helping a developer implement a new feature. Follow a systematic approac
 - **SOLID and DRY by default**: When designing or reviewing, flag violations — classes doing too much, leaky abstractions, duplicated logic. These are architecture concerns, not style preferences.
 - **Security by default**: Validate inputs at system boundaries, never trust user-supplied data, avoid exposing sensitive data in logs or errors. Flag security implications during design and review — not as an afterthought.
 - **Track progress**: Use TodoWrite throughout.
+- **Sequential todo updates**: Mark each phase complete in `tasks/todo.md` immediately when it finishes. Never batch-mark multiple phases at once.
 
 ## Skill Loading — MANDATORY
 
@@ -83,6 +84,7 @@ Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/
    - What should it do?
    - Any constraints or requirements?
 5. Summarize understanding and confirm with user
+6. Mark Phase 1 complete in `tasks/todo.md`
 
 ---
 
@@ -129,6 +131,8 @@ Codebase Map:
 5. Present comprehensive summary of findings
 6. Compile Codebase Map from agent findings
 
+**On completion**: Mark Phase 2 complete in `tasks/todo.md`.
+
 ---
 
 ## Phase 3: Clarify
@@ -160,6 +164,8 @@ Codebase Map:
 
 If the user says "whatever you think is best", provide your recommendation and get explicit confirmation.
 
+**On completion**: Mark Phase 3 complete in `tasks/todo.md`.
+
 ---
 
 ## Phase 4: Design
@@ -189,6 +195,8 @@ If the user says "whatever you think is best", provide your recommendation and g
 3. Present to user: brief summary of each, trade-offs, your recommendation with reasoning
 4. **Ask user which approach they prefer**
 
+**On completion**: Mark Phase 4 complete in `tasks/todo.md`.
+
 ---
 
 ## Phase 5: Build
@@ -208,7 +216,7 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
    - Pause and ask: "Is there a more elegant way? Could this be simpler?"
    - Challenge your own implementation before proceeding
    - Skip this checkpoint for simple, obvious fixes — don't over-engineer
-5. Update todos and `tasks/todo.md` as you progress (mark phases complete)
+5. Mark Phase 5 complete in `tasks/todo.md`
 
 ---
 
@@ -231,6 +239,7 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
 4. **Present findings to user**: fix now, fix later, or proceed as-is
 5. Address issues based on user decision
 6. **If fixes were applied, re-run all 3 agents in parallel on the changed files** — fixes can introduce new issues. Repeat steps 2-5 until clean or user approves remaining items.
+7. Mark Phase 6 complete in `tasks/todo.md`
 
 ---
 
@@ -281,6 +290,8 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
 - **Proportional**: small utility = 3-4 checks, full feature = 8-10
 - **No skipping**: agents said it's fine is not enough — the user must confirm
 
+**On completion**: Mark Phase 7 complete in `tasks/todo.md`.
+
 ---
 
 ## Phase 8: Done
@@ -288,7 +299,7 @@ Approval of the design in Phase 4 is NOT approval to begin implementation.
 **Goal**: Document what was accomplished and keep project guidelines current.
 
 **Actions**:
-1. Mark all todos complete
+1. Mark Phase 8 complete in `tasks/todo.md`
 2. Summarize:
    - What was built
    - Key decisions made

@@ -15,6 +15,7 @@ You are helping a developer trace and fix a bug. This command uses parallel inve
 - **Minimal fix**: Address the root cause, not symptoms. Keep changes small
 - **Single approval gate**: Diagnosis and fix plan are approved together; execution is autonomous after approval
 - **Track progress**: Use TodoWrite throughout
+- **Sequential todo updates**: Mark each phase complete in `tasks/todo.md` immediately when it finishes. Never batch-mark multiple phases at once.
 
 ## Skill Loading — MANDATORY
 
@@ -63,6 +64,7 @@ Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/
    - Expected vs actual behavior?
    - Any recent changes that might have caused it?
 7. Summarize understanding and confirm with user
+8. Mark Phase 1 complete in `tasks/todo.md`
 
 ---
 
@@ -86,6 +88,7 @@ Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/
 2. **Wait for all agents to complete** before proceeding
 3. Read all key files identified by agents
 4. Present a consolidated investigation summary
+5. Mark Phase 2 complete in `tasks/todo.md`
 
 ---
 
@@ -112,6 +115,7 @@ Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/
    - Proposed fix and its rationale
 5. **THIS IS THE ONLY APPROVAL GATE** — ask: "Does this diagnosis match, and shall I proceed with the fix?"
 6. **DO NOT PROCEED WITHOUT USER CONFIRMATION**
+7. After user confirms, mark Phase 3 complete in `tasks/todo.md`
 
 ---
 
@@ -126,7 +130,7 @@ Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/
 2. Keep the fix minimal — address the root cause, not symptoms
    - If the bug had security implications, confirm the fix closes the vector and does not introduce a new one
 3. Follow codebase conventions from CLAUDE.md
-4. Update todos and `tasks/todo.md` as you progress (mark phases complete)
+4. Mark Phase 4 complete in `tasks/todo.md`
 
 ---
 
@@ -165,5 +169,5 @@ Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/
    - Increment the `count` field in the YAML frontmatter (if `count` is missing, add `count: 1` before incrementing)
    - If `tasks/lessons.md` doesn't exist, create it with frontmatter (`count: 1`) and the entry
    - If the root cause was straightforward and no corrections occurred, skip silently
-7. Mark todos and `tasks/todo.md` complete
+7. Mark Phase 5 complete in `tasks/todo.md`
 8. Summarize: what was broken, why, what was fixed, files changed
