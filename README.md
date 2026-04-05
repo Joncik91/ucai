@@ -1,6 +1,6 @@
 # Ucai — Use Claude Code As Is
 
-A Claude Code plugin that solves the same problems as GSD, BMAD, Ralph, and Agent OS — but using Claude Code's native architecture instead of fighting it.
+A Claude Code plugin that solves the same problems as GSD, BMAD, Ralph, and Agent OS — but using Claude Code's native architecture instead of fighting it. v2.0 adds autonomous execution: give a spec, get a PR.
 
 Ucai was built from the inside out.
 We read the source code. We studied how Anthropic builds their own plugins.
@@ -18,6 +18,8 @@ Ucai is built from the inside out — using Claude Code's native systems exactly
 | No structure | Persona prompts + ceremonies | Commands with phased workflows + parallel agents |
 | No guardrails | CLAUDE.md rules (hope-based) | PreToolUse hooks (deterministic) |
 | No iteration | External bash loops | Stop hooks (native, built-in) |
+| No automation | Manual build → test → fix → PR | Zero-gate `/ship` pipeline: spec → PR autonomously |
+| No formatting | Hope-based or CI-only | PostToolUse hook auto-formats every write |
 | No planning | Manual PRD/FRD docs or skipped entirely | `/plan` with discovery agents + structured file output |
 | No onboarding | Template CLAUDE.md dumps | Agent-powered codebase analysis |
 | No learning | Same mistakes every session | Self-improvement loop — `tasks/lessons.md` persists corrections across sessions |
@@ -35,7 +37,11 @@ Ucai is built from the inside out — using Claude Code's native systems exactly
 - Structured debugging with single approval gate and autonomous execution
 - Documentation generation with gotcha extraction from lessons
 - Release automation
-- Hook lifecycle coverage — session context injection, task/lessons awareness, config guardrails, subagent quality gates, and iterate-state preservation across compaction
+- Autonomous spec-to-PR pipeline (`/ship`) — zero approval gates, worktree isolation, auto-test, auto-fix, auto-PR
+- Infrastructure scaffolding (`/bootstrap`) — scaffold tests, linting, and CI for projects that lack them
+- PostToolUse auto-formatting — every file write runs through your project's formatter
+- Lessons consolidation — automatic cleanup when corrections exceed 100 entries
+- Hook lifecycle coverage — session context injection, task/lessons awareness, config guardrails, subagent quality gates, and iterate/ship state preservation across compaction
 - Built-in skills (backend, frontend, QA, DevOps, architecture, code review, and more)
 
 All using native Claude Code commands, agents, hooks, and skills.
@@ -75,6 +81,8 @@ All commands are namespaced under `ucai:`:
 /ucai:init
 /ucai:plan
 /ucai:build
+/ucai:ship
+/ucai:bootstrap
 /ucai:debug
 /ucai:docs
 /ucai:release
@@ -91,7 +99,9 @@ Run `/help` to see them listed.
 |---------|-------------|
 | `/ucai:init` | Analyze codebase with parallel agents → generate real CLAUDE.md |
 | `/ucai:plan` | No args: project spec + requirements backlog. With args: feature FRD with milestones |
-| `/ucai:build` | 8-phase build workflow — explore, clarify, design, implement, verify, test (automated + manual) |
+| `/ucai:build` | 8-phase guided build — explore, clarify, design, implement, verify, test (with approval gates) |
+| `/ucai:ship` | Autonomous spec-to-PR — zero gates, worktree isolation, auto-test, auto-fix, auto-PR |
+| `/ucai:bootstrap` | Scaffold test, lint, and CI infrastructure for projects that lack it |
 | `/ucai:iterate` | Controlled autonomous iteration via native Stop hooks |
 | `/ucai:review` | Parallel agent code review — bugs, security, conventions, lessons-aware |
 | `/ucai:debug` | Structured debugging — single approval gate, autonomous fix, regression tests |
@@ -146,6 +156,22 @@ Run `/help` to see them listed.
 /ucai:build fix the broken auth flow
 ```
 
+### Autonomous (hands-off)
+
+```
+# 1. Plan the project + feature
+/ucai:plan
+/ucai:plan real-time notifications
+
+# 2. Ship it — autonomous: implement → test → fix → PR
+/ucai:ship real-time notifications
+
+# 3. Review the PR in GitHub
+# Claude handled everything: implementation, tests, formatting, PR creation
+```
+
+If your project has no tests or linting, run `/ucai:bootstrap` first — `/ship` needs infrastructure to verify against.
+
 `/ucai:build` auto-loads the FRD created by `/ucai:plan <feature>` when names match. `/ucai:debug`, `/ucai:review`, and `/ucai:docs` are standalone — use them whenever needed.
 
 ## 🧠 Built-In Skills
@@ -186,6 +212,11 @@ ucai/
 ├── agents/
 ├── hooks/
 ├── scripts/
+│   ├── setup-iterate.js
+│   ├── setup-ship.js
+│   ├── detect-infra.js
+│   ├── run-tests.js
+│   └── consolidate-lessons.js
 ├── skills/
 └── tasks/                  ← created at runtime by commands
     ├── todo.md             ← persistent task tracking (overwritten per session)
@@ -205,6 +236,7 @@ Every component is a native Claude Code system. Nothing invented.
 7. **CLAUDE.md is for project facts** — Not framework config
 8. **Learn from corrections** — Capture patterns in lessons, apply them proactively
 9. **Verify before done** — Automated tests + manual confirmation, never just agent review
+10. **Two modes** — `/build` when you want control, `/ship` when you want speed
 
 ## ⭐ Support the Project
 

@@ -7,9 +7,14 @@
 const fs = require("fs");
 
 const STATE_FILE = ".claude/ucai-iterate.local.md";
+const SHIP_STATE_FILE = ".claude/ucai-ship.local.md";
 
-// Check if iterate loop is active
+// Check if iterate loop is active (priority: iterate > ship)
 if (!fs.existsSync(STATE_FILE)) {
+  // No iterate loop — check for ship pipeline
+  if (fs.existsSync(SHIP_STATE_FILE)) {
+    handleShipPipeline();
+  }
   process.exit(0);
 }
 
@@ -207,4 +212,89 @@ function run(hookInput) {
 
   process.stdout.write(result);
   process.exit(0);
+}
+
+function handleShipPipeline() {
+  try {
+    const stateContent = fs.readFileSync(SHIP_STATE_FILE, "utf8");
+
+    const fmMatch = stateContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
+    if (!fmMatch) {
+      console.error("Ucai ship: State file has no frontmatter");
+      try { fs.unlinkSync(SHIP_STATE_FILE); } catch {}
+      return;
+    }
+
+    const frontmatter = fmMatch[1];
+    const specText = fmMatch[2].trim();
+
+    function getShipField(name) {
+      const m = frontmatter.match(new RegExp("^" + name + ":\\s*(.*)$", "m"));
+      return m ? m[1].trim() : null;
+    }
+
+    const phase = parseInt(getShipField("phase"), 10);
+    const milestone = getShipField("milestone");
+
+    if (isNaN(phase)) {
+      console.error("Ucai ship: State file corrupted (phase: '" + getShipField("phase") + "')");
+      try { fs.unlinkSync(SHIP_STATE_FILE); } catch {}
+      return;
+    }
+
+    // Pipeline complete — allow exit
+    if (phase >= 8) {
+      try { fs.unlinkSync(SHIP_STATE_FILE); } catch {}
+      return;
+    }
+
+    // Phase-aware continuation prompts
+    const phaseNames = [
+      "Setup",
+      "Spec Resolution",
+      "Explore",
+      "Detect Infrastructure",
+      "Implement",
+      "Verify Loop",
+      "Light Review",
+      "Create PR",
+      "Cleanup & Report",
+    ];
+
+    const phaseName = phaseNames[phase] || "Phase " + phase;
+    const milestoneInfo = milestone && milestone !== "null" ? " | Milestone: " + milestone : "";
+
+    let continuationPrompt;
+    if (phase <= 1) {
+      continuationPrompt = "Continue the /ship pipeline. Resolve the spec and start exploring the codebase. Spec: " + specText;
+    } else if (phase === 2) {
+      continuationPrompt = "Continue /ship. Explore the codebase for the feature, then detect infrastructure. Spec: " + specText;
+    } else if (phase === 3) {
+      continuationPrompt = "Continue /ship. Detect project infrastructure (tests, lint, format), then start implementing. Spec: " + specText;
+    } else if (phase === 4) {
+      continuationPrompt = "Continue /ship. Implement the feature, write tests, commit per milestone. After implementation, run the verify loop. Spec: " + specText;
+    } else if (phase === 5) {
+      continuationPrompt = "Continue /ship. Run the verify loop — execute tests and lint, fix failures. Then do a light review. Spec: " + specText;
+    } else if (phase === 6) {
+      continuationPrompt = "Continue /ship. Run a light code review on the changes, then create the PR. Spec: " + specText;
+    } else if (phase === 7) {
+      continuationPrompt = "Continue /ship. Create the PR, then clean up and report results. Spec: " + specText;
+    } else {
+      continuationPrompt = "Continue the /ship pipeline from phase " + phase + ". Spec: " + specText;
+    }
+
+    const systemMsg = "Ucai ship pipeline — Phase " + phase + ": " + phaseName + milestoneInfo + " | Complete all remaining phases.";
+
+    const result = JSON.stringify({
+      decision: "block",
+      reason: continuationPrompt,
+      systemMessage: systemMsg,
+    });
+
+    process.stdout.write(result);
+    process.exit(0);
+  } catch (err) {
+    console.error("Ucai ship: " + err.message);
+    try { fs.unlinkSync(SHIP_STATE_FILE); } catch {}
+  }
 }

@@ -2,6 +2,39 @@
 
 All notable changes to Ucai are documented here.
 
+## [v2.0.0] - 2026-04-05
+
+### Added
+- **`/ship` command**: Zero-gate autonomous pipeline — spec to PR with no human
+  approval gates. 8 phases: Setup → Spec Resolution → Explore → Detect Infrastructure
+  → Implement → Verify Loop → Light Review → Create PR → Cleanup. Supports worktree
+  isolation (default), CI watching, configurable fix retry limits.
+- **`/bootstrap` command**: Scaffold test, lint, and CI infrastructure for projects
+  that lack it. Detects tech stack, recommends standard tools, scaffolds with one
+  approval gate, verifies everything passes.
+- **PostToolUse auto-format hook**: Runs after every Write/Edit, detects project
+  formatter (Prettier, Black, Ruff, gofmt, rustfmt), caches detection result,
+  formats the changed file. Fails silently — never blocks.
+- **`scripts/detect-infra.js`**: Shared utility that detects test/lint/format/CI
+  commands from project files. Outputs JSON. Used by `/ship` and `/bootstrap`.
+- **`scripts/run-tests.js`**: Deterministic test runner. Uses detect-infra for
+  command detection, executes tests, outputs JSON with pass/fail + summary.
+- **`scripts/setup-ship.js`**: Ship state file creator. Parses arguments, creates
+  `.claude/ucai-ship.local.md`. Mirrors setup-iterate.js pattern.
+- **`scripts/consolidate-lessons.js`**: Consolidates `tasks/lessons.md` when >100
+  entries. Groups by rule, merges duplicates, keeps last 20 recent.
+- **Ship state in Stop hook**: Phase-aware continuation prompts keep the pipeline
+  running. Priority: iterate > ship > normal exit.
+- **Ship state awareness**: SessionStart, UserPromptSubmit, PreCompact, and
+  SessionEnd handlers all recognize and handle ship pipeline state.
+- **Formatter cache cleanup**: SessionEnd cleans up
+  `.claude/ucai-formatter-cache.local.json` alongside iterate/ship state.
+
+### Changed
+- SessionStart message updated to include `/ship` and `/bootstrap` commands
+- Stop hook now checks both iterate and ship state files (iterate takes priority)
+- CLAUDE.md updated to document v2.0 architecture (11 commands, 8 hooks)
+
 ## [v1.2.1] - 2026-04-05
 
 ### Added

@@ -7,13 +7,15 @@
 const fs = require("fs")
 
 const STATE_FILE = ".claude/ucai-iterate.local.md"
+const SHIP_STATE_FILE = ".claude/ucai-ship.local.md"
 const TODO_FILE = "tasks/todo.md"
 
-// Early exit before stdin if no iterate loop AND no tasks
+// Early exit before stdin if no iterate loop AND no ship AND no tasks
 const hasIterate = fs.existsSync(STATE_FILE)
+const hasShip = fs.existsSync(SHIP_STATE_FILE)
 const hasTodo = fs.existsSync(TODO_FILE)
 
-if (!hasIterate && !hasTodo) {
+if (!hasIterate && !hasShip && !hasTodo) {
   process.exit(0)
 }
 
@@ -49,6 +51,32 @@ process.stdin.on("end", () => {
         }
         parts.push(msg)
       }
+    }
+
+    // Ship pipeline context
+    if (hasShip) {
+      try {
+        const shipContent = fs.readFileSync(SHIP_STATE_FILE, "utf8")
+        const shipFm = shipContent.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+        if (shipFm) {
+          const frontmatter = shipFm[1]
+          function getShipField(name) {
+            const m = frontmatter.match(new RegExp("^" + name + ":\\s*(.*)$", "m"))
+            return m ? m[1].trim() : null
+          }
+
+          const phase = getShipField("phase")
+          const milestone = getShipField("milestone")
+          const phaseNames = [
+            "Setup", "Spec Resolution", "Explore", "Detect Infrastructure",
+            "Implement", "Verify Loop", "Light Review", "Create PR", "Cleanup"
+          ]
+          const phaseName = phaseNames[parseInt(phase, 10)] || "Phase " + phase
+          let msg = "Ucai ship pipeline active — Phase " + phase + ": " + phaseName
+          if (milestone && milestone !== "null") msg += " | Milestone: " + milestone
+          parts.push(msg)
+        }
+      } catch {}
     }
 
     // Active task from tasks/todo.md

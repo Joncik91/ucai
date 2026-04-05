@@ -10,15 +10,18 @@ Every command reads and writes files in `.claude/` and `tasks/`. This is how sta
 
 ```
 .claude/
-├── project.md          ← written by /plan (no args)
-├── requirements.md     ← written by /plan (no args), updated by /build
+├── project.md                          ← written by /plan (no args)
+├── requirements.md                     ← written by /plan (no args), updated by /build, /ship
+├── ucai-ship.local.md                  ← ship pipeline state (gitignored)
+├── ucai-iterate.local.md               ← iterate loop state (gitignored)
+├── ucai-formatter-cache.local.json     ← formatter detection cache (gitignored)
 └── frds/
-    ├── auth.md         ← written by /plan <feature>
+    ├── auth.md                         ← written by /plan <feature>
     └── payments.md
 
 tasks/
 ├── todo.md             ← written by /build, /debug (overwritten per session)
-└── lessons.md          ← appended by /build, /debug (persistent across sessions)
+└── lessons.md          ← appended by /build, /debug, /ship (persistent across sessions)
 ```
 
 Commands auto-load whatever exists. Start a new session and `/build` already knows your project vision, backlog status, feature architecture, and lessons from past sessions.
@@ -176,7 +179,77 @@ Stop at any time:
 
 ---
 
-### 6. Review code
+### 6. Ship a feature autonomously
+
+```
+/ucai:ship Add user authentication with JWT
+/ucai:ship auth                                    # references .claude/frds/auth.md
+/ucai:ship .claude/frds/payments.md --ci-watch     # watches CI after PR
+```
+
+`/ship` is the autonomous counterpart to `/build`. Same quality — zero approval gates. It runs in a worktree by default so you're never blocked.
+
+**When to use `/ship` vs `/build`:**
+
+| | `/build` | `/ship` |
+|---|---------|---------|
+| **Approval gates** | 3 (clarify, design, pre-implement) | 0 |
+| **Human reviews** | Design choices during build | The PR after it's done |
+| **Best for** | Unclear requirements, first-time architecture | Clear specs, proven patterns |
+| **Isolation** | Works in your directory | Worktree by default |
+
+**The 8 phases:**
+
+1. **Setup** — Parse spec, enter worktree, load project context + lessons
+2. **Spec Resolution** — Auto-select next FRD milestone (or generate internal plan for inline specs)
+3. **Explore** — 2 fast explorer agents map the codebase
+4. **Detect Infrastructure** — Find test/lint/format commands. If missing, scaffold minimal infrastructure inline.
+5. **Implement** — Build milestone by milestone, commit per milestone
+6. **Verify Loop** — Run tests → if fail: fix + retry (up to N attempts). Run formatter. Run linter → if fail: fix + retry.
+7. **Light Review** — 1 reviewer agent catches critical bugs. Auto-fixes confidence >= 90 issues.
+8. **Create PR** — Push, create PR via `gh`, optionally watch CI and fix failures.
+
+**Flags:**
+
+| Flag | Default | Effect |
+|------|---------|--------|
+| `--no-worktree` | off | Work in current directory instead of isolated worktree |
+| `--no-pr` | off | Skip PR creation |
+| `--max-fix-attempts N` | 5 | Max test/lint fix retries per milestone |
+| `--ci-watch` | off | Poll CI after PR creation, auto-fix failures |
+
+**How it stays running:** The Stop hook reads `.claude/ucai-ship.local.md` and blocks session exit until all phases complete. If context compacts, the PreCompact hook preserves phase, milestone, and fix attempt state.
+
+**Missing infrastructure?** If `/ship` detects no test framework, it scaffolds a minimal one inline (same logic as `/bootstrap`). You don't need to run `/bootstrap` separately — but you can if you want to review what gets scaffolded.
+
+---
+
+### 7. Bootstrap infrastructure
+
+```
+/ucai:bootstrap
+/ucai:bootstrap test
+/ucai:bootstrap lint
+```
+
+For projects without test, lint, or CI infrastructure. Detects your tech stack, recommends standard tools, and scaffolds everything with a single approval gate.
+
+**What it scaffolds:**
+
+| Stack | Test | Format | Lint | CI |
+|-------|------|--------|------|----|
+| JS/TS | Vitest | Prettier | ESLint | GitHub Actions |
+| Python | pytest | Black/Ruff | Ruff | GitHub Actions |
+| Go | `go test` | `gofmt` | `golangci-lint` | GitHub Actions |
+| Rust | `cargo test` | `rustfmt` | `clippy` | GitHub Actions |
+
+Creates one real example test (testing an actual function, not a dummy), adds scripts to package.json (or equivalent), and verifies everything passes before finishing.
+
+**Connection to `/ship`:** `/ship` Phase 3 runs the same detection. If it finds nothing, it bootstraps inline. `/bootstrap` is the standalone version for when you want to review and approve the setup explicitly.
+
+---
+
+### 8. Review code
 
 ```
 /ucai:review
@@ -187,7 +260,7 @@ Parallel agents check for bugs, security issues, convention violations, and code
 
 ---
 
-### 7. Debug
+### 9. Debug
 
 ```
 /ucai:debug TypeError: Cannot read property 'map' of undefined
@@ -198,7 +271,7 @@ Parallel agents investigate in different directions — recent changes, executio
 
 ---
 
-### 8. Generate docs
+### 10. Generate docs
 
 ```
 /ucai:docs
@@ -212,7 +285,7 @@ Output goes to the project root or `docs/`, not `.claude/`.
 
 ---
 
-### 9. Ship a release
+### 11. Ship a release
 
 ```
 /ucai:release patch
@@ -235,14 +308,17 @@ Ucai learns from your corrections across sessions. This is not a gimmick — it'
 3. On session start, hooks announce lessons count and task progress
 4. Commands load lessons in Phase 1 and apply relevant patterns proactively
 5. When lessons exceed 100 entries, SessionStart warns that consolidation is needed
+6. `/ship` Phase 8 auto-consolidates when entries exceed 100 (groups by rule, merges duplicates, keeps last 20 recent)
+7. Manual consolidation: `node scripts/consolidate-lessons.js` outputs consolidated content to stdout
 
 **What hooks surface:**
 
 | Hook | What it injects |
 |------|----------------|
-| **SessionStart** | "Tasks: X/Y done" + "Lessons: N entries" (+ warning if >100) |
-| **UserPromptSubmit** | "Active task: ..." from first unchecked item in `tasks/todo.md` |
-| **PreCompact** | Task progress + latest lesson title (survives context compaction) |
+| **SessionStart** | "Tasks: X/Y done" + "Lessons: N entries" (+ warning if >100) + ship/iterate status |
+| **PostToolUse** | Auto-formats files after Write/Edit (detects Prettier, Black, gofmt, rustfmt, etc.) |
+| **UserPromptSubmit** | "Active task: ..." + iterate/ship context from state files |
+| **PreCompact** | Task progress + latest lesson + iterate/ship state (survives context compaction) |
 
 ---
 
@@ -283,6 +359,15 @@ Ucai learns from your corrections across sessions. This is not a gimmick — it'
 # Repeat until all milestones done
 ```
 
+### Autonomous shipping
+
+```
+/ucai:plan Real-time notifications         # create FRD with milestones
+/ucai:ship Real-time notifications          # autonomous: implement → test → fix → PR
+# Review the PR in GitHub — Claude handled everything
+# /ship auto-selects the next incomplete milestone each run
+```
+
 ### Bug triage
 
 ```
@@ -303,9 +388,11 @@ Ucai learns from your corrections across sessions. This is not a gimmick — it'
 | `requirements.md` | `/plan` | `/build`, `/release` | Feature backlog + build order |
 | `frds/<slug>.md` | `/plan <feature>` | `/build` | Per-feature requirements + architecture + milestones |
 | `CLAUDE.md` | `/init`, `/build` | All commands | Codebase conventions and project facts |
-| `*.local.md` | Internal | Internal | Session state (gitignored) |
+| `ucai-iterate.local.md` | `/iterate` | Stop hook, SessionStart, PreCompact, UserPromptSubmit | Iterate loop state (gitignored) |
+| `ucai-ship.local.md` | `/ship` | Stop hook, SessionStart, PreCompact, UserPromptSubmit | Ship pipeline state — phase, milestone, fix attempts (gitignored) |
+| `ucai-formatter-cache.local.json` | PostToolUse hook | PostToolUse hook | Formatter detection cache (cleaned by SessionEnd) |
 | `tasks/todo.md` | `/build`, `/debug` | Hooks (SessionStart, PreCompact, UserPromptSubmit) | Persistent task tracking per session |
-| `tasks/lessons.md` | `/build`, `/debug` | Hooks + `/build`, `/debug`, `/review`, `/docs` | Self-improvement loop — corrections and patterns |
+| `tasks/lessons.md` | `/build`, `/debug`, `/ship` | Hooks + `/build`, `/debug`, `/review`, `/docs`, `/ship` | Self-improvement loop — corrections and patterns |
 
 ---
 
@@ -322,3 +409,7 @@ Ucai learns from your corrections across sessions. This is not a gimmick — it'
 **Lessons compound.** The more you correct Claude, the better it gets — corrections are captured in `tasks/lessons.md` and applied in future sessions. Don't hold back on corrections; they're the highest-ROI investment.
 
 **Skills load automatically.** Ucai ships with 8 skills (backend, frontend, architect, QA, DevOps, code-reviewer, receiving-code-review, ucai-patterns). Commands load them at the start of each relevant session. You don't need to manage this manually.
+
+**`/ship` vs `/build`.** Use `/build` when you want to review design choices, when requirements are unclear, or when you're building something for the first time. Use `/ship` when the spec is clear, patterns are established, and you want autonomous execution.
+
+**Bootstrap first.** If your project has no tests, run `/ucai:bootstrap` before `/ucai:ship`. `/ship` can scaffold inline, but `/bootstrap` gives you a chance to review what gets created.

@@ -8,6 +8,7 @@ const path = require("path")
 const { execSync } = require("child_process")
 
 const STATE_FILE = ".claude/ucai-iterate.local.md"
+const SHIP_STATE_FILE = ".claude/ucai-ship.local.md"
 const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.resolve(__dirname, "../..")
 
 function getGitBranch() {
@@ -40,6 +41,40 @@ function getIterateStatus() {
     const maxDisplay = maxIterations && maxIterations !== "0" ? maxIterations : "unlimited"
 
     return "iteration " + iteration + "/" + maxDisplay
+  } catch {
+    return null
+  }
+}
+
+function getShipStatus() {
+  if (!fs.existsSync(SHIP_STATE_FILE)) return null
+
+  try {
+    const content = fs.readFileSync(SHIP_STATE_FILE, "utf8")
+    const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
+    if (!fmMatch) return null
+
+    const frontmatter = fmMatch[1]
+    function getField(name) {
+      const m = frontmatter.match(new RegExp("^" + name + ":\\s*(.*)$", "m"))
+      return m ? m[1].trim() : null
+    }
+
+    const phase = getField("phase")
+    const milestone = getField("milestone")
+    const fixAttempts = getField("fix_attempts")
+
+    const phaseNames = [
+      "Setup", "Spec Resolution", "Explore", "Detect Infrastructure",
+      "Implement", "Verify Loop", "Light Review", "Create PR", "Cleanup"
+    ]
+    const phaseName = phaseNames[parseInt(phase, 10)] || "Phase " + phase
+
+    let status = "phase " + phase + " (" + phaseName + ")"
+    if (milestone && milestone !== "null") status += " | milestone: " + milestone
+    if (fixAttempts && fixAttempts !== "0") status += " | fix attempts: " + fixAttempts
+
+    return status
   } catch {
     return null
   }
@@ -250,7 +285,7 @@ function getAvailableSkills() {
 
 function main() {
   const parts = [
-    "Ucai plugin is active. Use /init to analyze this project, /plan for specs, /build for features, /debug for bugs, /docs for documentation, /release for versioning, /iterate for autonomous iteration, or /review for code review."
+    "Ucai plugin is active. Use /init to analyze this project, /plan for specs, /build for features, /ship for autonomous spec-to-PR, /debug for bugs, /docs for documentation, /release for versioning, /iterate for autonomous iteration, /review for code review, or /bootstrap to scaffold test/lint/CI infrastructure."
   ]
 
   const branch = getGitBranch()
@@ -261,6 +296,11 @@ function main() {
   const iterateStatus = getIterateStatus()
   if (iterateStatus) {
     parts.push("Iterate loop active: " + iterateStatus)
+  }
+
+  const shipStatus = getShipStatus()
+  if (shipStatus) {
+    parts.push("Ship pipeline active: " + shipStatus)
   }
 
   if (!hasClaudeMd()) {

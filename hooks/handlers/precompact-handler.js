@@ -7,6 +7,7 @@
 const fs = require("fs")
 
 const STATE_FILE = ".claude/ucai-iterate.local.md"
+const SHIP_STATE_FILE = ".claude/ucai-ship.local.md"
 const TODO_FILE = "tasks/todo.md"
 const LESSONS_FILE = "tasks/lessons.md"
 
@@ -16,10 +17,11 @@ process.stdin.on("data", (chunk) => (input += chunk))
 process.stdin.on("end", () => {
   try {
     const hasIterate = fs.existsSync(STATE_FILE)
+    const hasShip = fs.existsSync(SHIP_STATE_FILE)
     const hasTodo = fs.existsSync(TODO_FILE)
     const hasLessons = fs.existsSync(LESSONS_FILE)
 
-    if (!hasIterate && !hasTodo && !hasLessons) {
+    if (!hasIterate && !hasShip && !hasTodo && !hasLessons) {
       process.exit(0)
     }
 
@@ -61,6 +63,51 @@ process.stdin.on("end", () => {
         lines.push("")
         lines.push("Continue the iterate loop after compaction. The task and iteration state are preserved on disk.")
       }
+    }
+
+    // Ship pipeline state
+    if (hasShip) {
+      try {
+        const shipContent = fs.readFileSync(SHIP_STATE_FILE, "utf8")
+        const shipFm = shipContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
+        if (shipFm) {
+          const frontmatter = shipFm[1]
+          const specText = shipFm[2] ? shipFm[2].trim() : ""
+
+          function getShipField(name) {
+            const m = frontmatter.match(new RegExp("^" + name + ":\\s*(.*)$", "m"))
+            return m ? m[1].trim() : null
+          }
+
+          const phase = getShipField("phase")
+          const milestone = getShipField("milestone")
+          const fixAttempts = getShipField("fix_attempts")
+          const maxFixAttempts = getShipField("max_fix_attempts")
+          const testCmd = getShipField("test_cmd")
+          const lintCmd = getShipField("lint_cmd")
+
+          const phaseNames = [
+            "Setup", "Spec Resolution", "Explore", "Detect Infrastructure",
+            "Implement", "Verify Loop", "Light Review", "Create PR", "Cleanup"
+          ]
+          const phaseName = phaseNames[parseInt(phase, 10)] || "Phase " + phase
+
+          lines.push("[Ucai ship pipeline — pre-compaction recovery context]")
+          lines.push("Phase: " + phase + " (" + phaseName + ")")
+          if (milestone && milestone !== "null") lines.push("Milestone: " + milestone)
+          if (fixAttempts && fixAttempts !== "0") lines.push("Fix attempts: " + fixAttempts + "/" + maxFixAttempts)
+          if (testCmd && testCmd !== "null") lines.push("Test command: " + testCmd)
+          if (lintCmd && lintCmd !== "null") lines.push("Lint command: " + lintCmd)
+          lines.push("State file: .claude/ucai-ship.local.md")
+          if (specText) {
+            lines.push("")
+            lines.push("Spec:")
+            lines.push(specText)
+          }
+          lines.push("")
+          lines.push("Continue the /ship pipeline from Phase " + phase + " after compaction.")
+        }
+      } catch {}
     }
 
     // Task progress

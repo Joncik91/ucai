@@ -2,9 +2,11 @@
 
 ## Overview
 A Claude Code plugin that leverages native architecture — commands, agents, hooks,
-and skills — exactly as Anthropic designed them. v1.2 adds the Cherny methodology upgrade — persistent task tracking,
-self-improvement loop, TDD integration, elegance checkpoints, and
-autonomous debug execution.
+and skills — exactly as Anthropic designed them. v2.0 adds the autonomous execution
+engine — `/ship` (zero-gate spec-to-PR pipeline), `/bootstrap` (infrastructure
+scaffolding), PostToolUse auto-formatting, deterministic test execution, and
+lessons consolidation. Built on the Cherny methodology: persistent task tracking,
+self-improvement loop, TDD integration, and elegance checkpoints.
 
 ## Tech Stack
 - **Runtime**: Node.js 18+ (CommonJS, zero external dependencies)
@@ -37,11 +39,11 @@ node -e "const o=JSON.parse(process.argv[1]); if(!o.hookSpecificOutput) process.
 - **agents/** — Execution: read-only analysis workers, spawned in parallel via Task tool.
 - **hooks/handlers/** — Lifecycle: context injection, state management, config protection.
 - **skills/** — Knowledge: progressive disclosure domain expertise, loaded on-demand.
-- **scripts/** — Utilities: `setup-iterate.js` for iterate loop initialization.
+- **scripts/** — Utilities: `setup-iterate.js`, `setup-ship.js`, `detect-infra.js`, `run-tests.js`, `consolidate-lessons.js`.
 
-### Commands (9 slash commands)
-`/init`, `/plan`, `/build` (8-phase, most complex), `/debug`, `/review`, `/docs`,
-`/release`, `/iterate`, `/cancel-iterate`
+### Commands (11 slash commands)
+`/init`, `/plan`, `/build` (8-phase, guided), `/ship` (8-phase, autonomous), `/bootstrap`,
+`/debug`, `/review`, `/docs`, `/release`, `/iterate`, `/cancel-iterate`
 
 ### Agents (8, all read-only — no Write/Edit)
 | Agent | Model | Max Turns | Purpose |
@@ -55,29 +57,39 @@ node -e "const o=JSON.parse(process.argv[1]); if(!o.hookSpecificOutput) process.
 | `reviewer-opus` | opus | — | Deep review for subtle/high-impact issues |
 | `verifier` | sonnet | — | Acceptance criteria validation |
 
-### Hooks (7 lifecycle handlers, all in `hooks/handlers/`)
+### Hooks (8 lifecycle handlers, all in `hooks/handlers/`)
 | Hook | Handler | Purpose |
 |------|---------|---------|
-| SessionStart | `sessionstart-handler.js` | Git branch, iterate status, task progress, lessons count, spec files, skills |
+| SessionStart | `sessionstart-handler.js` | Git branch, iterate/ship status, task progress, lessons, specs, skills |
+| PostToolUse (Write\|Edit) | `posttooluse-format-handler.js` | Auto-format files after write/edit operations |
 | PreToolUse (Write\|Edit) | `pretooluse-guard.js` | Guard config files (ask before modifying) |
-| UserPromptSubmit | `userpromptsubmit-handler.js` | Inject iterate context + active task from todo.md |
-| Stop | `stop-handler.js` | Block exit to continue iterate loop |
+| UserPromptSubmit | `userpromptsubmit-handler.js` | Inject iterate/ship context + active task from todo.md |
+| Stop | `stop-handler.js` | Block exit to continue iterate loop or ship pipeline |
 | SubagentStop | `subagent-stop-handler.js` | Block on empty output; inject 1-line preview |
-| PreCompact | `precompact-handler.js` | Surface iterate state, task progress, latest lesson before compaction |
-| SessionEnd | `session-end-handler.js` | Delete stale iterate state on termination |
+| PreCompact | `precompact-handler.js` | Surface iterate/ship state, task progress, latest lesson before compaction |
+| SessionEnd | `session-end-handler.js` | Delete stale iterate/ship state + formatter cache on termination |
 
 ### Iterate Loop
 State file: `.claude/ucai-iterate.local.md` (gitignored). YAML frontmatter holds
 `iteration`, `max_iterations`, `completion_promise`; body holds the task.
 Stop hook reads state → feeds task back → checks limits → continues or exits.
 
+### Ship Pipeline
+State file: `.claude/ucai-ship.local.md` (gitignored). YAML frontmatter holds
+`phase`, `milestone`, `fix_attempts`, `max_fix_attempts`, `test_cmd`, `lint_cmd`,
+`format_cmd`, `spec_source`, `worktree`, `no_pr`, `ci_watch`; body holds the spec.
+Stop hook reads state → feeds phase-aware continuation → resumes pipeline.
+Priority: iterate > ship > normal exit.
+
 ### Context Chain
 - `/plan` → `.claude/project.md` + `.claude/requirements.md` (with build order)
 - `/plan <feature>` → `.claude/frds/<slug>.md` (never overwritten)
 - `/build`, `/debug` → `tasks/todo.md` (overwritten per session), `tasks/lessons.md` (append-only)
+- `/ship` → `.claude/ucai-ship.local.md` (pipeline state), uses same context chain as `/build`
 - All commands auto-load whatever spec files exist in `.claude/`
-- `/build`, `/debug`, `/review`, `/docs` load `tasks/lessons.md` for known patterns
+- `/build`, `/debug`, `/review`, `/docs`, `/ship` load `tasks/lessons.md` for known patterns
 - SessionStart announces `[plugin]` and `[project]` skills; Claude decides which to load
+- Formatter cache: `.claude/ucai-formatter-cache.local.json` (session-scoped, cleaned on SessionEnd)
 
 ### Config Protection
 PreToolUse guards: `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`,
@@ -114,12 +126,17 @@ All files `kebab-case`. Exception: `SKILL.md` is uppercase.
 ## Key Files
 | File | Purpose |
 |------|---------|
-| `.claude-plugin/plugin.json` | Plugin manifest (name, version 1.2.1, keywords) |
-| `hooks/hooks.json` | Hook registration (7 events, timeouts, matchers) |
+| `.claude-plugin/plugin.json` | Plugin manifest (name, version 2.0.0, keywords) |
+| `hooks/hooks.json` | Hook registration (8 events, timeouts, matchers) |
 | `hooks/handlers/sessionstart-handler.js` | Most complex handler (7.8 KB): git, iterate, skills |
 | `hooks/handlers/stop-handler.js` | Iteration control (5.4 KB, uses semicolons) |
 | `hooks/handlers/pretooluse-guard.js` | Config file protection (permissionDecision: ask) |
 | `scripts/setup-iterate.js` | Iterate setup: parses `--max-iterations`, `--completion-promise` |
+| `scripts/setup-ship.js` | Ship setup: parses `--max-fix-attempts`, `--no-worktree`, `--ci-watch` |
+| `scripts/detect-infra.js` | Detect test/lint/format/CI commands from project files |
+| `scripts/run-tests.js` | Deterministic test runner, outputs JSON with pass/fail + summary |
+| `scripts/consolidate-lessons.js` | Consolidate lessons.md when >100 entries |
+| `hooks/handlers/posttooluse-format-handler.js` | Auto-format after Write/Edit (caches detection) |
 | `commands/build.md` | Most complex command: 8-phase feature workflow |
 | `.github/workflows/ci.yml` | CI: file exist + JSON syntax + JS syntax + smoke test |
 | `skills/ucai-patterns/SKILL.md` | Best practices for Claude Code plugin development |
