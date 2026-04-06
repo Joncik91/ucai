@@ -5,11 +5,13 @@
 // in systemMessage before context compaction runs
 
 const fs = require("fs")
+const path = require("path")
 
 const STATE_FILE = ".claude/ucai-iterate.local.md"
 const SHIP_STATE_FILE = ".claude/ucai-ship.local.md"
 const TODO_FILE = "tasks/todo.md"
 const LESSONS_FILE = "tasks/lessons.md"
+const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.resolve(__dirname, "../..")
 
 let input = ""
 process.stdin.setEncoding("utf8")
@@ -155,6 +157,19 @@ process.stdin.on("end", () => {
         }
       } catch {}
     }
+
+    // Engine state summary
+    try {
+      const factory = require(path.join(PLUGIN_ROOT, "scripts", "engine-factory.js"))
+      for (const pipeline of ["build", "ship"]) {
+        const status = factory.readEngineStatus(pipeline)
+        if (!status) continue
+        lines.push("[Ucai engine (" + pipeline + ") — pre-compaction recovery context]")
+        lines.push("State: " + status.projectState + " | Tasks: " + status.completeTasks + "/" + status.totalTasks + " | Deps: " + status.completeDeps + "/" + status.totalDeps)
+        if (status.lastBlockedGate) lines.push("Last blocked gate: " + status.lastBlockedGate)
+        lines.push("Engine state file: .claude/ucai-" + pipeline + "-engine.local.json")
+      }
+    } catch {}
 
     if (lines.length > 0) {
       process.stdout.write(JSON.stringify({ systemMessage: lines.join("\n") }))

@@ -2,6 +2,37 @@
 
 All notable changes to Ucai are documented here.
 
+## [v2.2.0] - 2026-04-06
+
+### Added
+- **Enforcement engine (never-forget integration)**: Programmatic phase enforcement for `/build` and `/ship` pipelines using a `ContingencyEngine` with dependencies, logic gates, shadow tasks, and audit trail
+- **`scripts/engine-factory.js`**: Create, load, save, delete engines; `readEngineStatus()` for hooks
+- **`scripts/engine-gates.js`**: CLI to evaluate logic gates for a target task — outputs `{allowed, blockers, warnings}`
+- **`scripts/update-engine.js`**: CLI to update dependency/task state with proof of work
+- **`scripts/setup-build-engine.js`**: Creates build engine with 16 dependencies, 8 tasks, 10 logic gates, 128 shadow reactions
+- **`scripts/setup-ship-engine.js`**: Creates ship engine with 13 dependencies, 9 tasks, 7 logic gates
+- **`scripts/lib/never-forget/`**: Vendored never-forget dist (ESM, zero runtime deps, loaded via dynamic import)
+- **Gate checks in `/build`**: Every phase boundary runs `engine-gates.js` — blocked gates halt progression and report missing prerequisites
+- **Gate checks in `/ship`**: Same pattern but autonomous — blocked gates trigger auto-remedy or degrade to warnings
+- **Engine state updates**: Every phase completion updates dependency states with proof and marks tasks complete
+- **SessionStart engine status**: Reports engine task/dep completion and last blocked gate
+- **UserPromptSubmit engine context**: Injects engine status with blocking dep info into every prompt
+- **Stop hook engine context**: Enhanced ship continuation prompts with precise dependency/gate status
+- **PreCompact engine recovery**: Includes engine state summary in systemMessage for context recovery
+- **SessionEnd engine cleanup**: Deletes `.claude/ucai-{build|ship}-engine.local.json` alongside existing cleanup
+
+### Changed
+- `/build` command: added engine initialization in Phase 1, gate checks before each phase, state updates after each phase
+- `/ship` command: same engine integration pattern with autonomous gate handling
+- CLAUDE.md: added Engine Enforcement section, updated layers, key files, context chain
+- README: updated positioning to acknowledge enforcement engine extension, added Enforcement Engine section, updated architecture diagram and principles
+
+### never-forget library changes (separate repo)
+- Added `ContingencyEngine.fromSnapshot()` static factory for deserialization
+- Added `ContingencyEngine.toSnapshot()` instance method for serialization
+- Added `EngineSnapshot` type to public API
+- 3 new tests (round-trip, JSON serialization, isolation) — 70 total tests passing
+
 ## [v2.1.0] - 2026-04-05
 
 ### Added

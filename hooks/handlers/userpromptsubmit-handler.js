@@ -5,17 +5,20 @@
 // If tasks/todo.md has unchecked items, injects active task
 
 const fs = require("fs")
+const path = require("path")
 
 const STATE_FILE = ".claude/ucai-iterate.local.md"
 const SHIP_STATE_FILE = ".claude/ucai-ship.local.md"
 const TODO_FILE = "tasks/todo.md"
+const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.resolve(__dirname, "../..")
 
-// Early exit before stdin if no iterate loop AND no ship AND no tasks
+// Early exit before stdin if no iterate loop AND no ship AND no tasks AND no engine
 const hasIterate = fs.existsSync(STATE_FILE)
 const hasShip = fs.existsSync(SHIP_STATE_FILE)
 const hasTodo = fs.existsSync(TODO_FILE)
+const hasEngine = fs.existsSync(".claude/ucai-build-engine.local.json") || fs.existsSync(".claude/ucai-ship-engine.local.json")
 
-if (!hasIterate && !hasShip && !hasTodo) {
+if (!hasIterate && !hasShip && !hasTodo && !hasEngine) {
   process.exit(0)
 }
 
@@ -86,6 +89,20 @@ process.stdin.on("end", () => {
       if (uncheckedMatch) {
         parts.push("Active task: " + uncheckedMatch[1].trim())
       }
+    }
+
+    // Engine status
+    if (hasEngine) {
+      try {
+        const factory = require(path.join(PLUGIN_ROOT, "scripts", "engine-factory.js"))
+        for (const pipeline of ["build", "ship"]) {
+          const status = factory.readEngineStatus(pipeline)
+          if (!status) continue
+          let msg = "Engine (" + pipeline + "): " + status.completeTasks + "/" + status.totalTasks + " tasks, " + status.completeDeps + "/" + status.totalDeps + " deps"
+          if (status.lastBlockedGate) msg += " | blocked: " + status.lastBlockedGate.slice(0, 50)
+          parts.push(msg)
+        }
+      } catch {}
     }
 
     if (parts.length > 0) {

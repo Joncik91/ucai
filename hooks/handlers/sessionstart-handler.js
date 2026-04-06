@@ -283,6 +283,33 @@ function getAvailableSkills() {
   return all.length > 0 ? all.join(", ") : null
 }
 
+function getEngineStatus() {
+  try {
+    const factoryPath = path.join(PLUGIN_ROOT, "scripts", "engine-factory.js")
+    if (!fs.existsSync(factoryPath)) return null
+
+    const factory = require(factoryPath)
+    const statuses = []
+
+    for (const pipeline of ["build", "ship"]) {
+      const status = factory.readEngineStatus(pipeline)
+      if (!status) continue
+
+      let msg = "Engine (" + pipeline + "): " + status.projectState
+      msg += " | " + status.completeTasks + "/" + status.totalTasks + " tasks"
+      msg += " | " + status.completeDeps + "/" + status.totalDeps + " deps"
+      if (status.lastBlockedGate) {
+        msg += " | last blocked: " + status.lastBlockedGate.slice(0, 60)
+      }
+      statuses.push(msg)
+    }
+
+    return statuses.length > 0 ? statuses.join(" | ") : null
+  } catch {
+    return null
+  }
+}
+
 function main() {
   const parts = [
     "Ucai plugin is active. Use /init to analyze this project, /plan for specs, /build for features, /ship for autonomous spec-to-PR, /debug for bugs, /docs for documentation, /release for versioning, /iterate for autonomous iteration, /cancel-iterate to stop iterate, /cancel-ship to stop ship, /review for code review, or /bootstrap to scaffold test/lint/CI infrastructure."
@@ -301,6 +328,11 @@ function main() {
   const shipStatus = getShipStatus()
   if (shipStatus) {
     parts.push("Ship pipeline active: " + shipStatus)
+  }
+
+  const engineStatus = getEngineStatus()
+  if (engineStatus) {
+    parts.push(engineStatus)
   }
 
   if (!hasClaudeMd()) {

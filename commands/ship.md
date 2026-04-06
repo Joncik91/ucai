@@ -17,6 +17,7 @@ This is NOT `/build`. There are ZERO approval gates. You make every decision you
 - **Commit per milestone**: Each milestone gets its own commit for clean PR history.
 - **Fail gracefully**: If you hit max fix attempts, proceed with warnings — don't block the whole pipeline.
 - **Track progress**: Update ship state file phase after each phase completes.
+- **Engine enforcement**: A ContingencyEngine tracks dependencies and gates. Before each phase, check gates. If a gate blocks, auto-remedy (complete the prerequisite) or degrade to a warning — never stop to ask the user. After each phase, update engine state.
 
 ## Skill Loading
 
@@ -42,7 +43,9 @@ Before Phase 2, identify and load relevant skills automatically:
    - `.claude/requirements.md` — backlog, build order
    - `CLAUDE.md` — project conventions
    - `tasks/lessons.md` — known patterns and past corrections
-5. Update ship state: set `phase: 0` complete
+5. **Initialize engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/setup-ship-engine.js" --spec "$ARGUMENTS")`
+6. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-state-init --state complete --proof "state file created")`
+7. Update ship state: set `phase: 0` complete
 
 ---
 
@@ -69,11 +72,14 @@ Before Phase 2, identify and load relevant skills automatically:
    - Architecture approach (brief)
    - Scope boundaries (what this does NOT include)
 
-3. Update ship state: set `phase: 1`, set `milestone` if applicable
+3. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-spec-resolved --state complete --proof "<spec summary>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --task task-ship-spec --state complete --phase 1)`
+4. Update ship state: set `phase: 1`, set `milestone` if applicable
 
 ---
 
 ## Phase 2: Explore
+
+**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline ship --task task-ship-explore)` — if `allowed: false`, auto-remedy (complete the prerequisite phase) before proceeding.
 
 **Goal**: Map relevant codebase areas — fast.
 
@@ -92,7 +98,8 @@ Before Phase 2, identify and load relevant skills automatically:
    - Integration points
    - Test file locations and conventions
 
-5. Update ship state: set `phase: 2`
+5. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-codebase-mapped --state complete --proof "<file count> files mapped")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --task task-ship-explore --state complete --phase 2)`
+6. Update ship state: set `phase: 2`
 
 ---
 
@@ -119,11 +126,14 @@ Before Phase 2, identify and load relevant skills automatically:
 
 5. **If linter/formatter is missing**: Note it but proceed — these are nice-to-have, not blockers.
 
-6. Update ship state: set `phase: 3`
+6. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-infra-detected --state complete --proof "<test_cmd>,<lint_cmd>,<format_cmd>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --task task-ship-infra --state complete --phase 3)`
+7. Update ship state: set `phase: 3`
 
 ---
 
 ## Phase 4: Implement
+
+**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline ship --task task-ship-implement)` — if `allowed: false`, auto-remedy before proceeding.
 
 **Goal**: Build the feature, milestone by milestone.
 
@@ -145,11 +155,14 @@ Before Phase 2, identify and load relevant skills automatically:
    f. **Immediately proceed to Phase 5 (Verify Loop) for this milestone**
    g. After verification passes, move to the next milestone
 
-3. Update ship state: set `phase: 4`, update `milestone` as each completes
+3. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-code-implemented --state complete --proof "<commit hashes>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --task task-ship-implement --state complete --phase 4)`
+4. Update ship state: set `phase: 4`, update `milestone` as each completes
 
 ---
 
 ## Phase 5: Verify Loop
+
+**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline ship --task task-ship-verify)` — if `allowed: false`, auto-remedy before proceeding.
 
 **Goal**: Deterministically run tests and lint. Auto-fix failures. Loop until green or max attempts.
 
@@ -188,11 +201,14 @@ This phase runs AFTER EACH MILESTONE in Phase 4, not just once at the end.
 
 ### Step 4: Reset
 1. Reset `fix_attempts` to 0 in ship state (for next milestone)
-2. Update ship state: set `phase: 5`
+2. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-tests-pass --state complete --proof "<test summary>")` and (if lint passed) `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-lint-pass --state complete --proof "<lint result>")` and (if format applied) `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-format-applied --state complete --proof "formatted")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --task task-ship-verify --state complete --phase 5)`
+3. Update ship state: set `phase: 5`
 
 ---
 
 ## Phase 6: Light Review
+
+**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline ship --task task-ship-review)` — if `allowed: false`, auto-remedy before proceeding.
 
 **Goal**: Quick automated review — catch obvious bugs before PR.
 
@@ -207,11 +223,14 @@ This phase runs AFTER EACH MILESTONE in Phase 4, not just once at the end.
    c. Re-run the verify loop (Phase 5) once more
 4. If only minor issues: log them in the PR description as "Known minor issues"
 5. If FRD milestone exists, mark all acceptance criteria checkboxes as `[x]`
-6. Update ship state: set `phase: 6`
+6. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-review-clean --state complete --proof "<review summary>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --task task-ship-review --state complete --phase 6)`
+7. Update ship state: set `phase: 6`
 
 ---
 
 ## Phase 7: Create PR
+
+**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline ship --task task-ship-pr)` — note warnings but proceed (ship is autonomous).
 
 **Goal**: Push changes and create a pull request.
 
@@ -255,7 +274,8 @@ This phase runs AFTER EACH MILESTONE in Phase 4, not just once at the end.
       - Max 3 CI fix attempts
    d. If CI passes: log success
 
-6. Update ship state: set `phase: 7`
+6. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-pr-created --state complete --proof "<PR URL or 'skipped'>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --task task-ship-pr --state complete --phase 7)`
+7. Update ship state: set `phase: 7`
 
 ---
 
@@ -286,7 +306,13 @@ This phase runs AFTER EACH MILESTONE in Phase 4, not just once at the end.
    - Run: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/consolidate-lessons.js")`
    - If output is valid, overwrite `tasks/lessons.md` with consolidated content
 
-5. **Delete ship state**: Remove `.claude/ucai-ship.local.md`
+5. **Finalize engine**: Update remaining deps and task:
+   - `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-frd-updated --state complete --proof "<FRD update summary or 'no FRD'>")`
+   - `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-requirements-updated --state complete --proof "<requirements update or 'none'>")`
+   - `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-lessons-captured --state complete --proof "<lesson count or 'none'>")`
+   - `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --task task-ship-cleanup --state complete --phase 8)`
+6. **Delete ship state**: Remove `.claude/ucai-ship.local.md`
+   - Engine state file (`.claude/ucai-ship-engine.local.json`) will be cleaned up by the SessionEnd hook.
 
 6. **Print summary**:
    ```

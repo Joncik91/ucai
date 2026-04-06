@@ -5,9 +5,11 @@
 // Feeds the task back as input to continue the loop
 
 const fs = require("fs")
+const path = require("path")
 
 const STATE_FILE = ".claude/ucai-iterate.local.md"
 const SHIP_STATE_FILE = ".claude/ucai-ship.local.md"
+const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.resolve(__dirname, "../..")
 
 // Check if iterate loop is active (priority: iterate > ship)
 if (!fs.existsSync(STATE_FILE)) {
@@ -283,7 +285,18 @@ function handleShipPipeline() {
       continuationPrompt = "Continue the /ship pipeline from phase " + phase + ". Spec: " + specText
     }
 
-    const systemMsg = "Ucai ship pipeline — Phase " + phase + ": " + phaseName + milestoneInfo + " | Complete all remaining phases."
+    // Enhance with engine context if available
+    let engineContext = ""
+    try {
+      const factory = require(path.join(PLUGIN_ROOT, "scripts", "engine-factory.js"))
+      const status = factory.readEngineStatus("ship") || factory.readEngineStatus("build")
+      if (status) {
+        engineContext = " | Engine: " + status.completeTasks + "/" + status.totalTasks + " tasks, " + status.completeDeps + "/" + status.totalDeps + " deps"
+        if (status.lastBlockedGate) engineContext += " | blocked: " + status.lastBlockedGate.slice(0, 50)
+      }
+    } catch {}
+
+    const systemMsg = "Ucai ship pipeline — Phase " + phase + ": " + phaseName + milestoneInfo + engineContext + " | Complete all remaining phases."
 
     const result = JSON.stringify({
       decision: "block",

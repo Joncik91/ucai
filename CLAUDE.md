@@ -2,8 +2,10 @@
 
 ## Overview
 A Claude Code plugin that leverages native architecture — commands, agents, hooks,
-and skills — exactly as Anthropic designed them. v2.0 adds the autonomous execution
-engine — `/ship` (zero-gate spec-to-PR pipeline), `/bootstrap` (infrastructure
+and skills — exactly as Anthropic designed them. v2.2 adds the never-forget
+enforcement engine — programmatic phase enforcement via ContingencyEngine with
+dependencies, logic gates, shadow tasks, and audit trail. v2.0 added autonomous
+execution — `/ship` (zero-gate spec-to-PR pipeline), `/bootstrap` (infrastructure
 scaffolding), PostToolUse auto-formatting, deterministic test execution, and
 lessons consolidation. Built on the Cherny methodology: persistent task tracking,
 self-improvement loop, TDD integration, and elegance checkpoints.
@@ -40,6 +42,7 @@ node -e "const o=JSON.parse(process.argv[1]); if(!o.hookSpecificOutput) process.
 - **hooks/handlers/** — Lifecycle: context injection, state management, config protection.
 - **skills/** — Knowledge: progressive disclosure domain expertise, loaded on-demand.
 - **scripts/** — Utilities: `setup-iterate.js`, `setup-ship.js`, `detect-infra.js`, `run-tests.js`, `consolidate-lessons.js`.
+- **scripts/lib/never-forget/** — Vendored never-forget engine (ESM, zero deps): dependency validation, logic gates, shadow tasks, audit trail.
 
 ### Commands (12 slash commands)
 `/init`, `/plan`, `/build` (8-phase, guided), `/ship` (9-phase, autonomous), `/bootstrap`,
@@ -90,10 +93,22 @@ Priority: iterate > ship > normal exit.
 - `/build`, `/debug`, `/review`, `/docs`, `/ship` load `tasks/lessons.md` for known patterns
 - SessionStart announces `[plugin]` and `[project]` skills; Claude decides which to load
 - Formatter cache: `.claude/ucai-formatter-cache.local.json` (session-scoped, cleaned on SessionEnd)
+- Engine state: `.claude/ucai-{build|ship}-engine.local.json` (session-scoped, cleaned on SessionEnd)
 
 ### Config Protection
 PreToolUse guards: `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`,
 `hooks/hooks.json`, `CLAUDE.md`, and all skill `.md` files. Emits `permissionDecision: "ask"`.
+
+### Engine Enforcement (never-forget integration)
+Both `/build` and `/ship` use a `ContingencyEngine` for programmatic phase enforcement:
+- **Dependencies**: Track prerequisites (specs loaded, code implemented, tests passing)
+- **Logic gates**: Block phase transitions until dependencies are met (`neq complete` → block)
+- **Shadow tasks**: Auto-generated reactions ensure every dependency is addressed per task
+- **Audit trail**: Observer events log gate passes/blocks, state transitions, missed reactions
+- State persisted in `.claude/ucai-{build|ship}-engine.local.json` (session-scoped, cleaned on SessionEnd)
+- Engine scripts: `engine-factory.js` (create/load/save), `engine-gates.js` (evaluate), `update-engine.js` (update state)
+- Hooks read engine JSON (read-only) for status injection; commands call scripts for gate checks and state updates
+- Backward compatible: if engine JSON is missing, commands and hooks fall back to existing behavior
 
 ## Conventions
 
@@ -126,7 +141,7 @@ All files `kebab-case`. Exception: `SKILL.md` is uppercase.
 ## Key Files
 | File | Purpose |
 |------|---------|
-| `.claude-plugin/plugin.json` | Plugin manifest (name, version 2.1.0, keywords) |
+| `.claude-plugin/plugin.json` | Plugin manifest (name, version 2.2.0, keywords) |
 | `hooks/hooks.json` | Hook registration (8 events, timeouts, matchers) |
 | `hooks/handlers/sessionstart-handler.js` | Most complex handler (7.8 KB): git, iterate, skills |
 | `hooks/handlers/stop-handler.js` | Iteration control (5.4 KB) |
@@ -136,6 +151,12 @@ All files `kebab-case`. Exception: `SKILL.md` is uppercase.
 | `scripts/detect-infra.js` | Detect test/lint/format/CI commands from project files |
 | `scripts/run-tests.js` | Deterministic test runner, outputs JSON with pass/fail + summary |
 | `scripts/consolidate-lessons.js` | Consolidate lessons.md when >100 entries |
+| `scripts/engine-factory.js` | ContingencyEngine create/load/save/delete + readEngineStatus |
+| `scripts/engine-gates.js` | CLI: evaluate logic gates for a target task |
+| `scripts/update-engine.js` | CLI: update dependency/task state with proof |
+| `scripts/setup-build-engine.js` | Create build engine with 16 deps, 8 tasks, 10 gates |
+| `scripts/setup-ship-engine.js` | Create ship engine with 13 deps, 9 tasks, 7 gates |
+| `scripts/lib/never-forget/` | Vendored never-forget dist (ESM, imported via dynamic import) |
 | `hooks/handlers/posttooluse-format-handler.js` | Auto-format after Write/Edit (caches detection) |
 | `commands/build.md` | Most complex command: 8-phase feature workflow |
 | `.github/workflows/ci.yml` | CI: file exist + JSON syntax + JS syntax + smoke test |

@@ -18,6 +18,7 @@ You are helping a developer implement a new feature. Follow a systematic approac
 - **Security by default**: Validate inputs at system boundaries, never trust user-supplied data, avoid exposing sensitive data in logs or errors. Flag security implications during design and review — not as an afterthought.
 - **Track progress**: Write and update `tasks/todo.md` to track phase completion.
 - **Sequential todo updates**: Mark each phase complete in `tasks/todo.md` immediately when it finishes. Never batch-mark multiple phases at once.
+- **Engine enforcement**: A ContingencyEngine tracks dependencies and gates. Before each phase, check gates. After each phase, update engine state. If a gate blocks, do NOT proceed — complete the prerequisite first.
 
 ## Skill Loading — MANDATORY
 
@@ -77,19 +78,27 @@ Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/
 **Lessons loading**: If `tasks/lessons.md` exists, read it and note any patterns relevant to the current feature. Apply known patterns proactively throughout the build. If the file doesn't exist, skip silently.
 
 **Actions**:
-1. Create todo list with all phases
-2. Write `tasks/todo.md` with YAML frontmatter and checkable phase items (one `- [ ]` per phase)
-3. If `tasks/lessons.md` exists, load it and note relevant patterns
-4. If the feature is unclear, ask:
+1. **Initialize engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/setup-build-engine.js" --feature "$ARGUMENTS")` — creates the ContingencyEngine with all dependencies, tasks, and logic gates.
+2. Create todo list with all phases
+3. Write `tasks/todo.md` with YAML frontmatter and checkable phase items (one `- [ ]` per phase)
+4. If `tasks/lessons.md` exists, load it and note relevant patterns
+5. If the feature is unclear, ask:
    - What problem does this solve?
    - What should it do?
    - Any constraints or requirements?
-5. Summarize understanding and confirm with user
-6. Mark Phase 1 complete in `tasks/todo.md`
+6. Summarize understanding and confirm with user
+7. **Update engine** (run each):
+   - `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-spec-chain --state complete --proof "<specs loaded summary>")`
+   - `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-milestone-selected --state complete --proof "<milestone name or 'no FRD'>")`
+   - `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-acceptance-criteria --state complete --proof "<criteria count>")`
+   - `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --task task-understand --state complete --phase 1)`
+8. Mark Phase 1 complete in `tasks/todo.md`
 
 ---
 
 ## Phase 2: Explore
+
+**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline build --task task-explore)` — if `allowed: false`, report blockers and complete prerequisites first.
 
 **Goal**: Map the relevant codebase.
 
@@ -132,11 +141,15 @@ Codebase Map:
 5. Present comprehensive summary of findings
 6. Compile Codebase Map from agent findings
 
-**On completion**: Mark Phase 2 complete in `tasks/todo.md`.
+**On completion**:
+1. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-skills-loaded --state complete --proof "<skill names>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-codebase-map --state complete --proof "<key file count> files mapped")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --task task-explore --state complete --phase 2)`
+2. Mark Phase 2 complete in `tasks/todo.md`.
 
 ---
 
 ## Phase 3: Clarify
+
+**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline build --task task-clarify)` — if `allowed: false`, report blockers and complete prerequisites first.
 
 **Goal**: Resolve all ambiguities before designing.
 
@@ -165,13 +178,17 @@ Codebase Map:
 
 If the user says "whatever you think is best", provide your recommendation and get explicit confirmation.
 
-**On completion**: Mark Phase 3 complete in `tasks/todo.md`.
+**On completion**:
+1. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-clarifications --state complete --proof "<clarification summary>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --task task-clarify --state complete --phase 3)`
+2. Mark Phase 3 complete in `tasks/todo.md`.
 
 **Transition to Phase 4**: Carry forward the Codebase Map (Phase 2) and all clarification answers (Phase 3). Both feed into architect agent prompts.
 
 ---
 
 ## Phase 4: Design
+
+**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline build --task task-design)` — if `allowed: false`, report blockers and complete prerequisites first.
 
 **Goal**: Present architecture options with trade-offs.
 
@@ -198,11 +215,15 @@ If the user says "whatever you think is best", provide your recommendation and g
 3. Present to user: brief summary of each, trade-offs, your recommendation with reasoning
 4. **Ask user which approach they prefer**
 
-**On completion**: Mark Phase 4 complete in `tasks/todo.md`.
+**On completion**:
+1. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-architecture-approved --state complete --proof "<chosen approach>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --task task-design --state complete --phase 4)`
+2. Mark Phase 4 complete in `tasks/todo.md`.
 
 ---
 
 ## Phase 5: Build
+
+**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline build --task task-build)` — if `allowed: false`, report blockers and complete prerequisites first.
 
 **Goal**: Implement the feature.
 
@@ -220,13 +241,16 @@ Phase 4 design approval is NOT implementation approval — you must ask separate
    - Pause and ask: "Is there a more elegant way? Could this be simpler?"
    - Challenge your own implementation before proceeding
    - Skip this checkpoint for simple, obvious fixes — don't over-engineer
-5. Mark Phase 5 complete in `tasks/todo.md`
+5. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-implementation-go --state complete --proof "user confirmed go")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-code-implemented --state complete --proof "<commit hash>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --task task-build --state complete --phase 5)`
+6. Mark Phase 5 complete in `tasks/todo.md`
 
 **Transition to Phase 6**: Implementation is complete. All changed files are candidates for verification. Carry forward the acceptance criteria (Phase 1) and Codebase Map (Phase 2).
 
 ---
 
 ## Phase 6: Verify
+
+**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline build --task task-verify)` — if `allowed: false`, report blockers and complete prerequisites first.
 
 **Goal**: Ensure the implementation meets requirements.
 
@@ -247,11 +271,14 @@ Phase 4 design approval is NOT implementation approval — you must ask separate
 4. **Present findings to user**: fix now, fix later, or proceed as-is
 5. Address issues based on user decision
 6. **If fixes were applied, re-run all 3 agents in parallel on the changed files** — fixes can introduce new issues. Repeat steps 2-5 until clean or user approves remaining items.
-7. Mark Phase 6 complete in `tasks/todo.md`
+7. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-agents-reviewed --state complete --proof "<issue count> findings")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-issues-resolved --state complete --proof "<resolution summary>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --task task-verify --state complete --phase 6)`
+8. Mark Phase 6 complete in `tasks/todo.md`
 
 ---
 
 ## Phase 7: Test
+
+**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline build --task task-test)` — if `allowed: false`, report blockers and complete prerequisites first.
 
 **Goal**: Write automated tests AND have the user manually verify.
 
@@ -298,11 +325,15 @@ Phase 4 design approval is NOT implementation approval — you must ask separate
 - **Proportional**: small utility = 3-4 checks, full feature = 8-10
 - **No skipping**: agents said it's fine is not enough — the user must confirm
 
-**On completion**: Mark Phase 7 complete in `tasks/todo.md`.
+**On completion**:
+1. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-tests-written --state complete --proof "<test pass summary>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-manual-test-passed --state complete --proof "user confirmed")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --task task-test --state complete --phase 7)`
+2. Mark Phase 7 complete in `tasks/todo.md`.
 
 ---
 
 ## Phase 8: Done
+
+**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline build --task task-done)` — if `allowed: false`, report blockers and complete prerequisites first.
 
 **Goal**: Document what was accomplished and keep project guidelines current.
 
@@ -366,6 +397,12 @@ Phase 4 design approval is NOT implementation approval — you must ask separate
    - Changed conventions or dependencies
    - If updates are needed, present the proposed changes to the user and **wait for approval** before editing CLAUDE.md
    - If nothing meaningful changed, skip silently — do not update for trivial additions
+7. **Finalize engine**: Update remaining deps and clean up:
+   - `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-lessons-captured --state complete --proof "<lesson count or 'none needed'>")`
+   - `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-requirements-updated --state complete --proof "<update summary or 'no requirements.md'>")`
+   - `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-milestone-updated --state complete --proof "<milestone summary or 'no FRD'>")`
+   - `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --task task-done --state complete --phase 8)`
+   - The engine state file (`.claude/ucai-build-engine.local.json`) will be cleaned up by the SessionEnd hook.
 
 ---
 

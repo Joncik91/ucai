@@ -1,10 +1,11 @@
 # Ucai — Use Claude Code As Is
 
-A Claude Code plugin that solves the same problems as GSD, BMAD, Ralph, and Agent OS — but using Claude Code's native architecture instead of fighting it. v2.0 adds autonomous execution: give a spec, get a PR.
+A Claude Code plugin that solves the same problems as GSD, BMAD, Ralph, and Agent OS — but using Claude Code's native architecture instead of fighting it. v2.2 adds programmatic enforcement: phase dependencies are mechanically verified, not just instructed.
 
 Ucai was built from the inside out.
 We read the source code. We studied how Anthropic builds their own plugins.
 Every component maps 1:1 to a native Claude Code system — no wrappers, no personas, no bash loops.
+v2.2 extends this with the [never-forget](https://github.com/Joncik91/never-forget) engine — a programmatic enforcement layer that makes phase skipping impossible.
 
 ## 🥊 Frameworks vs. Ucai — What's Actually Different?
 
@@ -16,7 +17,7 @@ Ucai is built from the inside out — using Claude Code's native systems exactly
 |---------|-------------------|----------------------|
 | Context rot | Bash wrappers spawning fresh sessions | Task tool already gives fresh context per agent |
 | No structure | Persona prompts + ceremonies | Commands with phased workflows + parallel agents |
-| No guardrails | CLAUDE.md rules (hope-based) | PreToolUse hooks (deterministic) |
+| No guardrails | CLAUDE.md rules (hope-based) | PreToolUse hooks + ContingencyEngine (deterministic) |
 | No iteration | External bash loops | Stop hooks (native, built-in) |
 | No automation | Manual build → test → fix → PR | Zero-gate `/ship` pipeline: spec → PR autonomously |
 | No formatting | Hope-based or CI-only | PostToolUse hook auto-formats every write |
@@ -42,9 +43,10 @@ Ucai is built from the inside out — using Claude Code's native systems exactly
 - PostToolUse auto-formatting — every file write runs through your project's formatter
 - Lessons consolidation — automatic cleanup when corrections exceed 100 entries
 - Hook lifecycle coverage — session context injection, task/lessons awareness, config guardrails, subagent quality gates, and iterate/ship state preservation across compaction
+- **Programmatic phase enforcement** — ContingencyEngine (never-forget) tracks 16 dependencies, 10 logic gates, and 128 shadow tasks per build. Gates mechanically block phase transitions until prerequisites are met. Full audit trail.
 - Built-in skills (backend, frontend, QA, DevOps, architecture, code review, and more)
 
-All using native Claude Code commands, agents, hooks, and skills.
+All using native Claude Code commands, agents, hooks, and skills — extended with a programmatic enforcement engine.
 
 ## ⚡ Quickstart
 
@@ -201,6 +203,39 @@ Ucai learns from corrections. When you correct Claude during a `/build` or `/deb
 
 This is inspired by [Boris Cherny's methodology](https://getpushtoprod.substack.com/p/how-the-creator-of-claude-code-actually) — persistent correction capture is the highest-ROI investment for AI-assisted development.
 
+## 🔒 Enforcement Engine (never-forget)
+
+UCAI's `/build` and `/ship` pipelines use a [ContingencyEngine](https://github.com/Joncik91/never-forget) for programmatic phase enforcement. This is the difference between "Claude usually follows the instructions" and "Claude literally cannot skip Phase 4."
+
+**How it works:**
+
+| Concept | What it does |
+|---------|-------------|
+| **Dependencies** | Track prerequisites with states (identified → drafted → complete) and proof of work |
+| **Logic Gates** | Block phase transitions until dependencies are met (e.g., "architecture must be approved before coding") |
+| **Shadow Tasks** | Auto-generated reactions ensure every dependency is addressed per task — nothing silently skipped |
+| **Audit Trail** | Observer events log every gate pass/block, state transition, and missed reaction |
+
+**Per pipeline:**
+
+| Pipeline | Dependencies | Tasks | Logic Gates | Shadow Reactions |
+|----------|-------------|-------|-------------|-----------------|
+| `/build` | 16 | 8 | 10 (all `block`) | 128 |
+| `/ship` | 13 | 9 | 7 (`block` + `warn`) | auto-generated |
+
+**Gate check before every phase:**
+```
+Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline build --task task-design)
+→ {"allowed": false, "blockers": ["Complete codebase exploration before designing"]}
+```
+
+**State update after every phase:**
+```
+Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-codebase-map --state complete --proof "12 files mapped")
+```
+
+Engine state persists in `.claude/ucai-{build|ship}-engine.local.json` (session-scoped, cleaned on exit). All hooks inject engine status into context. Backward compatible — if the engine file is missing, everything falls back to instruction-based flow.
+
 ## 🏗 Architecture
 
 ```
@@ -217,18 +252,24 @@ ucai/
 │   ├── setup-ship.js
 │   ├── detect-infra.js
 │   ├── run-tests.js
-│   └── consolidate-lessons.js
+│   ├── consolidate-lessons.js
+│   ├── engine-factory.js       ← ContingencyEngine create/load/save
+│   ├── engine-gates.js         ← evaluate logic gates per phase
+│   ├── update-engine.js        ← update dependency/task state
+│   ├── setup-build-engine.js   ← init build engine (16 deps, 10 gates)
+│   ├── setup-ship-engine.js    ← init ship engine (13 deps, 7 gates)
+│   └── lib/never-forget/       ← vendored enforcement engine (zero deps)
 ├── skills/
 └── tasks/                  ← created at runtime by commands
     ├── todo.md             ← persistent task tracking (overwritten per session)
     └── lessons.md          ← self-improvement loop (append-only)
 ```
 
-Every component is a native Claude Code system. Nothing invented.
+Every orchestration component is a native Claude Code system. The enforcement layer (never-forget) is the only extension — it adds mechanical verification that native architecture doesn't provide.
 
 ## 🧭 Principles
 
-1. **Use native systems** — Commands, agents, hooks, skills
+1. **Use native systems** — Commands, agents, hooks, skills (extended with programmatic enforcement)
 2. **Files are context** — No external memory
 3. **Context is a public good** — Only add what Claude doesn't know
 4. **Agents are not personas** — Real model assignments + tools
