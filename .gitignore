@@ -3,3 +3,6 @@
 
 #Claude-bridge
 .claude-bridge
+
+docs/
+.bg-shell/manifest.json
