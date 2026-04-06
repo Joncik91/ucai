@@ -15,6 +15,8 @@ Every command reads and writes files in `.claude/` and `tasks/`. This is how sta
 ├── ucai-ship.local.md                  ← ship pipeline state (gitignored)
 ├── ucai-iterate.local.md               ← iterate loop state (gitignored)
 ├── ucai-formatter-cache.local.json     ← formatter detection cache (gitignored)
+├── ucai-build-engine.local.json        ← build engine state (gitignored)
+├── ucai-ship-engine.local.json         ← ship engine state (gitignored)
 └── frds/
     ├── auth.md                         ← written by /plan <feature>
     └── payments.md
@@ -134,14 +136,14 @@ Example FRD structure:
 
 | Phase | What happens |
 |-------|-------------|
-| **1 Understand** | Loads specs, writes `tasks/todo.md`, loads `tasks/lessons.md` for relevant patterns. Checks build order dependencies. |
-| **2 Explore** | Parallel agents map the codebase — similar features, architecture, testing patterns |
-| **3 Clarify** | Resolves ambiguities before any design. You answer questions. |
-| **4 Design** | Architect agents generate 3 approaches (minimal / clean / pragmatic). You choose. |
-| **5 Build** | Implements the chosen design. Approval-gated. Elegance checkpoint for non-trivial changes (>50 lines or >3 files). |
-| **6 Verify** | Staff engineer self-check, then verifier + reviewer agents check correctness, conventions, and quality. |
-| **7 Test** | Writes automated tests (unit/integration/E2E as appropriate), then generates a manual test checklist. Waits for you to confirm. |
-| **8 Done** | Marks requirements done. Updates milestone criteria. Captures lessons from corrections. |
+| **1 Understand** | Loads specs, writes `tasks/todo.md`, loads `tasks/lessons.md` for relevant patterns. Checks build order dependencies. **Initializes enforcement engine** (16 deps, 10 gates). |
+| **2 Explore** | **Gate check** → parallel agents map the codebase — similar features, architecture, testing patterns |
+| **3 Clarify** | **Gate check** → resolves ambiguities before any design. You answer questions. |
+| **4 Design** | **Gate check** (blocked until codebase mapped + clarifications resolved) → architect agents generate 3 approaches. You choose. |
+| **5 Build** | **Gate check** (blocked until architecture approved + user says "go") → implements the chosen design. Elegance checkpoint for non-trivial changes. |
+| **6 Verify** | **Gate check** (blocked until code implemented) → staff engineer self-check, then 3 review agents check correctness, conventions, quality. |
+| **7 Test** | **Gate check** (blocked until issues resolved) → writes automated tests, then generates manual test checklist. Waits for you to confirm. |
+| **8 Done** | **Gate check** (blocked until tests pass + manual testing confirmed) → marks requirements done. Updates milestone criteria. Captures lessons. Finalizes engine. |
 
 Phase 1 shows the milestone list and asks which to build:
 
@@ -212,17 +214,17 @@ Stop at any time:
 | **Best for** | Unclear requirements, first-time architecture | Clear specs, proven patterns |
 | **Isolation** | Works in your directory | Worktree by default |
 
-**The 9 phases (0-8):**
+**The 9 phases (0-8):** Each phase runs a gate check (13 deps, 7 gates). Blocked gates auto-remedy or degrade to warnings — ship never stops to ask.
 
-0. **Setup** — Parse spec, enter worktree, load project context + lessons
+0. **Setup** — Parse spec, enter worktree, load project context + lessons. **Initialize enforcement engine.**
 1. **Spec Resolution** — Auto-select next FRD milestone (or generate internal plan for inline specs)
-2. **Explore** — 2 fast explorer agents map the codebase
+2. **Explore** — **Gate check** → 2 fast explorer agents map the codebase
 3. **Detect Infrastructure** — Find test/lint/format commands. If missing, scaffold minimal infrastructure inline.
-4. **Implement** — Build milestone by milestone, commit per milestone
-5. **Verify Loop** — Run tests → if fail: fix + retry (up to N attempts). Run formatter. Run linter → if fail: fix + retry.
-6. **Light Review** — 1 reviewer agent catches critical bugs. Auto-fixes confidence >= 90 issues.
-7. **Create PR** — Push, create PR via `gh`, optionally watch CI and fix failures.
-8. **Cleanup & Report** — Update FRD milestones, mark requirements done, capture lessons, print summary.
+4. **Implement** — **Gate check** (blocked until codebase mapped) → build milestone by milestone, commit per milestone
+5. **Verify Loop** — **Gate check** (blocked until code implemented + infra detected) → run tests → if fail: fix + retry. Run formatter. Run linter.
+6. **Light Review** — **Gate check** (blocked until tests pass) → 1 reviewer agent catches critical bugs. Auto-fixes confidence >= 90 issues.
+7. **Create PR** — **Gate check** (warns if review incomplete) → push, create PR via `gh`, optionally watch CI and fix failures.
+8. **Cleanup & Report** — Update FRD milestones, mark requirements done, capture lessons, finalize engine, print summary.
 
 Stop at any time: `/ucai:cancel-ship`
 
@@ -334,10 +336,12 @@ Ucai learns from your corrections across sessions. This is not a gimmick — it'
 
 | Hook | What it injects |
 |------|----------------|
-| **SessionStart** | "Tasks: X/Y done" + "Lessons: N entries" (+ warning if >100) + ship/iterate status |
+| **SessionStart** | "Tasks: X/Y done" + "Lessons: N entries" (+ warning if >100) + ship/iterate status + **engine status** (tasks/deps complete, last blocked gate) |
 | **PostToolUse** | Auto-formats files after Write/Edit (detects Prettier, Black, gofmt, rustfmt, etc.) |
-| **UserPromptSubmit** | "Active task: ..." + iterate/ship context from state files |
-| **PreCompact** | Task progress + latest lesson + iterate/ship state (survives context compaction). Fires for ALL commands, not just /ship and /iterate. |
+| **UserPromptSubmit** | "Active task: ..." + iterate/ship context + **engine status** (blocking deps) |
+| **Stop** | Blocks exit for active iterate/ship. **Enhanced with engine dep/gate context** for precise continuation prompts. |
+| **PreCompact** | Task progress + latest lesson + iterate/ship state + **engine state summary** (survives context compaction). Fires for ALL commands. |
+| **SessionEnd** | Cleans up iterate/ship state + formatter cache + **engine state files** |
 
 ---
 
@@ -410,6 +414,8 @@ Ucai learns from your corrections across sessions. This is not a gimmick — it'
 | `ucai-iterate.local.md` | `/iterate` | Stop hook, SessionStart, PreCompact, UserPromptSubmit | Iterate loop state (gitignored) |
 | `ucai-ship.local.md` | `/ship` | Stop hook, SessionStart, PreCompact, UserPromptSubmit | Ship pipeline state — phase, milestone, fix attempts (gitignored) |
 | `ucai-formatter-cache.local.json` | PostToolUse hook | PostToolUse hook | Formatter detection cache (cleaned by SessionEnd) |
+| `ucai-build-engine.local.json` | `/build` Phase 1 | All hooks, engine scripts | ContingencyEngine state for /build (cleaned by SessionEnd) |
+| `ucai-ship-engine.local.json` | `/ship` Phase 0 | All hooks, engine scripts | ContingencyEngine state for /ship (cleaned by SessionEnd) |
 | `tasks/todo.md` | `/build`, `/debug` | Hooks (SessionStart, PreCompact, UserPromptSubmit) | Persistent task tracking per session |
 | `tasks/lessons.md` | `/build`, `/debug`, `/ship` | Hooks + `/build`, `/debug`, `/review`, `/docs`, `/ship` | Self-improvement loop — corrections and patterns |
 
@@ -432,6 +438,8 @@ Ucai learns from your corrections across sessions. This is not a gimmick — it'
 **`/ship` vs `/build`.** Use `/build` when you want to review design choices, when requirements are unclear, or when you're building something for the first time. Use `/ship` when the spec is clear, patterns are established, and you want autonomous execution.
 
 **Bootstrap first.** If your project has no tests, run `/ucai:bootstrap` before `/ucai:ship`. `/ship` can scaffold inline, but `/bootstrap` gives you a chance to review what gets created.
+
+**Engine enforcement is automatic.** Both `/build` and `/ship` create a ContingencyEngine at startup with logic gates that mechanically block phase transitions until prerequisites are met. You don't need to interact with it — gates are checked and state is updated automatically at each phase boundary. If the engine file gets corrupted or deleted mid-session, everything falls back to instruction-based flow.
 
 ---
 
