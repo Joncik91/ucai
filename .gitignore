@@ -4,5 +4,5 @@
 #Claude-bridge
 .claude-bridge
 
-docs/
+docs/claude-code/
 .bg-shell/manifest.json
