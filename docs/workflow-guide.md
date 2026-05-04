@@ -140,9 +140,9 @@ Example FRD structure:
 | **2 Explore** | **Gate check** → parallel agents map the codebase — similar features, architecture, testing patterns |
 | **3 Clarify** | **Gate check** → resolves ambiguities before any design. You answer questions. |
 | **4 Design** | **Gate check** (blocked until codebase mapped + clarifications resolved) → architect agents generate 3 approaches. You choose. |
-| **5 Build** | **Gate check** (blocked until architecture approved + user says "go") → implements the chosen design. Elegance checkpoint for non-trivial changes. |
-| **6 Verify** | **Gate check** (blocked until code implemented) → staff engineer self-check, then 3 review agents check correctness, conventions, quality. |
-| **7 Test** | **Gate check** (blocked until issues resolved) → writes automated tests, then generates manual test checklist. Waits for you to confirm. |
+| **5 Build** | **Gate check** (blocked until architecture approved + user says "go") → pre-flight Algorithm Audit (question requirements, prefer deletion, simplify), then implements the chosen design. Post-write Elegance checkpoint for non-trivial changes; pivots if implementation reveals the design was wrong. |
+| **6 Verify** | **Gate check** (blocked until code implemented) → staff engineer self-check, then 3 review agents check correctness, conventions, quality. Each must-fix issue is paired with a concrete failure scenario from the code (not theoretical). |
+| **7 Test** | **Gate check** (blocked until issues resolved) → spawns a test-author subagent (not the implementing agent), then `ucai:reviewer` enforces 10 anti-gaming verdicts. Retry 1 stays on sonnet; retry 2 escalates to `ucai:reviewer-opus`. Then generates manual test checklist and waits for you to confirm. |
 | **8 Done** | **Gate check** (blocked until tests pass + manual testing confirmed) → marks requirements done. Updates milestone criteria. Captures lessons. Finalizes engine. |
 
 Phase 1 shows the milestone list and asks which to build:
@@ -220,7 +220,7 @@ Stop at any time:
 1. **Spec Resolution** — Auto-select next FRD milestone (or generate internal plan for inline specs)
 2. **Explore** — **Gate check** → 2 fast explorer agents map the codebase
 3. **Detect Infrastructure** — Find test/lint/format commands. If missing, scaffold minimal infrastructure inline.
-4. **Implement** — **Gate check** (blocked until codebase mapped) → build milestone by milestone, commit per milestone
+4. **Implement** — **Gate check** (blocked until codebase mapped) → per milestone: pre-flight Algorithm Audit, implement, then spawn a test-author subagent + `ucai:reviewer` gate (escalates to `ucai:reviewer-opus` on retry 2) before commit. Halts count against `--max-fix-attempts`.
 5. **Verify Loop** — **Gate check** (blocked until code implemented + infra detected) → run tests → if fail: fix + retry. Run formatter. Run linter.
 6. **Light Review** — **Gate check** (blocked until tests pass) → 1 reviewer agent catches critical bugs. Auto-fixes confidence >= 90 issues.
 7. **Create PR** — **Gate check** (warns if review incomplete) → push, create PR via `gh`, optionally watch CI and fix failures.

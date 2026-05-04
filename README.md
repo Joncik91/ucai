@@ -7,12 +7,12 @@
 [![Claude Code v2.1+](https://img.shields.io/badge/Claude%20Code-v2.1%2B-E8954A)](https://docs.claude.com/en/docs/claude-code/overview)
 [![Node.js 18+](https://img.shields.io/badge/node-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-E8954A.svg)](LICENSE)
-[![Version: 2.2](https://img.shields.io/badge/version-2.2-E8954A)](CHANGELOG.md)
+[![Version: 2.3](https://img.shields.io/badge/version-2.3-E8954A)](CHANGELOG.md)
 [![GitHub stars](https://img.shields.io/github/stars/Joncik91/ucai?color=E8954A&logo=github)](https://github.com/Joncik91/ucai/stargazers)
 [![Marketplace install](https://img.shields.io/badge/install-marketplace-E8954A)](#install-marketplace)
 [![Zero deps](https://img.shields.io/badge/zero%20deps-✓-E8954A)]()
 
-A Claude Code plugin that solves the same problems as GSD, BMAD, Ralph, and Agent OS — but using Claude Code's native architecture instead of fighting it. v2.2 adds programmatic enforcement: phase dependencies are mechanically verified, not just instructed.
+A Claude Code plugin that solves the same problems as GSD, BMAD, Ralph, and Agent OS — but using Claude Code's native architecture instead of fighting it. v2.3 adds discipline layers on top of v2.2's programmatic enforcement: pre-flight requirement audits before any code is written, per-issue failure-mode analysis in every review, and strict author/reviewer separation for tests with anti-gaming verdicts aligned with the [Pragma](https://github.com/Joncik91/pragma) detector.
 
 </div>
 
@@ -56,9 +56,10 @@ Ucai is built from the inside out — using Claude Code's native systems exactly
 
 - Project planning with discovery agents
 - Feature-level FRDs with milestone breakdown (each milestone = one fresh context window)
-- 8-phase build workflow with parallel agents, elegance checkpoints, and staff engineer self-checks
+- 8-phase build workflow with parallel agents, pre-flight requirement audits, elegance checkpoints, and staff engineer self-checks
 - Persistent task tracking (`tasks/todo.md`) and self-improvement loop (`tasks/lessons.md`)
-- Automated test writing (TDD) integrated into build and debug workflows
+- **Test author/reviewer separation**: tests are written by a subagent (not the implementing agent) and reviewed by a different agent against 10 anti-gaming verdicts (mocked-away, orphan, tautological, semantic gaming, etc.) — same author/reviewer pattern already used for production code
+- **Failure-mode analysis on review**: every flagged issue is paired with a concrete failure scenario from the code, not theoretical risk
 - Native autonomous iteration (`/ucai:iterate`)
 - Multi-agent code review with lessons-aware pattern detection
 - Structured debugging with single approval gate and autonomous execution
@@ -305,6 +306,8 @@ Every orchestration component is a native Claude Code system. The enforcement la
 8. **Learn from corrections** — Capture patterns in lessons, apply them proactively
 9. **Verify before done** — Automated tests + manual confirmation, never just agent review
 10. **Two modes** — `/build` when you want control, `/ship` when you want speed
+11. **Question requirements before writing code** — pre-flight audit: is this load-bearing or aspirational? can ~10 lines of vanilla logic replace this dependency? reason from fundamentals, not analogy
+12. **Test author ≠ test reviewer** — tests are authored by a different agent than the one that wrote the production code, and reviewed against anti-gaming verdicts before they count
 
 ## Security
 

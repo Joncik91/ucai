@@ -2,13 +2,18 @@
 
 ## Overview
 A Claude Code plugin that leverages native architecture — commands, agents, hooks,
-and skills — exactly as Anthropic designed them. v2.2 adds the never-forget
-enforcement engine — programmatic phase enforcement via ContingencyEngine with
-dependencies, logic gates, shadow tasks, and audit trail. v2.0 added autonomous
-execution — `/ship` (zero-gate spec-to-PR pipeline), `/bootstrap` (infrastructure
-scaffolding), PostToolUse auto-formatting, deterministic test execution, and
-lessons consolidation. Built on the Cherny methodology: persistent task tracking,
-self-improvement loop, TDD integration, and elegance checkpoints.
+and skills — exactly as Anthropic designed them. v2.3 adds discipline layers on
+top of v2.2's enforcement engine: pre-flight requirement audits before code is
+written, per-issue failure-mode analysis on every review, design-pivot clauses,
+and strict author/reviewer separation for tests with anti-gaming verdicts
+aligned with the [Pragma](https://github.com/Joncik91/pragma) detector. v2.2
+added the never-forget enforcement engine — programmatic phase enforcement via
+ContingencyEngine with dependencies, logic gates, shadow tasks, and audit trail.
+v2.0 added autonomous execution — `/ship` (zero-gate spec-to-PR pipeline),
+`/bootstrap` (infrastructure scaffolding), PostToolUse auto-formatting,
+deterministic test execution, and lessons consolidation. Built on the Cherny
+methodology: persistent task tracking, self-improvement loop, TDD integration,
+and elegance checkpoints.
 
 ## Tech Stack
 - **Runtime**: Node.js 18+ (CommonJS, zero external dependencies)
@@ -141,7 +146,7 @@ All files `kebab-case`. Exception: `SKILL.md` is uppercase.
 ## Key Files
 | File | Purpose |
 |------|---------|
-| `.claude-plugin/plugin.json` | Plugin manifest (name, version 2.2.0, keywords) |
+| `.claude-plugin/plugin.json` | Plugin manifest (name, version 2.3.0, keywords) |
 | `hooks/hooks.json` | Hook registration (8 events, timeouts, matchers) |
 | `hooks/handlers/sessionstart-handler.js` | Most complex handler (7.8 KB): git, iterate, skills |
 | `hooks/handlers/stop-handler.js` | Iteration control (5.4 KB) |

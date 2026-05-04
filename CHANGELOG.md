@@ -2,6 +2,31 @@
 
 All notable changes to Ucai are documented here.
 
+## [v2.3.0] - 2026-05-04
+
+### Added
+- **Test authorship and review separation**: Tests in `/build`, `/ship`, and `/debug` are now authored by a Task subagent (not by the implementing agent) and reviewed by a different agent against an anti-gaming checklist. Mirrors the production-code author/reviewer separation already used in `/build` Phase 6.
+- **Anti-Gaming Verdicts in `skills/qa/SKILL.md`**: 10 language-agnostic principles aligned with the [Pragma](https://github.com/Joncik91/pragma) test-gaming detector — `mocked-away`, `target_not_covered`/`orphan_test`, `swallowed`, `tautological`, `conditional`, `mismatched`, `monkeypatched`/`module_attr_reassignment`/`module_shimmed`, `skipped`/`xfail_gaming`, `no_success_assertion`, `semantic_gaming`. Soft prescription whether or not Pragma is installed; composes with Pragma's hooks as defense-in-depth when present.
+- **Authorship Discipline section in `skills/qa/SKILL.md`**: codifies that tests are authored by a different agent than the one that wrote the production code under test, that the author imports the production symbol directly (no reimplementation), and that the author self-checks against the verdicts before returning.
+- **Reviewer escalation ladder**: `/build` Phase 7 and `/ship` Phase 4 use `ucai:reviewer` (sonnet) by default; if the reviewer flags blocking verdicts and the author's first retry still fails, retry 2 escalates to `ucai:reviewer-opus` for a deeper read. Halts only if opus also flags.
+- **Pre-flight requirement audit** (build/ship implementation, architect agent, architect/backend/frontend skills, tech_decision_guide): question requirements before writing code, prefer deletion over optimization, reason from fundamentals not analogy. Sharpens the existing post-write Elegance checkpoint with an unconditional pre-flight check.
+- **Failure-mode analysis** (debug Phase 3, reviewer + reviewer-opus, code review checklist, verifier): every flagged issue or PASS is paired with concrete failure scenarios drawn from the code, not theoretical ones.
+- **Design-pivot clause** in `/build` Elegance checkpoint: pivot if the implementation reveals the design was wrong; do not defend code already written.
+
+### Changed
+- `commands/build.md` Phase 7 Step A: replaces inline test writing with subagent authorship + reviewer gate + escalation ladder.
+- `commands/ship.md` Phase 4 step e: per-milestone subagent author + reviewer gate before commit; halts count against `max_fix_attempts`.
+- `commands/debug.md` Phase 5 step 2: subagent writes regression test; existing parallel reviewer prompt extended to apply Anti-Gaming Verdicts to the test.
+- `commands/build.md` Phase 5: drops the `>50 lines / >3 files` gate for the new pre-flight Algorithm Audit (must fire before code is written, not after); existing post-write Elegance checkpoint stays gated.
+- `agents/verifier.md`: when acceptance criteria reference *tested behavior*, the verifier now checks that the test calls the production target directly and asserts on real return values — not on its own mock setup.
+- `agents/architect.md`, `agents/reviewer.md`, `agents/reviewer-opus.md`: pre-flight audit and per-issue failure-mode analysis folded into their core review responsibilities.
+- `skills/architect/SKILL.md`, `skills/architect/references/tech_decision_guide.md`, `skills/backend/SKILL.md`, `skills/frontend/SKILL.md`, `skills/code-reviewer/references/code_review_checklist.md`, `skills/ucai-patterns/SKILL.md`: First Principles preambles, Algorithm Audit pre-checks, and Pathological Honesty notes added to relevant principle surfaces.
+
+### Notes
+- No new agents, no new commands, no new hooks — the discipline is in *who calls what*, not in new agent definitions.
+- Aggregate footprint: 18 files, +80/-27.
+- Pragma plugin (when installed) provides hard PreToolUse/PostToolUse enforcement at the Edit/Write layer; Ucai's verdicts list is the soft prescription that applies regardless of Pragma's presence.
+
 ## [v2.2.0] - 2026-04-06
 
 ### Added
