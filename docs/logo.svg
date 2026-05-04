@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="UCAI">
   <title>UCAI</title>
-
   <rect width="400" height="400" rx="48" fill="#0E0E0F"/>
 
-  <!-- The slash, split at the midpoint into two segments so the
-       crossbar can pass THROUGH it — not sit on top.
-       Segment A: lower-left → just-before-midpoint (gap = crossbar width)
-       Segment B: just-after-midpoint → upper-right
-       The 8-unit gap reads as a real intersection, not a sticker. -->
-  <g fill="none" stroke="#E8954A" stroke-linecap="square" stroke-linejoin="miter">
-    <line x1="96" y1="312" x2="194" y2="206" stroke-width="36"/>
-    <line x1="206" y1="194" x2="304" y2="88" stroke-width="36"/>
-    <!-- The crossbar — now genuinely interrupts the slash. -->
-    <line x1="180" y1="181" x2="220" y2="219" stroke-width="16"/>
-  </g>
+  <!--
+    A single jigsaw puzzle piece, centred on the canvas.
+    Square base with:
+      - a knob (rounded protrusion) on the TOP edge
+      - a socket (rounded indent) on the LEFT edge
+    Reads as "fits natively into Claude Code" — the puzzle metaphor.
+
+    Built as one continuous filled path — clean silhouette at all sizes.
+    Edge length ~200u, knob/socket radius 28u.
+  -->
+  <path d="
+    M 100 130
+    L 100 172
+    A 28 28 0 0 1 100 228
+    L 100 300
+    L 300 300
+    L 300 130
+    L 228 130
+    A 28 28 0 0 0 172 130
+    Z
+  " fill="#E8954A"/>
 </svg>
