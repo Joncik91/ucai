@@ -41,6 +41,14 @@ function getBuildDependencies() {
     { id: "dep-lessons-captured", name: "Lessons Captured", priority: "recommended", state: "identified" },
     { id: "dep-requirements-updated", name: "Requirements Updated", priority: "recommended", state: "identified" },
     { id: "dep-milestone-updated", name: "Milestone Updated", priority: "recommended", state: "identified" },
+    {
+      id: "dep-fast-track-mode",
+      name: "FRD Fast-Track Mode",
+      priority: "optional",
+      state: "identified",
+      satisfiedBy: ["fast_track_explicit", "fast_track_implicit"],
+      description: "User opted into FRD fast-track for phases 2-4",
+    },
   ]
 }
 
