@@ -2,54 +2,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="UCAI">
   <title>UCAI</title>
 
-  <!--
-    UCAI — Use Claude Code As Is.
-
-    The mark is the slash that leads every UCAI command (/ucai:build,
-    /ship, /plan) — the most native of native surfaces. A bold amber
-    diagonal stroke, square-capped, with one perpendicular crossbar
-    at its midpoint: the v2.2 phase-enforcement marker, the moment
-    the contingency engine interrupts the diagonal flow.
-
-    Substrate: dark panel #0E0E0F, single amber accent #E8954A,
-    rx=48 corners — same as the rest of the portfolio.
-  -->
-
   <rect width="400" height="400" rx="48" fill="#0E0E0F"/>
 
-  <!--
-    The slash. Diagonal from lower-left (96, 312) to upper-right
-    (304, 88). Slope is steep (~47° from horizontal) — steeper than
-    a typographic / on most monospace fonts, which gives it display
-    weight and the confidence appropriate for a 27-star repo.
-
-    Stroke 36 (9% of canvas width) is the dominant visual mass.
-    Square caps + miter joins keep the form mechanical / CLI-toned.
-  -->
+  <!-- The slash, split at the midpoint into two segments so the
+       crossbar can pass THROUGH it — not sit on top.
+       Segment A: lower-left → just-before-midpoint (gap = crossbar width)
+       Segment B: just-after-midpoint → upper-right
+       The 8-unit gap reads as a real intersection, not a sticker. -->
   <g fill="none" stroke="#E8954A" stroke-linecap="square" stroke-linejoin="miter">
-
-    <!-- Slash spine: stroke-width 36 -->
-    <line x1="96" y1="312" x2="304" y2="88" stroke-width="36"/>
-
-    <!--
-      Phase-checkpoint crossbar: a short perpendicular stroke
-      crossing the slash at its exact geometric midpoint (200, 200).
-
-      Slash direction vector: (304-96, 88-312) = (208, -224)
-        |v| ≈ 306. Unit vector: (0.679, -0.731).
-      Perpendicular unit: (0.731, 0.679).
-
-      Crossbar half-length 28 → spans:
-        midpoint ± 28 × (0.731, 0.679)
-        = (200 ± 20.5, 200 ± 19.0)
-        ≈ (179.5, 181.0) to (220.5, 219.0)
-
-      Stroke-width 16 — about 44% of the slash's weight. Reads as
-      a deliberate qualifier, not as decoration. The visual
-      hierarchy (slash heavier, crossbar lighter) mirrors the
-      product hierarchy: the slash is the brand, the crossbar is
-      the v2.2 enforcement-engine detail.
-    -->
+    <line x1="96" y1="312" x2="194" y2="206" stroke-width="36"/>
+    <line x1="206" y1="194" x2="304" y2="88" stroke-width="36"/>
+    <!-- The crossbar — now genuinely interrupts the slash. -->
     <line x1="180" y1="181" x2="220" y2="219" stroke-width="16"/>
   </g>
 </svg>
