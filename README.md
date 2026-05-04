@@ -1,11 +1,37 @@
+<div align="center">
+
+<img src="docs/logo.svg" alt="Ucai" width="160" height="160">
+
 # Ucai — Use Claude Code As Is
 
+[![Claude Code v2.1+](https://img.shields.io/badge/Claude%20Code-v2.1%2B-E8954A)](https://docs.claude.com/en/docs/claude-code/overview)
+[![Node.js 18+](https://img.shields.io/badge/node-18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-E8954A.svg)](LICENSE)
+[![Version: 2.2](https://img.shields.io/badge/version-2.2-E8954A)](CHANGELOG.md)
+[![GitHub stars](https://img.shields.io/github/stars/Joncik91/ucai?color=E8954A&logo=github)](https://github.com/Joncik91/ucai/stargazers)
+[![Marketplace install](https://img.shields.io/badge/install-marketplace-E8954A)](#install-marketplace)
+[![Zero deps](https://img.shields.io/badge/zero%20deps-✓-E8954A)]()
+
 A Claude Code plugin that solves the same problems as GSD, BMAD, Ralph, and Agent OS — but using Claude Code's native architecture instead of fighting it. v2.2 adds programmatic enforcement: phase dependencies are mechanically verified, not just instructed.
+
+</div>
 
 Ucai was built from the inside out.
 We read the source code. We studied how Anthropic builds their own plugins.
 Every component maps 1:1 to a native Claude Code system — no wrappers, no personas, no bash loops.
 v2.2 extends this with the [never-forget](https://github.com/Joncik91/never-forget) engine — a programmatic enforcement layer that makes phase skipping impossible.
+
+## Table of Contents
+
+- [Frameworks vs. Ucai](#-frameworks-vs-ucai--whats-actually-different)
+- [What Ucai Gives You](#-what-ucai-gives-you)
+- [Quickstart](#-quickstart)
+- [Verify Installation](#-verify-installation)
+- [Commands](#commands)
+- [Hook Lifecycle](#hook-lifecycle)
+- [Principles](#-principles)
+- [Security](#security)
+- [Support the Project](#-support-the-project)
 
 ## 🥊 Frameworks vs. Ucai — What's Actually Different?
 
@@ -279,6 +305,36 @@ Every orchestration component is a native Claude Code system. The enforcement la
 8. **Learn from corrections** — Capture patterns in lessons, apply them proactively
 9. **Verify before done** — Automated tests + manual confirmation, never just agent review
 10. **Two modes** — `/build` when you want control, `/ship` when you want speed
+
+## Security
+
+Ucai installs **8 lifecycle hooks** and **12 slash commands** into your
+Claude Code session. That position has implications worth being explicit
+about.
+
+- **Hooks intercept tool calls.** `PreToolUse` guards block edits to
+  config files (`.claude-plugin/plugin.json`, `hooks/hooks.json`,
+  `CLAUDE.md`, all skill `.md` files) by emitting
+  `permissionDecision: "ask"`. Hooks never auto-approve writes.
+- **Agents are read-only.** All eight Ucai agents declare `tools` that
+  exclude `Write` and `Edit`. Agents can analyse, never alter — write
+  permissions live only in commands, where you see the prompt and gate
+  it yourself.
+- **`/ship` is autonomous.** It runs spec → PR with **zero approval
+  gates** under a worktree, auto-tests, auto-fixes. That's the point —
+  but it also means: don't aim `/ship` at a branch you can't roll back,
+  and read [`commands/ship.md`](commands/ship.md) before pointing it at
+  anything load-bearing. `/build` is the gated alternative when you want
+  control.
+- **State files are local.** All Ucai state (`.claude/ucai-iterate.local.md`,
+  `.claude/ucai-ship.local.md`, the engine JSONs) is gitignored and
+  session-scoped. The `SessionEnd` hook deletes stale state on
+  termination. Nothing leaves the machine.
+- **Zero external dependencies.** No `package.json`, no `node_modules`,
+  no network calls in any hook handler. `scripts/lib/never-forget/` is
+  vendored, not fetched. Audit the surface yourself with
+  `find hooks/ scripts/ -name '*.js' | xargs wc -l` — it's small enough
+  to read end-to-end.
 
 ## ⭐ Support the Project
 
