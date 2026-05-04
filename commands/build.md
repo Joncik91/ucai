@@ -112,6 +112,12 @@ Codebase Map:
 - Conventions: [naming, structure, error handling rules]
 ```
 
+### If FRD Covers Discovery AND User Explicitly Opts In to Fast-Track
+
+(e.g., "skip exploration, FRD is enough", "go straight to build")
+
+**Skip the phase.** Compile the Codebase Map directly from the FRD's `## Discovery` section — no explorer agents. Update the engine with proof: `"fast-track skip: FRD Discovery"`. Also set: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-fast-track-mode --state complete --proof "user: '<their exact words>'")`. Note: the user is taking responsibility for any gaps the agents would have surfaced.
+
 ### If FRD Exists with Discovery Section
 
 **LIGHT VALIDATION** — run 1 quick explorer to spot-check FRD findings, not full discovery.
@@ -155,6 +161,12 @@ Codebase Map:
 
 **CRITICAL**: Do not skip this phase.
 
+### If FRD Covers Requirements AND User Explicitly Opts In to Fast-Track
+
+(e.g., "skip clarification, FRD is enough", "go straight to build")
+
+**Skip the phase.** Mark clarifications resolved using the FRD's Requirements section as the source. Update the engine with proof: `"fast-track skip: FRD Requirements"`. Also set: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-fast-track-mode --state complete --proof "user: '<their exact words>'")` (no-op if already set in Phase 2). Note: the user is taking responsibility for any gaps the agents would have surfaced.
+
 ### If FRD Exists with Requirements Section
 
 **Only clarify gaps** — the FRD already defines requirements.
@@ -191,6 +203,12 @@ If the user says "whatever you think is best", provide your recommendation and g
 **Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline build --task task-design)` — if `allowed: false`, report blockers and complete prerequisites first.
 
 **Goal**: Present architecture options with trade-offs.
+
+### If FRD Covers Architecture AND User Explicitly Opts In to Fast-Track
+
+(e.g., "skip design, FRD is enough", "go straight to build")
+
+**Skip the phase.** Accept the FRD's `## Architecture` section as the approved design — no architect agents. Update the engine with proof: `"fast-track skip: FRD Architecture"`. Also set: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-fast-track-mode --state complete --proof "user: '<their exact words>'")` (no-op if already set). Note: the user is taking responsibility for any gaps the agents would have surfaced.
 
 ### If FRD Exists with Architecture Section
 
