@@ -1,6 +1,6 @@
 {
   "name": "ucai",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Use Claude Code As Is - native plugin leveraging built-in architecture",
   "author": {
     "name": "Ucai"

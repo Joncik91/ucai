@@ -2,6 +2,17 @@
 
 All notable changes to Ucai are documented here.
 
+## [v2.3.1] - 2026-05-04
+
+### Fixed
+- **Engine state preserved across SessionEnd until pipeline complete** (#4): `hooks/handlers/session-end-handler.js` previously deleted `.claude/ucai-{build,ship}-engine.local.json` unconditionally, wiping mid-flight state when a subagent stop or inactivity timeout fired during a long `/build`. Now reads `data.snapshot.project.state` and only deletes engine files when `state === "complete"`. Mid-flight, missing, and malformed states are preserved.
+- **Phase 7 test author/reviewer separation now programmatically gated** (#5): added required dependency `dep-test-author-spawned` and logic gate `gate-test-author-before-done` blocking `task-done` until the test-author subagent dispatch is recorded with proof. Build engine: 17 deps, 11 gates. `commands/build.md` Phase 7 Step A requires an inline `update-engine` call with a structured proof string (file paths + scope) immediately after the author subagent is dispatched — bare `"ok"` is rejected.
+- **FRD fast-track skip codified as first-class workflow** (#6): added optional audit-marker dependency `dep-fast-track-mode` (`satisfiedBy: ["fast_track_explicit", "fast_track_implicit"]`, no logic gate references it) and a fourth decision-tree bullet to the top of `commands/build.md` Phases 2/3/4. Users who explicitly say "go straight to build, FRD covers it" now follow a documented path with audit-trail clarity instead of bending the "MUST use Task tool" rule.
+
+### Notes
+- All three fixes shipped via the v2.3 author/reviewer test-separation discipline: each fix's regression tests were authored by a sub-subagent (not the implementer) and reviewed by `ucai:reviewer` against the qa skill's 10 anti-gaming verdicts.
+- Aggregate footprint: 5 files modified, 3 new test files (18 regression tests total), +325 lines.
+
 ## [v2.3.0] - 2026-05-04
 
 ### Added
