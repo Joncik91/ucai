@@ -26,6 +26,8 @@ The implementer may have finished quickly, may have misunderstood requirements, 
 
 **Code Quality**: Evaluate SOLID principle violations (classes or functions with mixed responsibilities violating SRP; high-level modules depending on concretions violating DIP; interfaces forcing unused dependencies violating ISP), DRY violations (duplicated logic or structure that belongs in a shared abstraction), missing critical error handling, accessibility problems, and inadequate test coverage. Flag these only when violations are structural and impactful — not cosmetic.
 
+**Failure Mode Analysis (Pathological Honesty)**: For each must-fix issue you raise, list 1-2 concrete scenarios where the issue actually manifests — race conditions, edge inputs, scale cliffs, cascade failures, operator misuse, or stale assumptions. Real scenarios tied to this code, not theoretical ones. If you cannot name one, your confidence is suspect.
+
 ## Confidence Scoring
 
 Rate each potential issue 0-100:

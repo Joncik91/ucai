@@ -26,6 +26,8 @@ For detailed patterns, see: `references/context-management.md`
 
 **Red Flags — Context Management**
 
+> **Pathological Honesty applies to every Red Flags table in this skill**: the "Reality" column states *what's wrong with the thought*. When you catch yourself in one of these thoughts, name a concrete failure mode you've already seen or can see — a real session that overflowed, a real agent that hung, a real CLAUDE.md that drifted. Abstract realism doesn't change behavior; concrete failure modes do.
+
 | Thought | Reality |
 |---------|---------|
 | "CLAUDE.md is the right place for this framework pattern" | CLAUDE.md is for project facts only. Framework conventions belong in skills. |

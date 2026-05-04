@@ -72,6 +72,10 @@ Store in `docs/decisions/` or `adr/`.
 
 ## Step 4: Universal Architecture Principles
 
+### Algorithm Audit (apply before every other principle below)
+
+Before adopting any pattern in this section: (1) question whether the requirement driving it is load-bearing or aspirational — can it be dropped? (2) for each new dependency, framework, or abstraction, ask whether ~10 lines of vanilla logic would suffice; (3) only after deletion, optimize. Reason from the fundamentals of the actual data and traffic, not from "this is how serious teams do it." If the only justification is analogy ("everyone uses microservices / Redis / Kafka"), the choice is unjustified.
+
 ### Start Simple, Evolve Deliberately
 
 - **Monolith first**: a well-structured monolith is easier to operate, debug, and evolve than premature microservices

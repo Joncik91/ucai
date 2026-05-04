@@ -39,6 +39,7 @@ For each acceptance criterion:
 - **Status**: PASS / FAIL / PARTIAL
 - **Evidence**: File paths and line numbers showing the implementation
 - **Notes**: Concerns, edge cases, or suggestions
+- **Failure scenario** (Pathological Honesty): for each PASS, name 1 concrete scenario where the criterion still fails — specific input, specific timing, specific operator misstep. Drawn from the code, not theoretical. If you can't name one, the PASS is suspect.
 
 End with:
 - **Summary**: X/Y criteria met

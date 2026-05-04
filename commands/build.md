@@ -236,13 +236,14 @@ Phase 4 design approval is NOT implementation approval — you must ask separate
 **Actions**:
 1. Read all relevant files identified in previous phases
 2. If this feature will require tests (most do), load `Skill(ucai:qa)` now — its testing patterns inform how you structure the implementation for testability. This is not redundant with Phase 7; early loading ensures the code is test-friendly.
-3. Implement following the chosen architecture, strictly following codebase conventions
-4. **Elegance checkpoint** (non-trivial changes only — >50 lines of new code OR >3 files modified):
+3. **Algorithm Audit** (pre-flight, always runs — before writing any code): Ask in order: (1) Is this requirement load-bearing or aspirational — can we drop it? (2) For each new dependency or framework: can we get the same result with ~10 lines of vanilla logic? (3) Only after deleting, optimize. Reject "we need X because everyone uses X" — reason from the data structure's fundamentals, not analogy.
+4. Implement following the chosen architecture, strictly following codebase conventions
+5. **Elegance checkpoint** (non-trivial changes only — >50 lines of new code OR >3 files modified):
    - Pause and ask: "Is there a more elegant way? Could this be simpler?"
-   - Challenge your own implementation before proceeding
+   - Challenge your own implementation before proceeding — and pivot if the implementation reveals the design was wrong; don't defend code already written
    - Skip this checkpoint for simple, obvious fixes — don't over-engineer
-5. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-implementation-go --state complete --proof "user confirmed go")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-code-implemented --state complete --proof "<commit hash>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --task task-build --state complete --phase 5)`
-6. Mark Phase 5 complete in `tasks/todo.md`
+6. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-implementation-go --state complete --proof "user confirmed go")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --dep dep-code-implemented --state complete --proof "<commit hash>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline build --task task-build --state complete --phase 5)`
+7. Mark Phase 5 complete in `tasks/todo.md`
 
 **Transition to Phase 6**: Implementation is complete. All changed files are candidates for verification. Carry forward the acceptance criteria (Phase 1) and Codebase Map (Phase 2).
 

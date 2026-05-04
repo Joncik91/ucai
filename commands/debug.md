@@ -109,6 +109,7 @@ Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/
    - What the change is (conceptually)
    - Why this fixes the root cause
    - Any risks or side effects
+   - **Pathological Honesty**: enumerate 3-6 concrete ways the fix can still break — race conditions, edge inputs, scale cliffs, cascade failures, operator misuse, stale assumptions. Real failure modes, not theoretical ones. If you cannot list at least 3, you have not understood the fix yet.
 4. Present the diagnosis AND fix plan together:
    - Root cause explanation (clear, non-technical where possible)
    - Evidence trail (file:line references, git commits)

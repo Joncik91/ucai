@@ -48,6 +48,8 @@ Use the search results to ground your recommendations in current community stand
 
 These apply regardless of language or framework.
 
+> **First Principles preamble**: before adopting any pattern below, ask whether it's fundamental to *this* service's correctness or a habit imported from larger systems. "Cursor-based pagination," "circuit breakers," "idempotency keys" — each is correct in the right context and overkill in the wrong one. Question the requirement before reaching for the pattern; reach only when the data, traffic, or failure mode actually demands it.
+
 ### API Design
 
 - **REST resource naming**: nouns, plural, lowercase (`/users`, `/orders/{id}`)

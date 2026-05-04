@@ -43,6 +43,8 @@ Before diving into code, verify these basics:
 
 ## Correctness
 
+> **Pathological Honesty**: every flagged issue in this section must be paired with 1-2 concrete failure scenarios drawn from the code under review (specific input, specific timing, specific operator misstep) — not theoretical ones. "This could fail under high load" is not a scenario; "if two writes hit `updateBalance` within the same tick, the second overwrites the first" is.
+
 ### Logic
 - [ ] Algorithm implements requirements correctly
 - [ ] Edge cases handled (null, empty, boundary values)

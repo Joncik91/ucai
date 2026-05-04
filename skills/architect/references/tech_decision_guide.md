@@ -2,6 +2,10 @@
 
 Decision frameworks and comparison matrices for common technology choices.
 
+## First Principles Pre-Check (run before any matrix below)
+
+Before comparing options, eliminate first. Ask in order: (1) does this category of choice apply at our current scale, or are we solving a hypothetical? (2) which options can we drop *without* a matrix — not because they're "wrong" but because we don't have the constraint that justifies them? (3) for what remains, what are the fundamentals of *our* data, traffic, and team — not the fundamentals of "serious teams"? Only then consult the matrix. A matrix-first decision driven by analogy ("everyone uses Postgres / Kafka / OAuth") is unjustified, even when the answer happens to be right.
+
 ## Decision Frameworks Index
 
 1. [Database Selection](#1-database-selection)

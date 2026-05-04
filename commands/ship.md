@@ -143,17 +143,18 @@ Before Phase 2, identify and load relevant skills automatically:
 2. For each milestone (or single pass):
    a. Review the acceptance criteria for this milestone
    b. Read the relevant files from the Codebase Map
-   c. Implement the feature following:
+   c. **Algorithm Audit (pre-flight)**: before writing, ask in order: (1) is this requirement load-bearing or aspirational — can we drop it? (2) for each new dependency or framework: can ~10 lines of vanilla logic do the job? (3) only after deletion, optimize. Reject "we need X because everyone uses X" — reason from the data structure's fundamentals, not analogy.
+   d. Implement the feature following:
       - Project conventions from CLAUDE.md
       - Patterns from the loaded skill(s)
       - Lessons from tasks/lessons.md
       - Codebase patterns found in Phase 2
-   d. Write tests alongside the implementation (TDD when practical, tests-after otherwise)
-   e. After implementation is complete, create a git commit:
+   e. Write tests alongside the implementation (TDD when practical, tests-after otherwise)
+   f. After implementation is complete, create a git commit:
       - Stage specific files (not `git add -A`)
       - Commit message: concise description of what this milestone delivers
-   f. **Immediately proceed to Phase 5 (Verify Loop) for this milestone**
-   g. After verification passes, move to the next milestone
+   g. **Immediately proceed to Phase 5 (Verify Loop) for this milestone**
+   h. After verification passes, move to the next milestone
 
 3. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-code-implemented --state complete --proof "<commit hashes>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --task task-ship-implement --state complete --phase 4)`
 4. Update ship state: set `phase: 4`, update `milestone` as each completes

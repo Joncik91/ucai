@@ -44,6 +44,8 @@ WebSearch: " best practices 2025"
 
 ## Step 3: Design Thinking
 
+> **First Principles preamble**: before reaching for a library, framework, or component pattern, ask whether the choice solves *this* UI's specific constraint, or is a habit from larger apps. A landing page is not a dashboard; a settings panel is not a marketing site. Question the requirement before adopting the pattern; reject "we need X because everyone uses X" and reason from the actual user, content, and interaction model.
+
 When building any UI — component, page, or application — commit to a bold aesthetic direction **before writing a line of code**:
 
 - **Purpose**: What problem does this interface solve? Who uses it?
