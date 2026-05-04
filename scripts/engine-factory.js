@@ -36,6 +36,7 @@ function getBuildDependencies() {
     { id: "dep-code-implemented", name: "Code Implemented", priority: "required", state: "identified" },
     { id: "dep-agents-reviewed", name: "Agent Review Complete", priority: "required", state: "identified" },
     { id: "dep-issues-resolved", name: "Issues Resolved", priority: "required", state: "identified" },
+    { id: "dep-test-author-spawned", name: "Test Author Subagent Dispatched", priority: "required", state: "identified" },
     { id: "dep-tests-written", name: "Tests Written", priority: "required", state: "identified" },
     { id: "dep-manual-test-passed", name: "Manual Testing Confirmed", priority: "required", state: "identified" },
     { id: "dep-lessons-captured", name: "Lessons Captured", priority: "recommended", state: "identified" },
@@ -98,6 +99,11 @@ function getBuildGates() {
       id: "gate-issues-before-test", name: "Issues Resolved Before Test", enabled: true,
       condition: { subject: "dep-issues-resolved", property: "state", operator: "neq", value: "complete" },
       action: { type: "block", target: "task-test", message: "Resolve all review issues before testing" },
+    },
+    {
+      id: "gate-test-author-before-done", name: "Test Author Dispatch Before Done", enabled: true,
+      condition: { subject: "dep-test-author-spawned", property: "state", operator: "neq", value: "complete" },
+      action: { type: "block", target: "task-done", message: "Test author subagent must be dispatched before completion — implementing agent may not write tests directly" },
     },
     {
       id: "gate-tests-before-done", name: "Tests Before Done", enabled: true,
