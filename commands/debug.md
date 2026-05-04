@@ -144,16 +144,13 @@ Body: `## Phase N` sections with `- [ ]` items for each step. Create the `tasks/
 
 **Actions**:
 1. Load `Skill(ucai:qa)` — apply its guidance for regression test design
-2. **Write regression test(s)** before launching review agents:
-   - Write a test that would have caught this bug (fails without fix, passes with fix)
-   - Match the project's existing test framework and conventions
-   - If no test infrastructure exists, set it up following the tech stack
-   - Run the test(s) — they must pass before proceeding
+2. **Spawn a Task subagent for regression test authorship** (`subagent_type: general-purpose`, sonnet). The agent that wrote the fix does *not* write the regression test. Prompt embeds: the bug description, root cause from Phase 3, the fix changes, the project test framework + conventions (set up a framework if none exists), and an instruction to load `Skill(ucai:qa)` and self-check against its Anti-Gaming Verdicts before returning. The regression test must fail without the fix and pass with it; it must call the production target directly (no mocks of the function under test).
+   - Run the regression test(s) — they must pass before proceeding
 3. Launch 2 agents in parallel using the Task tool:
 
    - **Verifier** (`ucai:verifier`, sonnet): "[sonnet] Verify that this fix resolves the bug without introducing regressions. The bug was: [description]. The root cause was: [diagnosis]. The fix was: [changes made]. Check the changed files, trace the execution path, and confirm the fix addresses the root cause. Look for edge cases the fix might miss."
 
-   - **Reviewer** (`ucai:reviewer`, sonnet): "[sonnet] Review this debug fix for code quality, conventions compliance, and potential side effects. The changed files are: [list]. Check for: correctness, style consistency with the codebase, error handling, and any unintended consequences."
+   - **Reviewer** (`ucai:reviewer`, sonnet): "[sonnet] Review this debug fix for code quality, conventions compliance, and potential side effects. The changed files are: [list]. Check for: correctness, style consistency with the codebase, error handling, and any unintended consequences. Also review the regression test (`[test path]`) against the qa skill's Anti-Gaming Verdicts — flag any blocking verdict matches with file:line."
 
 4. **Wait for all agents to complete**
 5. Present findings to user

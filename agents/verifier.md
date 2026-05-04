@@ -32,6 +32,7 @@ For each criterion:
 - Find criteria that are not met at all
 - Note any regressions or side effects introduced
 - Flag criteria that are ambiguous and need clarification
+- When acceptance criteria reference *tested behavior*, verify the test exists, calls the production target directly (not a mock of it), and asserts on real return values or exception types — not on the test's own mock setup. A criterion that says "X is tested" is unmet if the test mocks X, swallows its exceptions, or asserts only on hand-rolled fakes.
 
 ## Output Format
 

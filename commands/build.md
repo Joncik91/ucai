@@ -289,6 +289,8 @@ Phase 4 design approval is NOT implementation approval — you must ask separate
 
 ### Step A: Automated Tests
 
+**Author/reviewer separation**: tests are written by a subagent (not by the implementing agent) and reviewed by a different agent against the qa skill's Anti-Gaming Verdicts. This mirrors Phase 6's production-code separation pattern.
+
 **Actions**:
 1. Confirm `Skill(ucai:qa)` is loaded — if not, load it now
 2. Determine the right test type(s) for this feature:
@@ -300,12 +302,13 @@ Phase 4 design approval is NOT implementation approval — you must ask separate
    - Test framework already in use? (Jest, Vitest, Playwright, pytest, etc.)
    - Test file conventions? (`*.test.ts`, `*.spec.ts`, `__tests__/`, etc.)
    - If no test infrastructure exists, set it up following the project's tech stack
-4. Write tests that cover:
-   - Happy path for each new behavior
-   - Edge cases identified in Phase 3 (Clarify)
-   - Error paths from the implementation
-5. Run the tests — they must pass before proceeding
-6. If tests fail, fix the implementation or tests until green
+4. **Authorship — spawn a Task subagent** (`subagent_type: general-purpose`, sonnet). The implementing agent does *not* write test files. Prompt embeds: production files written in Phase 5 with paths, acceptance criteria from Phase 1, the project's test framework + file conventions from step 3, the test-type choice from step 2, and an instruction to load `Skill(ucai:qa)` and self-check against its Anti-Gaming Verdicts before returning. Subagent must call the production target directly (no mocks of the function under test) and assert on real return values or exception types. Cover happy path, edge cases from Phase 3 (Clarify), and error paths.
+5. **Review gate — spawn a reviewer subagent** on the test files the author wrote. Default: `ucai:reviewer` (sonnet). Prompt embeds: the test files, the production target paths, and `Skill(ucai:qa)` reference; reviewer applies the Anti-Gaming Verdicts and flags any blocking matches with file:line.
+6. **Iterate with escalation** if the reviewer flags blocking verdicts:
+   - Retry 1: re-spawn the author subagent with the reviewer's verdict list as feedback. Re-run `ucai:reviewer` on the new tests.
+   - Retry 2: if retry 1 still fails, escalate the review to `ucai:reviewer-opus` for a deeper read.
+   - Halt only if opus also flags blocking verdicts. Surface the verdict list to the user for a call.
+7. Run the tests — they must pass before proceeding. If tests fail, fix the implementation (not the tests — modifying tests to pass is a Pragma `mocked-away`/`semantic_gaming` trigger).
 
 ### Step B: Manual Testing
 

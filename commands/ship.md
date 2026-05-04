@@ -149,12 +149,13 @@ Before Phase 2, identify and load relevant skills automatically:
       - Patterns from the loaded skill(s)
       - Lessons from tasks/lessons.md
       - Codebase patterns found in Phase 2
-   e. Write tests alongside the implementation (TDD when practical, tests-after otherwise)
-   f. After implementation is complete, create a git commit:
+   e. **Test authorship — spawn a Task subagent** (`subagent_type: general-purpose`, sonnet). The implementing agent does *not* write test files. Prompt embeds: the milestone's acceptance criteria, the production files just written, the project's test framework + conventions, and an instruction to load `Skill(ucai:qa)` and self-check against its Anti-Gaming Verdicts before returning. The subagent must call the production target directly (no mocks of the function under test) and assert on real return values or exception types.
+   f. **Test review gate — spawn `ucai:reviewer`** (sonnet) on the test files. Prompt embeds: the test files, the production target paths, and `Skill(ucai:qa)` reference; reviewer applies the Anti-Gaming Verdicts and flags blocking matches with file:line. Iterate with escalation: retry 1 re-spawns the author with feedback; retry 2 escalates the review to `ucai:reviewer-opus`. Halt only if opus also flags. A halt counts against `max_fix_attempts` and surfaces the verdict list to the user.
+   g. After implementation + tests pass review, create a git commit:
       - Stage specific files (not `git add -A`)
       - Commit message: concise description of what this milestone delivers
-   g. **Immediately proceed to Phase 5 (Verify Loop) for this milestone**
-   h. After verification passes, move to the next milestone
+   h. **Immediately proceed to Phase 5 (Verify Loop) for this milestone**
+   i. After verification passes, move to the next milestone
 
 3. **Update engine**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --dep dep-ship-code-implemented --state complete --proof "<commit hashes>")` and `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/update-engine.js" --pipeline ship --task task-ship-implement --state complete --phase 4)`
 4. Update ship state: set `phase: 4`, update `milestone` as each completes
