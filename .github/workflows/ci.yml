@@ -96,3 +96,19 @@ jobs:
             }
             console.log('OK: sessionstart-handler.js outputs valid JSON');
           " "$output"
+
+      - name: Run tests
+        shell: bash
+        run: |
+          echo "Running test suites..."
+          overall_status=0
+          for file in tests/*.js; do
+            echo "--- $file ---"
+            if node "$file"; then
+              echo "PASS: $file"
+            else
+              echo "FAIL: $file"
+              overall_status=1
+            fi
+          done
+          exit $overall_status
