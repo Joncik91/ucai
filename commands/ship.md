@@ -17,7 +17,7 @@ This is NOT `/build`. There are ZERO approval gates. You make every decision you
 - **Commit per milestone**: Each milestone gets its own commit for clean PR history.
 - **Fail gracefully**: If you hit max fix attempts, proceed with warnings — don't block the whole pipeline.
 - **Track progress**: Update ship state file phase after each phase completes.
-- **Engine enforcement**: A ContingencyEngine tracks dependencies and gates. Before each phase, check gates. If a gate blocks, auto-remedy (complete the prerequisite) or degrade to a warning — never stop to ask the user. After each phase, update engine state.
+- **Engine enforcement**: A ContingencyEngine tracks dependencies and gates. Before each phase, check gates. If a gate blocks, auto-remedy (complete the prerequisite) or degrade to a warning — never stop to ask the user. A degrade-to-warning decision must be recorded explicitly in the run output (ship state file and/or PR description) — never applied silently. After each phase, update engine state.
 
 ## Skill Loading
 
@@ -232,7 +232,7 @@ This phase runs AFTER EACH MILESTONE in Phase 4, not just once at the end.
 
 ## Phase 7: Create PR
 
-**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline ship --task task-ship-pr)` — note warnings but proceed (ship is autonomous).
+**Gate check**: `Bash(node "${CLAUDE_PLUGIN_ROOT}/scripts/engine-gates.js" --pipeline ship --task task-ship-pr)` — if `allowed: false`, this is a hard failure of gate evaluation itself (corrupt/unloadable engine state or an unrecognized task), not a degradable block; do not silently proceed — record it in the run output and treat it like any other blocker. If `allowed: true` with warnings present, note them in the run output (ship is autonomous) and proceed.
 
 **Goal**: Push changes and create a pull request.
 

@@ -228,7 +228,7 @@ This is inspired by [Boris Cherny's methodology](https://getpushtoprod.substack.
 
 ## 🔒 Enforcement Engine (never-forget)
 
-UCAI's `/build` and `/ship` pipelines use a [ContingencyEngine](https://github.com/Joncik91/never-forget) for programmatic phase enforcement. This is the difference between "Claude usually follows the instructions" and "Claude literally cannot skip Phase 4."
+UCAI's `/build` and `/ship` pipelines use a [ContingencyEngine](https://github.com/Joncik91/never-forget) for programmatic phase enforcement. This is the difference between "Claude usually follows the instructions" and "Claude literally cannot skip Phase 4 silently" — every gate check emits a verdict as JSON on stdout, which the model reads and must act on; there is no hook-side mechanism that blocks the tool call itself.
 
 **How it works:**
 
