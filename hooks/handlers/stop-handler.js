@@ -1,220 +1,20 @@
 #!/usr/bin/env node
 
 // Ucai Stop Hook
-// Prevents session exit when an /iterate loop is active
-// Feeds the task back as input to continue the loop
+// Drives the /ship pipeline by feeding the task back as input until phase 8
 
 const fs = require("fs")
 const path = require("path")
 
-const STATE_FILE = ".claude/ucai-iterate.local.md"
 const SHIP_STATE_FILE = ".claude/ucai-ship.local.md"
 const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.resolve(__dirname, "../..")
 
-// Check if iterate loop is active (priority: iterate > ship)
-if (!fs.existsSync(STATE_FILE)) {
-  // No iterate loop — check for ship pipeline
-  if (fs.existsSync(SHIP_STATE_FILE)) {
-    handleShipPipeline()
-  }
+// No ship pipeline active — nothing to do
+if (!fs.existsSync(SHIP_STATE_FILE)) {
   process.exit(0)
 }
 
-// Read hook input from stdin
-let input = ""
-process.stdin.setEncoding("utf8")
-process.stdin.on("data", (chunk) => (input += chunk))
-process.stdin.on("end", () => {
-  try {
-    run(input)
-  } catch (err) {
-    console.error("Ucai iterate: " + err.message)
-    cleanup()
-    process.exit(0)
-  }
-})
-
-function cleanup() {
-  try {
-    fs.unlinkSync(STATE_FILE)
-  } catch {}
-}
-
-function run(hookInput) {
-  const stateContent = fs.readFileSync(STATE_FILE, "utf8")
-
-  // Parse markdown frontmatter (YAML between ---)
-  const fmMatch = stateContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
-  if (!fmMatch) {
-    console.error("Ucai iterate: State file has no frontmatter")
-    cleanup()
-    process.exit(0)
-  }
-
-  const frontmatter = fmMatch[1]
-  const promptText = fmMatch[2].trim()
-
-  // Parse YAML fields
-  function getField(name) {
-    const m = frontmatter.match(new RegExp("^" + name + ":\\s*(.*)$", "m"))
-    return m ? m[1].trim() : null
-  }
-
-  const iteration = parseInt(getField("iteration"), 10)
-  const maxIterations = parseInt(getField("max_iterations"), 10)
-  let completionPromise = getField("completion_promise")
-
-  // Strip quotes from completion_promise
-  if (
-    completionPromise &&
-    completionPromise.startsWith('"') &&
-    completionPromise.endsWith('"')
-  ) {
-    completionPromise = completionPromise.slice(1, -1)
-  }
-
-  // Validate numeric fields
-  if (isNaN(iteration)) {
-    console.error(
-      "Ucai iterate: State file corrupted (iteration: '" +
-        getField("iteration") +
-        "')"
-    )
-    cleanup()
-    process.exit(0)
-  }
-
-  if (isNaN(maxIterations)) {
-    console.error(
-      "Ucai iterate: State file corrupted (max_iterations: '" +
-        getField("max_iterations") +
-        "')"
-    )
-    cleanup()
-    process.exit(0)
-  }
-
-  // Check if max iterations reached
-  if (maxIterations > 0 && iteration >= maxIterations) {
-    console.log(
-      "Ucai iterate: Max iterations (" + maxIterations + ") reached."
-    )
-    cleanup()
-    process.exit(0)
-  }
-
-  // Parse hook input for transcript path
-  let transcriptPath = null
-  try {
-    const hookData = JSON.parse(hookInput)
-    transcriptPath = hookData.transcript_path
-  } catch {
-    console.error("Ucai iterate: Failed to parse hook input")
-    cleanup()
-    process.exit(0)
-  }
-
-  // Check completion promise against transcript
-  if (
-    completionPromise &&
-    completionPromise !== "null" &&
-    transcriptPath &&
-    fs.existsSync(transcriptPath)
-  ) {
-    // Read only the tail of the transcript (last 64KB) instead of the full file
-    // to avoid loading multi-MB transcripts into memory for long sessions
-    const TAIL_SIZE = 65536
-    const stat = fs.statSync(transcriptPath)
-    const readStart = Math.max(0, stat.size - TAIL_SIZE)
-    const fd = fs.openSync(transcriptPath, "r")
-    const buf = Buffer.alloc(Math.min(TAIL_SIZE, stat.size))
-    fs.readSync(fd, buf, 0, buf.length, readStart)
-    fs.closeSync(fd)
-    const tail = buf.toString("utf8")
-    const lines = tail.split("\n")
-
-    // Find last assistant message (JSONL format)
-    let lastAssistantLine = null
-    for (let i = lines.length - 1; i >= 0; i--) {
-      if (lines[i].includes('"role":"assistant"')) {
-        lastAssistantLine = lines[i]
-        break
-      }
-    }
-
-    if (lastAssistantLine) {
-      try {
-        const msg = JSON.parse(lastAssistantLine)
-        const textParts = (msg.message?.content || [])
-          .filter((c) => c.type === "text")
-          .map((c) => c.text)
-        const lastOutput = textParts.join("\n")
-
-        // Check for <promise>...</promise> tag
-        const promiseMatch = lastOutput.match(
-          /<promise>([\s\S]*?)<\/promise>/
-        )
-        if (promiseMatch) {
-          const promiseText = promiseMatch[1].trim().replace(/\s+/g, " ")
-          if (promiseText === completionPromise) {
-            console.log(
-              "Ucai iterate: Completion promise met - <promise>" +
-                completionPromise +
-                "</promise>"
-            )
-            cleanup()
-            process.exit(0)
-          }
-        }
-      } catch {
-        // Failed to parse assistant message, continue loop
-      }
-    }
-  }
-
-  // Not complete - continue loop
-  const nextIteration = iteration + 1
-
-  if (!promptText) {
-    console.error("Ucai iterate: No task prompt found in state file")
-    cleanup()
-    process.exit(0)
-  }
-
-  // Update iteration counter in state file
-  const updatedContent = stateContent.replace(
-    /^iteration:\s*\d+/m,
-    "iteration: " + nextIteration
-  )
-  fs.writeFileSync(STATE_FILE, updatedContent)
-
-  // Build system message
-  let systemMsg
-  if (completionPromise && completionPromise !== "null") {
-    systemMsg =
-      "Ucai iteration " +
-      nextIteration +
-      "/" +
-      maxIterations +
-      " | To complete: output <promise>" +
-      completionPromise +
-      "</promise> (ONLY when TRUE)"
-  } else {
-    const maxDisplay = maxIterations > 0 ? maxIterations : "unlimited"
-    systemMsg =
-      "Ucai iteration " + nextIteration + " | Max: " + maxDisplay
-  }
-
-  // Block exit and feed task back
-  const result = JSON.stringify({
-    decision: "block",
-    reason: promptText,
-    systemMessage: systemMsg,
-  })
-
-  process.stdout.write(result)
-  process.exit(0)
-}
+handleShipPipeline()
 
 function handleShipPipeline() {
   try {
@@ -223,8 +23,7 @@ function handleShipPipeline() {
     const fmMatch = stateContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
     if (!fmMatch) {
       console.error("Ucai ship: State file has no frontmatter")
-      try { fs.unlinkSync(SHIP_STATE_FILE) } catch {}
-      return
+      process.exit(0)
     }
 
     const frontmatter = fmMatch[1]
@@ -240,14 +39,13 @@ function handleShipPipeline() {
 
     if (isNaN(phase)) {
       console.error("Ucai ship: State file corrupted (phase: '" + getShipField("phase") + "')")
-      try { fs.unlinkSync(SHIP_STATE_FILE) } catch {}
-      return
+      process.exit(0)
     }
 
     // Pipeline complete — allow exit
     if (phase >= 8) {
       try { fs.unlinkSync(SHIP_STATE_FILE) } catch {}
-      return
+      process.exit(0)
     }
 
     // Phase-aware continuation prompts
@@ -307,7 +105,9 @@ function handleShipPipeline() {
     process.stdout.write(result)
     process.exit(0)
   } catch (err) {
+    // Preserve state on error so the pipeline can be resumed/inspected —
+    // only the phase >= 8 completion path above deletes SHIP_STATE_FILE.
     console.error("Ucai ship: " + err.message)
-    try { fs.unlinkSync(SHIP_STATE_FILE) } catch {}
+    process.exit(0)
   }
 }

@@ -2,6 +2,14 @@
 
 All notable changes to Ucai are documented here.
 
+## [Unreleased]
+
+### Removed
+- **`/iterate` and `/cancel-iterate` commands**: deleted `commands/iterate.md`, `commands/cancel-iterate.md`, and `scripts/setup-iterate.js`. `/iterate` duplicated the vendor-native Stop-hook continuation loop and was never properly tested. All iterate-branch handling was stripped from `hooks/handlers/stop-handler.js`, `precompact-handler.js`, `session-end-handler.js`, `userpromptsubmit-handler.js`, and `sessionstart-handler.js` (including `getIterateStatus`) — these hooks now only drive the `/ship` pipeline. `.claude/ucai-iterate.local.md` is no longer read or written anywhere in the plugin.
+
+### Fixed
+- **`SHIP_STATE_FILE` no longer deleted on error paths** (`hooks/handlers/stop-handler.js`): the three error paths (missing frontmatter, corrupted `phase` field, and the outer catch) previously called `fs.unlinkSync(SHIP_STATE_FILE)` unconditionally, silently discarding in-flight `/ship` pipeline state on any transient failure. These paths now log to stderr and leave the state file on disk so the pipeline can be resumed or inspected. Only the legitimate completion path (`phase >= 8`) deletes the file, matching the preserve-and-report pattern already tested in `hooks/handlers/session-end-handler.js`.
+
 ## [v2.3.1] - 2026-05-04
 
 ### Fixed

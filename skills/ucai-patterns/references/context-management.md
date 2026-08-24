@@ -42,8 +42,8 @@ This is how Anthropic manages document processing skills that have 17k+ bytes of
 
 ### 4. File System State
 
-Use `.local.md` files in `.claude/` for persistent state between iterations and sessions:
-- `.claude/ucai-iterate.local.md` — iteration loop state
+Use `.local.md` files in `.claude/` for persistent state between phases and sessions:
+- `.claude/ucai-ship.local.md` — ship pipeline state
 - Files ending in `.local.md` are git-ignored by convention
 
 ### 5. Subagent Context Isolation

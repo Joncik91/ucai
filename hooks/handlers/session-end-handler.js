@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Ucai SessionEnd Hook
-// Cleans up stale iterate state file when the session terminates.
+// Cleans up stale ship state file when the session terminates.
 // Engine state files are only deleted when the pipeline has reached "complete"
 // state — mid-flight engines survive SessionEnd so gate enforcement is not lost
 // when a subagent stop or inactivity timeout fires before Phase 8 finishes.
@@ -9,7 +9,6 @@
 const fs = require("fs")
 const path = require("path")
 
-const STATE_FILE = ".claude/ucai-iterate.local.md"
 const SHIP_STATE_FILE = ".claude/ucai-ship.local.md"
 const FORMATTER_CACHE = ".claude/ucai-formatter-cache.local.json"
 const BUILD_ENGINE_FILE = ".claude/ucai-build-engine.local.json"
@@ -33,10 +32,6 @@ process.stdin.setEncoding("utf8")
 process.stdin.on("data", (chunk) => (input += chunk))
 process.stdin.on("end", () => {
   try {
-    if (fs.existsSync(STATE_FILE)) {
-      fs.unlinkSync(STATE_FILE)
-      console.error("Ucai: iterate state cleared on session end")
-    }
     if (fs.existsSync(SHIP_STATE_FILE)) {
       fs.unlinkSync(SHIP_STATE_FILE)
       console.error("Ucai: ship state cleared on session end")

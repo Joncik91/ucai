@@ -61,7 +61,7 @@ Frame as shared goals in collaborative sections.
 
 ```
 ✅ "We keep config files protected so no session breaks the plugin."
-✅ "Our codebase conventions make the iterate loop reliable."
+✅ "Our codebase conventions make the ship pipeline reliable."
 ❌ "You are required to follow the conventions."
 ```
 

@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
 // Ucai PreCompact Hook
-// Surfaces iterate loop state, task progress, and latest lesson
+// Surfaces ship pipeline state, task progress, and latest lesson
 // in systemMessage before context compaction runs
 
 const fs = require("fs")
 const path = require("path")
 
-const STATE_FILE = ".claude/ucai-iterate.local.md"
 const SHIP_STATE_FILE = ".claude/ucai-ship.local.md"
 const TODO_FILE = "tasks/todo.md"
 const LESSONS_FILE = "tasks/lessons.md"
@@ -18,54 +17,15 @@ process.stdin.setEncoding("utf8")
 process.stdin.on("data", (chunk) => (input += chunk))
 process.stdin.on("end", () => {
   try {
-    const hasIterate = fs.existsSync(STATE_FILE)
     const hasShip = fs.existsSync(SHIP_STATE_FILE)
     const hasTodo = fs.existsSync(TODO_FILE)
     const hasLessons = fs.existsSync(LESSONS_FILE)
 
-    if (!hasIterate && !hasShip && !hasTodo && !hasLessons) {
+    if (!hasShip && !hasTodo && !hasLessons) {
       process.exit(0)
     }
 
     const lines = []
-
-    // Iterate state
-    if (hasIterate) {
-      const stateContent = fs.readFileSync(STATE_FILE, "utf8")
-      const fmMatch = stateContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
-      if (fmMatch) {
-        const frontmatter = fmMatch[1]
-        const taskBody = fmMatch[2] ? fmMatch[2].trim() : ""
-
-        function getField(name) {
-          const m = frontmatter.match(new RegExp("^" + name + ":\\s*(.*)$", "m"))
-          return m ? m[1].trim() : null
-        }
-
-        const iteration = getField("iteration")
-        const maxIterations = getField("max_iterations")
-        let completionPromise = getField("completion_promise")
-        if (completionPromise && completionPromise.startsWith('"') && completionPromise.endsWith('"')) {
-          completionPromise = completionPromise.slice(1, -1)
-        }
-
-        const maxDisplay = maxIterations && maxIterations !== "0" ? maxIterations : "unlimited"
-
-        lines.push("[Ucai iterate loop — pre-compaction recovery context]")
-        lines.push("Iteration: " + iteration + "/" + maxDisplay)
-        if (completionPromise && completionPromise !== "null") {
-          lines.push("Completion promise: <promise>" + completionPromise + "</promise>")
-        }
-        lines.push("State file: .claude/ucai-iterate.local.md")
-        if (taskBody) {
-          lines.push("")
-          lines.push("Task:")
-          lines.push(taskBody)
-        }
-        lines.push("")
-        lines.push("Continue the iterate loop after compaction. The task and iteration state are preserved on disk.")
-      }
-    }
 
     // Ship pipeline state
     if (hasShip) {

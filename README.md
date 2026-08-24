@@ -60,7 +60,6 @@ Ucai is built from the inside out — using Claude Code's native systems exactly
 - Persistent task tracking (`tasks/todo.md`) and self-improvement loop (`tasks/lessons.md`)
 - **Test author/reviewer separation**: tests are written by a subagent (not the implementing agent) and reviewed by a different agent against 10 anti-gaming verdicts (mocked-away, orphan, tautological, semantic gaming, etc.) — same author/reviewer pattern already used for production code
 - **Failure-mode analysis on review**: every flagged issue is paired with a concrete failure scenario from the code, not theoretical risk
-- Native autonomous iteration (`/ucai:iterate`)
 - Multi-agent code review with lessons-aware pattern detection
 - Structured debugging with single approval gate and autonomous execution
 - Documentation generation with gotcha extraction from lessons
@@ -69,7 +68,7 @@ Ucai is built from the inside out — using Claude Code's native systems exactly
 - Infrastructure scaffolding (`/bootstrap`) — scaffold tests, linting, and CI for projects that lack them
 - PostToolUse auto-formatting — every file write runs through your project's formatter
 - Lessons consolidation — automatic cleanup when corrections exceed 100 entries
-- Hook lifecycle coverage — session context injection, task/lessons awareness, config guardrails, subagent quality gates, and iterate/ship state preservation across compaction
+- Hook lifecycle coverage — session context injection, task/lessons awareness, config guardrails, subagent quality gates, and ship state preservation across compaction
 - **Programmatic phase enforcement** — ContingencyEngine (never-forget) tracks 16 dependencies, 10 logic gates, and 128 shadow tasks per build. Gates mechanically block phase transitions until prerequisites are met. Full audit trail.
 - Built-in skills (backend, frontend, QA, DevOps, architecture, code review, and more)
 
@@ -115,9 +114,8 @@ All commands are namespaced under `ucai:`:
 /ucai:debug
 /ucai:docs
 /ucai:release
-/ucai:iterate
 /ucai:review
-/ucai:cancel-iterate
+/ucai:cancel-ship
 ```
 
 Run `/help` to see them listed.
@@ -131,12 +129,10 @@ Run `/help` to see them listed.
 | `/ucai:build` | 8-phase guided build with approval gates at each phase |
 | `/ucai:ship` | 9-phase autonomous spec-to-PR — zero gates, worktree isolation, auto-test, auto-fix, auto-PR |
 | `/ucai:bootstrap` | Scaffold test, lint, and CI infrastructure for projects that lack it |
-| `/ucai:iterate` | Autonomous loop: repeats a task until done or max iterations |
 | `/ucai:review` | Parallel agent code review — bugs, security, conventions, lessons-aware |
 | `/ucai:debug` | Structured debugging — single approval gate, autonomous fix, regression tests |
 | `/ucai:docs` | Generate README, API docs, deployment guides from codebase + specs + lessons |
 | `/ucai:release` | Changelog from git history, version bump, git tag |
-| `/ucai:cancel-iterate` | Stop an active iteration loop |
 | `/ucai:cancel-ship` | Stop an active ship pipeline |
 
 → **[Full workflow guide](docs/workflow-guide.md)** — getting started patterns, milestone-based builds, command deep-dives, context chain reference.
@@ -275,7 +271,6 @@ ucai/
 ├── agents/
 ├── hooks/
 ├── scripts/
-│   ├── setup-iterate.js
 │   ├── setup-ship.js
 │   ├── detect-infra.js
 │   ├── run-tests.js
@@ -311,7 +306,7 @@ Every orchestration component is a native Claude Code system. The enforcement la
 
 ## Security
 
-Ucai installs **8 lifecycle hooks** and **12 slash commands** into your
+Ucai installs **8 lifecycle hooks** and **10 slash commands** into your
 Claude Code session. That position has implications worth being explicit
 about.
 
@@ -329,8 +324,8 @@ about.
   and read [`commands/ship.md`](commands/ship.md) before pointing it at
   anything load-bearing. `/build` is the gated alternative when you want
   control.
-- **State files are local.** All Ucai state (`.claude/ucai-iterate.local.md`,
-  `.claude/ucai-ship.local.md`, the engine JSONs) is gitignored and
+- **State files are local.** All Ucai state (`.claude/ucai-ship.local.md`,
+  the engine JSONs) is gitignored and
   session-scoped. The `SessionEnd` hook deletes stale state on
   termination. Nothing leaves the machine.
 - **Zero external dependencies.** No `package.json`, no `node_modules`,

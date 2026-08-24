@@ -141,11 +141,9 @@ function testMalformedEngineJsonPreserved() {
 function testNonEngineStateFilesAlwaysDeleted() {
   const tmpDir = setupTempDir()
   try {
-    const iteratePath = path.join(tmpDir, ".claude", "ucai-iterate.local.md")
     const shipStatePath = path.join(tmpDir, ".claude", "ucai-ship.local.md")
     const formatterCachePath = path.join(tmpDir, ".claude", "ucai-formatter-cache.local.json")
 
-    fs.writeFileSync(iteratePath, "# Iterate state", "utf8")
     fs.writeFileSync(shipStatePath, "# Ship state", "utf8")
     fs.writeFileSync(formatterCachePath, "{}", "utf8")
 
@@ -157,7 +155,6 @@ function testNonEngineStateFilesAlwaysDeleted() {
     const result = runHandler(tmpDir)
 
     assert.strictEqual(result.status, 0, "Handler should exit cleanly")
-    assert.strictEqual(fs.existsSync(iteratePath), false, "Iterate state should be deleted")
     assert.strictEqual(fs.existsSync(shipStatePath), false, "Ship state should be deleted")
     assert.strictEqual(fs.existsSync(formatterCachePath), false, "Formatter cache should be deleted")
     assert.strictEqual(

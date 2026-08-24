@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
 // Ucai SessionStart Hook
-// Injects useful context: plugin status, git branch, iterate loop, CLAUDE.md, skills
+// Injects useful context: plugin status, git branch, ship pipeline, CLAUDE.md, skills
 
 const fs = require("fs")
 const path = require("path")
 const { execSync } = require("child_process")
 
-const STATE_FILE = ".claude/ucai-iterate.local.md"
 const SHIP_STATE_FILE = ".claude/ucai-ship.local.md"
 const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.resolve(__dirname, "../..")
 
@@ -17,30 +16,6 @@ function getGitBranch() {
       encoding: "utf8",
       stdio: ["pipe", "pipe", "pipe"],
     }).trim()
-  } catch {
-    return null
-  }
-}
-
-function getIterateStatus() {
-  if (!fs.existsSync(STATE_FILE)) return null
-
-  try {
-    const content = fs.readFileSync(STATE_FILE, "utf8")
-    const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
-    if (!fmMatch) return null
-
-    const frontmatter = fmMatch[1]
-    function getField(name) {
-      const m = frontmatter.match(new RegExp("^" + name + ":\\s*(.*)$", "m"))
-      return m ? m[1].trim() : null
-    }
-
-    const iteration = getField("iteration")
-    const maxIterations = getField("max_iterations")
-    const maxDisplay = maxIterations && maxIterations !== "0" ? maxIterations : "unlimited"
-
-    return "iteration " + iteration + "/" + maxDisplay
   } catch {
     return null
   }
@@ -312,17 +287,12 @@ function getEngineStatus() {
 
 function main() {
   const parts = [
-    "Ucai plugin is active. Use /init to analyze this project, /plan for specs, /build for features, /ship for autonomous spec-to-PR, /debug for bugs, /docs for documentation, /release for versioning, /iterate for autonomous iteration, /cancel-iterate to stop iterate, /cancel-ship to stop ship, /review for code review, or /bootstrap to scaffold test/lint/CI infrastructure."
+    "Ucai plugin is active. Use /init to analyze this project, /plan for specs, /build for features, /ship for autonomous spec-to-PR, /debug for bugs, /docs for documentation, /release for versioning, /cancel-ship to stop ship, /review for code review, or /bootstrap to scaffold test/lint/CI infrastructure."
   ]
 
   const branch = getGitBranch()
   if (branch) {
     parts.push("Git branch: " + branch)
-  }
-
-  const iterateStatus = getIterateStatus()
-  if (iterateStatus) {
-    parts.push("Iterate loop active: " + iterateStatus)
   }
 
   const shipStatus = getShipStatus()
