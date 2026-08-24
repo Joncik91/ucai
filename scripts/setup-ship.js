@@ -129,6 +129,9 @@ spec_source: "${specSource}"
 worktree: ${!noWorktree}
 no_pr: ${noPr}
 ci_watch: ${ciWatch}
+last_blocked_phase: -1
+last_blocked_milestone: null
+stall_count: 0
 ---
 
 ${spec}

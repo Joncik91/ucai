@@ -1,24 +1,22 @@
 #!/usr/bin/env node
 
 // Ucai UserPromptSubmit Hook
-// If an iterate loop is active, injects loop context into additionalContext
+// If a ship pipeline is active, injects pipeline context into additionalContext
 // If tasks/todo.md has unchecked items, injects active task
 
 const fs = require("fs")
 const path = require("path")
 
-const STATE_FILE = ".claude/ucai-iterate.local.md"
 const SHIP_STATE_FILE = ".claude/ucai-ship.local.md"
 const TODO_FILE = "tasks/todo.md"
 const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.resolve(__dirname, "../..")
 
-// Early exit before stdin if no iterate loop AND no ship AND no tasks AND no engine
-const hasIterate = fs.existsSync(STATE_FILE)
+// Early exit before stdin if no ship AND no tasks AND no engine
 const hasShip = fs.existsSync(SHIP_STATE_FILE)
 const hasTodo = fs.existsSync(TODO_FILE)
 const hasEngine = fs.existsSync(".claude/ucai-build-engine.local.json") || fs.existsSync(".claude/ucai-ship-engine.local.json")
 
-if (!hasIterate && !hasShip && !hasTodo && !hasEngine) {
+if (!hasShip && !hasTodo && !hasEngine) {
   process.exit(0)
 }
 
@@ -28,33 +26,6 @@ process.stdin.on("data", (chunk) => (input += chunk))
 process.stdin.on("end", () => {
   try {
     const parts = []
-
-    // Iterate loop context
-    if (hasIterate) {
-      const stateContent = fs.readFileSync(STATE_FILE, "utf8")
-      const fmMatch = stateContent.match(/^---\r?\n([\s\S]*?)\r?\n---/)
-      if (fmMatch) {
-        const frontmatter = fmMatch[1]
-        function getField(name) {
-          const m = frontmatter.match(new RegExp("^" + name + ":\\s*(.*)$", "m"))
-          return m ? m[1].trim() : null
-        }
-
-        const iteration = getField("iteration")
-        const maxIterations = getField("max_iterations")
-        let completionPromise = getField("completion_promise")
-        if (completionPromise && completionPromise.startsWith('"') && completionPromise.endsWith('"')) {
-          completionPromise = completionPromise.slice(1, -1)
-        }
-
-        const maxDisplay = maxIterations && maxIterations !== "0" ? maxIterations : "unlimited"
-        let msg = "Ucai iterate loop active (iteration " + iteration + "/" + maxDisplay + ")"
-        if (completionPromise && completionPromise !== "null") {
-          msg += " — complete by outputting <promise>" + completionPromise + "</promise>"
-        }
-        parts.push(msg)
-      }
-    }
 
     // Ship pipeline context
     if (hasShip) {

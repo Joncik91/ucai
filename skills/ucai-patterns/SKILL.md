@@ -108,7 +108,7 @@ Hooks are lifecycle event handlers. They are the primary extension point.
 **Key patterns**:
 - SessionStart: Inject project context
 - PreToolUse: Guardrails before writes/edits
-- Stop: Iteration control (block exit, feed task back)
+- Stop: Ship pipeline control (block exit, feed next phase back)
 - Exit code 2 blocks the operation
 
 For detailed patterns, see: `references/hook-patterns.md`
@@ -119,7 +119,7 @@ For detailed patterns, see: `references/hook-patterns.md`
 |---------|---------|
 | "The hook will handle this automatically" | Hooks run on lifecycle events. Read the handler to confirm scope. |
 | "Exit code 2 might be too aggressive" | Exit code 2 is the designed block mechanism. Use it when blocking is correct. |
-| "I'll skip the Stop hook iteration check" | The iterate loop depends on the Stop hook. Skipping breaks the loop. |
+| "I'll skip the Stop hook phase check" | The `/ship` pipeline depends on the Stop hook. Skipping breaks the pipeline. |
 
 ## Anti-Patterns
 

@@ -13,7 +13,6 @@ Every command reads and writes files in `.claude/` and `tasks/`. This is how sta
 ├── project.md                          ← written by /plan (no args)
 ├── requirements.md                     ← written by /plan (no args), updated by /build, /ship
 ├── ucai-ship.local.md                  ← ship pipeline state (gitignored)
-├── ucai-iterate.local.md               ← iterate loop state (gitignored)
 ├── ucai-formatter-cache.local.json     ← formatter detection cache (gitignored)
 ├── ucai-build-engine.local.json        ← build engine state (gitignored)
 ├── ucai-ship-engine.local.json         ← ship engine state (gitignored)
@@ -176,26 +175,7 @@ For brownfield (existing) projects, `/init` is the starting point — run it bef
 
 ---
 
-### 5. Iterate autonomously (optional)
-
-```
-/ucai:iterate Refactor the auth module --max-iterations 5
-/ucai:iterate Build a REST API --completion-promise 'All endpoints working' --max-iterations 15
-```
-
-Uses native Stop hooks. Claude works autonomously, reviews its own output, and continues until the completion promise is met or the iteration limit is reached.
-
-**Context compaction is handled automatically.** If the context window fills during a long iteration run, the PreCompact hook reads the iterate state, task progress, and latest lesson, then injects them into the compaction summary — so the loop continues without losing track of where it is.
-
-Stop at any time:
-
-```
-/ucai:cancel-iterate
-```
-
----
-
-### 6. Ship a feature autonomously
+### 5. Ship a feature autonomously
 
 ```
 /ucai:ship Add user authentication with JWT
@@ -243,7 +223,7 @@ Stop at any time: `/ucai:cancel-ship`
 
 ---
 
-### 7. Bootstrap infrastructure
+### 6. Bootstrap infrastructure
 
 ```
 /ucai:bootstrap
@@ -268,7 +248,7 @@ Creates one real example test (testing an actual function, not a dummy), adds sc
 
 ---
 
-### 8. Review code
+### 7. Review code
 
 ```
 /ucai:review
@@ -279,7 +259,7 @@ Parallel agents check for bugs, security issues, convention violations, and code
 
 ---
 
-### 9. Debug
+### 8. Debug
 
 ```
 /ucai:debug TypeError: Cannot read property 'map' of undefined
@@ -290,7 +270,7 @@ Parallel agents investigate in different directions — recent changes, executio
 
 ---
 
-### 10. Generate docs
+### 9. Generate docs
 
 ```
 /ucai:docs
@@ -304,7 +284,7 @@ Output goes to the project root or `docs/`, not `.claude/`.
 
 ---
 
-### 11. Ship a release
+### 10. Ship a release
 
 ```
 /ucai:release patch
@@ -336,12 +316,12 @@ Ucai learns from your corrections across sessions. This is not a gimmick — it'
 
 | Hook | What it injects |
 |------|----------------|
-| **SessionStart** | "Tasks: X/Y done" + "Lessons: N entries" (+ warning if >100) + ship/iterate status + **engine status** (tasks/deps complete, last blocked gate) |
+| **SessionStart** | "Tasks: X/Y done" + "Lessons: N entries" (+ warning if >100) + ship status + **engine status** (tasks/deps complete, last blocked gate) |
 | **PostToolUse** | Auto-formats files after Write/Edit (detects Prettier, Black, gofmt, rustfmt, etc.) |
-| **UserPromptSubmit** | "Active task: ..." + iterate/ship context + **engine status** (blocking deps) |
-| **Stop** | Blocks exit for active iterate/ship. **Enhanced with engine dep/gate context** for precise continuation prompts. |
-| **PreCompact** | Task progress + latest lesson + iterate/ship state + **engine state summary** (survives context compaction). Fires for ALL commands. |
-| **SessionEnd** | Cleans up iterate/ship state + formatter cache + **engine state files** |
+| **UserPromptSubmit** | "Active task: ..." + ship context + **engine status** (blocking deps) |
+| **Stop** | Blocks exit for an active ship pipeline. **Enhanced with engine dep/gate context** for precise continuation prompts. |
+| **PreCompact** | Task progress + latest lesson + ship state + **engine state summary** (survives context compaction). Fires for ALL commands. |
+| **SessionEnd** | Cleans up ship state + formatter cache + **engine state files** |
 
 ---
 
@@ -411,7 +391,6 @@ Ucai learns from your corrections across sessions. This is not a gimmick — it'
 | `requirements.md` | `/plan` | `/build`, `/release` | Feature backlog + build order |
 | `frds/<slug>.md` | `/plan <feature>` | `/build` | Per-feature requirements + architecture + milestones |
 | `CLAUDE.md` | `/init`, `/build` | All commands | Codebase conventions and project facts |
-| `ucai-iterate.local.md` | `/iterate` | Stop hook, SessionStart, PreCompact, UserPromptSubmit | Iterate loop state (gitignored) |
 | `ucai-ship.local.md` | `/ship` | Stop hook, SessionStart, PreCompact, UserPromptSubmit | Ship pipeline state — phase, milestone, fix attempts (gitignored) |
 | `ucai-formatter-cache.local.json` | PostToolUse hook | PostToolUse hook | Formatter detection cache (cleaned by SessionEnd) |
 | `ucai-build-engine.local.json` | `/build` Phase 1 | All hooks, engine scripts | ContingencyEngine state for /build (cleaned by SessionEnd) |
