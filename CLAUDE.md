@@ -80,8 +80,17 @@ node -e "const o=JSON.parse(process.argv[1]); if(!o.hookSpecificOutput) process.
 ### Ship Pipeline
 State file: `.claude/ucai-ship.local.md` (gitignored). YAML frontmatter holds
 `phase`, `milestone`, `fix_attempts`, `max_fix_attempts`, `test_cmd`, `lint_cmd`,
-`format_cmd`, `spec_source`, `worktree`, `no_pr`, `ci_watch`; body holds the spec.
+`format_cmd`, `spec_source`, `worktree`, `no_pr`, `ci_watch`, `last_blocked_phase`,
+`last_blocked_milestone`, `stall_count`; body holds the spec.
 Stop hook reads state → feeds phase-aware continuation → resumes pipeline.
+`phase` alone is not a complete progress signal: Phase 4 (Implement) loops over
+every milestone, with the Phase 5 verify loop nested inside, before `phase` is
+ever updated, so `last_blocked_phase`/`last_blocked_milestone`/`stall_count`
+let the Stop hook tell a healthy multi-phase run (`stop_hook_active: true`
+with `phase` or `milestone` advanced since the last block) from a stalled one
+(neither advanced). `stop_hook_active` only short-circuits the loop guard once
+`stall_count` exceeds a small budget of consecutive no-progress Stops, not on
+the first one.
 
 ### Context Chain
 - `/plan` → `.claude/project.md` + `.claude/requirements.md` (with build order)
