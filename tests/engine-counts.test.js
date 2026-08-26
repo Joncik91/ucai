@@ -32,6 +32,14 @@
 // fixed phrase. "shadow tasks" there means the total reaction count
 // (project.tasks[].reactions.length summed), not project.tasks.length.
 //
+// docs/workflow-guide.md:138 documents the build engine's counts a fourth
+// way, in a table cell with no script filename ("**Initializes enforcement
+// engine** (N deps, N gates)") — parsed by extractAnchoredShortFormCounts,
+// anchored on the fixed phrase "Initializes enforcement engine" (distinct
+// from the unrelated, count-free "Initialize enforcement engine." bullet
+// elsewhere in the same file), reusing the same short-form "deps"/"gates"
+// token pattern as extractDocumentedCounts.
+//
 // Plain node script, no test runner. Uses only per-test temp directories
 // (via os.tmpdir/path.join) and never touches the repo working tree.
 // Portable: no shell-outs, no symlinks, no mode bits -- must run unchanged
@@ -49,6 +57,7 @@ const SETUP_BUILD_ENGINE = path.join(SCRIPTS, "setup-build-engine.js")
 const SETUP_SHIP_ENGINE = path.join(SCRIPTS, "setup-ship-engine.js")
 const README_PATH = path.join(REPO_ROOT, "README.md")
 const CLAUDE_MD_PATH = path.join(REPO_ROOT, "CLAUDE.md")
+const WORKFLOW_GUIDE_PATH = path.join(REPO_ROOT, "docs", "workflow-guide.md")
 
 function makeTmpDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "ucai-engine-counts-test-"))
@@ -169,6 +178,39 @@ function extractContingencyEngineSummaryCounts(content) {
   return { line, counts }
 }
 
+// docs/workflow-guide.md:138 documents the build engine's counts a fourth
+// way: a table cell with no script filename, anchored on the fixed phrase
+// `anchor`, using the same short-form "N deps"/"N gates" token pattern as
+// extractDocumentedCounts. Kept as its own function (rather than reusing
+// extractDocumentedCounts) because the match key here is a fixed anchor
+// phrase, not a script filename.
+function extractAnchoredShortFormCounts(content, anchor, expectedMetrics) {
+  const pattern = /(\d+)\s+(deps|tasks|gates)\b/g
+
+  const lines = content.split("\n").filter((line) => line.includes(anchor))
+  assert.strictEqual(
+    lines.length,
+    1,
+    `expected exactly one line containing "${anchor}", found ${lines.length}`
+  )
+  const line = lines[0]
+
+  const counts = {}
+  let match
+  while ((match = pattern.exec(line)) !== null) {
+    counts[match[2]] = Number(match[1])
+  }
+
+  for (const metric of expectedMetrics) {
+    assert.ok(
+      metric in counts,
+      `line "${line.trim()}" contains "${anchor}" but does not document a "${metric}" count`
+    )
+  }
+
+  return { line, counts }
+}
+
 let passed = 0
 let failed = 0
 
@@ -207,6 +249,7 @@ function main() {
 
   const readme = fs.readFileSync(README_PATH, "utf8")
   const claudeMd = fs.readFileSync(CLAUDE_MD_PATH, "utf8")
+  const workflowGuide = fs.readFileSync(WORKFLOW_GUIDE_PATH, "utf8")
 
   // --- build engine ---
   const buildTmpDir = makeTmpDir()
@@ -251,6 +294,19 @@ function main() {
     "README.md",
     readmeContingencySummary.line,
     readmeContingencySummary.counts,
+    buildGenerated
+  )
+
+  const workflowGuideBuild = extractAnchoredShortFormCounts(
+    workflowGuide,
+    "Initializes enforcement engine",
+    ["deps", "gates"]
+  )
+  assertDocMatchesGenerated(
+    "docs/workflow-guide.md enforcement engine line",
+    "docs/workflow-guide.md",
+    workflowGuideBuild.line,
+    workflowGuideBuild.counts,
     buildGenerated
   )
 

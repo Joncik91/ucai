@@ -135,7 +135,7 @@ Example FRD structure:
 
 | Phase | What happens |
 |-------|-------------|
-| **1 Understand** | Loads specs, writes `tasks/todo.md`, loads `tasks/lessons.md` for relevant patterns. Checks build order dependencies. **Initializes enforcement engine** (16 deps, 10 gates). |
+| **1 Understand** | Loads specs, writes `tasks/todo.md`, loads `tasks/lessons.md` for relevant patterns. Checks build order dependencies. **Initializes enforcement engine** (18 deps, 11 gates). |
 | **2 Explore** | **Gate check** → parallel agents map the codebase — similar features, architecture, testing patterns |
 | **3 Clarify** | **Gate check** → resolves ambiguities before any design. You answer questions. |
 | **4 Design** | **Gate check** (blocked until codebase mapped + clarifications resolved) → architect agents generate 3 approaches. You choose. |
