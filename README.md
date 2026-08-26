@@ -69,7 +69,7 @@ Ucai is built from the inside out — using Claude Code's native systems exactly
 - PostToolUse auto-formatting — every file write runs through your project's formatter
 - Lessons consolidation — automatic cleanup when corrections exceed 100 entries
 - Hook lifecycle coverage — session context injection, task/lessons awareness, config guardrails, subagent quality gates, and ship state preservation across compaction
-- **Programmatic phase enforcement** — ContingencyEngine (never-forget) tracks 16 dependencies, 10 logic gates, and 128 shadow tasks per build. Gates mechanically block phase transitions until prerequisites are met. Full audit trail.
+- **Programmatic phase enforcement** — ContingencyEngine (never-forget) tracks 18 dependencies, 11 logic gates, and 144 shadow tasks per build. Gates mechanically block phase transitions until prerequisites are met. Full audit trail.
 - Built-in skills (backend, frontend, QA, DevOps, architecture, code review, and more)
 
 All using native Claude Code commands, agents, hooks, and skills — extended with a programmatic enforcement engine.
@@ -278,7 +278,7 @@ ucai/
 │   ├── engine-factory.js       ← ContingencyEngine create/load/save
 │   ├── engine-gates.js         ← evaluate logic gates per phase
 │   ├── update-engine.js        ← update dependency/task state
-│   ├── setup-build-engine.js   ← init build engine (16 deps, 10 gates)
+│   ├── setup-build-engine.js   ← init build engine (18 deps, 11 gates)
 │   ├── setup-ship-engine.js    ← init ship engine (13 deps, 7 gates)
 │   └── lib/never-forget/       ← vendored enforcement engine (zero deps)
 ├── skills/

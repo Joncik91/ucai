@@ -161,7 +161,7 @@ All files `kebab-case`. Exception: `SKILL.md` is uppercase.
 | `scripts/engine-factory.js` | ContingencyEngine create/load/save/delete + readEngineStatus |
 | `scripts/engine-gates.js` | CLI: evaluate logic gates for a target task |
 | `scripts/update-engine.js` | CLI: update dependency/task state with proof |
-| `scripts/setup-build-engine.js` | Create build engine with 17 deps, 8 tasks, 11 gates |
+| `scripts/setup-build-engine.js` | Create build engine with 18 deps, 8 tasks, 11 gates |
 | `scripts/setup-ship-engine.js` | Create ship engine with 13 deps, 9 tasks, 7 gates |
 | `scripts/lib/never-forget/` | Vendored never-forget dist (ESM, imported via dynamic import) |
 | `hooks/handlers/posttooluse-format-handler.js` | Auto-format after Write/Edit (caches detection) |
