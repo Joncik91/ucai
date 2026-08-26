@@ -40,6 +40,14 @@
 // elsewhere in the same file), reusing the same short-form "deps"/"gates"
 // token pattern as extractDocumentedCounts.
 //
+// docs/workflow-guide.md:197 documents the ship engine's counts a fifth
+// way, again with no script filename ("Each phase runs a gate check (N
+// deps, N gates)") — also parsed by extractAnchoredShortFormCounts, anchored
+// on the fixed phrase "Each phase runs a gate check". Both anchored
+// short-form sites live in the same file, so each is checked against the
+// engine it actually documents (build for :138, ship for :197) rather than
+// assumed from position.
+//
 // Plain node script, no test runner. Uses only per-test temp directories
 // (via os.tmpdir/path.join) and never touches the repo working tree.
 // Portable: no shell-outs, no symlinks, no mode bits -- must run unchanged
@@ -339,6 +347,19 @@ function main() {
 
   const claudeMdShip = extractDocumentedCounts(claudeMd, "setup-ship-engine.js", ["deps", "tasks", "gates"])
   assertDocMatchesGenerated("CLAUDE.md ship engine line", "CLAUDE.md", claudeMdShip.line, claudeMdShip.counts, shipGenerated)
+
+  const workflowGuideShip = extractAnchoredShortFormCounts(
+    workflowGuide,
+    "Each phase runs a gate check",
+    ["deps", "gates"]
+  )
+  assertDocMatchesGenerated(
+    "docs/workflow-guide.md phase gate check line",
+    "docs/workflow-guide.md",
+    workflowGuideShip.line,
+    workflowGuideShip.counts,
+    shipGenerated
+  )
 
   console.log(`\n${passed} passed, ${failed} failed`)
   process.exit(failed > 0 ? 1 : 0)
