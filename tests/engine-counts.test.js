@@ -19,7 +19,18 @@
 // but changing a documented number does. This also lets one parser handle
 // both documented shapes: README.md's tree-diagram comment (only deps and
 // gates are mentioned there) and CLAUDE.md's table row (deps, tasks, and
-// gates are all mentioned).
+// gates are all mentioned). Each call site declares which metrics it
+// expects to find on its line; if the label is reworded into a form the
+// parser doesn't recognize (e.g. "dependencies"/"logic gates") or an
+// earlier plain-usage mention of the filename has no numbers on it, the
+// test fails loudly instead of silently registering zero assertions.
+//
+// README.md:72 documents the build engine's counts a third way, in prose
+// with no script filename ("ContingencyEngine (never-forget) tracks N
+// dependencies, N logic gates, and N shadow tasks per build") — parsed
+// separately by extractContingencyEngineSummaryCounts, anchored on that
+// fixed phrase. "shadow tasks" there means the total reaction count
+// (project.tasks[].reactions.length summed), not project.tasks.length.
 //
 // Plain node script, no test runner. Uses only per-test temp directories
 // (via os.tmpdir/path.join) and never touches the repo working tree.
@@ -49,8 +60,11 @@ function removeTmpDir(dir) {
 
 // Run a setup script as a subprocess in tmpDir, the way a user invoking it
 // from a project root would, then read back the engine state file it wrote
-// to <tmpDir>/.claude and count dependencies/tasks/logicGates directly from
-// the generated snapshot.
+// to <tmpDir>/.claude and count dependencies/tasks/logicGates/shadow
+// reactions directly from the generated snapshot. "shadowReactions" is the
+// total count of reactions (original + auto-generated shadow reactions)
+// across all tasks -- this is the number setup-build-engine.js itself
+// prints as "Shadow Reactions" and README.md:72 documents as "shadow tasks".
 function generateEngineCounts(scriptPath, args, tmpDir, engineFileName) {
   execFileSync(process.execPath, [scriptPath, ...args], {
     cwd: tmpDir,
@@ -65,24 +79,93 @@ function generateEngineCounts(scriptPath, args, tmpDir, engineFileName) {
     deps: project.dependencies.length,
     tasks: project.tasks.length,
     gates: project.logicGates.length,
+    shadowReactions: project.tasks.reduce((sum, t) => sum + t.reactions.length, 0),
   }
 }
 
-// Find every line in `content` that mentions `scriptFilename`, then extract
-// the integers that precede "deps", "tasks", or "gates" on that line. Which
-// of the three metrics appear varies by doc (README's tree diagram only
-// mentions deps and gates; CLAUDE.md's table row mentions all three), so
-// the return value only contains the keys actually found.
-function extractDocumentedCounts(content, scriptFilename) {
-  const line = content.split("\n").find((l) => l.includes(scriptFilename))
-  assert.ok(line, `no line mentioning "${scriptFilename}" found`)
-
-  const counts = {}
+// Find the line in `content` that documents counts for `scriptFilename`,
+// then extract the integers that precede "deps", "tasks", or "gates" on
+// that line. Which of the three metrics appear varies by doc (README's
+// tree diagram only mentions deps and gates; CLAUDE.md's table row mentions
+// all three), so callers pass `expectedMetrics` -- the exact set that MUST
+// be present on the documenting line -- and this function asserts every one
+// of them was actually found, rather than silently returning an empty
+// object when the label is reworded (e.g. "dependencies"/"logic gates")
+// or a count is dropped from the prose.
+//
+// A candidate line must mention the script filename AND carry at least one
+// recognized count token. Requiring both stops an earlier plain-usage
+// mention of the filename (with no numbers on the line, e.g. a `node
+// scripts/setup-build-engine.js --feature "..."` example) from stealing the
+// match away from the real documentation line.
+function extractDocumentedCounts(content, scriptFilename, expectedMetrics) {
   const pattern = /(\d+)\s+(deps|tasks|gates)\b/g
+
+  const matches = content
+    .split("\n")
+    .filter((line) => line.includes(scriptFilename))
+    .map((line) => {
+      const counts = {}
+      pattern.lastIndex = 0
+      let match
+      while ((match = pattern.exec(line)) !== null) {
+        counts[match[2]] = Number(match[1])
+      }
+      return { line, counts }
+    })
+    .filter(({ counts }) => Object.keys(counts).length > 0)
+
+  assert.strictEqual(
+    matches.length,
+    1,
+    `expected exactly one line mentioning "${scriptFilename}" with documented deps/tasks/gates counts, ` +
+      `found ${matches.length} (a reworded label with no recognized count token, or a stray plain-usage ` +
+      `mention of the filename, can cause this)`
+  )
+
+  const { line, counts } = matches[0]
+
+  for (const metric of expectedMetrics) {
+    assert.ok(
+      metric in counts,
+      `line "${line.trim()}" mentions "${scriptFilename}" but does not document a "${metric}" count`
+    )
+  }
+
+  return { line, counts }
+}
+
+// README.md:72 documents the build engine's counts in a third format,
+// unrelated to any setup script filename: prose naming "dependencies",
+// "logic gates", and "shadow tasks" (the latter being the total reaction
+// count, i.e. generated.shadowReactions, not generated.tasks). Located by
+// its fixed anchor phrase "ContingencyEngine (never-forget) tracks" so that
+// rewording elsewhere in the surrounding bullet list doesn't affect it.
+function extractContingencyEngineSummaryCounts(content) {
+  const anchor = "ContingencyEngine (never-forget) tracks"
+  const lines = content.split("\n").filter((line) => line.includes(anchor))
+  assert.strictEqual(
+    lines.length,
+    1,
+    `expected exactly one line containing "${anchor}", found ${lines.length}`
+  )
+  const line = lines[0]
+
+  const pattern = /(\d+)\s+(dependencies|logic gates|shadow tasks)\b/g
+  const counts = {}
   let match
   while ((match = pattern.exec(line)) !== null) {
-    counts[match[2]] = Number(match[1])
+    const key = { dependencies: "deps", "logic gates": "gates", "shadow tasks": "shadowReactions" }[match[2]]
+    counts[key] = Number(match[1])
   }
+
+  for (const metric of ["deps", "gates", "shadowReactions"]) {
+    assert.ok(
+      metric in counts,
+      `line "${line.trim()}" does not document a "${metric}" count`
+    )
+  }
+
   return { line, counts }
 }
 
@@ -102,11 +185,11 @@ function ok(label, fn) {
 }
 
 // Assert that every metric documented on `line` (a subset of deps/tasks/
-// gates) matches the corresponding value in `generated`, naming the doc
-// file, the metric, and both the documented and generated numbers on
-// failure.
+// gates/shadowReactions) matches the corresponding value in `generated`,
+// naming the doc file, the metric, and both the documented and generated
+// numbers on failure.
 function assertDocMatchesGenerated(docLabel, docPath, line, documented, generated) {
-  for (const metric of ["deps", "tasks", "gates"]) {
+  for (const metric of ["deps", "tasks", "gates", "shadowReactions"]) {
     if (!(metric in documented)) continue
     ok(`${docLabel}: documented ${metric} count matches generated count`, () => {
       assert.strictEqual(
@@ -148,12 +231,28 @@ function main() {
   ok("build engine: generated gates count matches ground truth", () => {
     assert.strictEqual(buildGenerated.gates, 11, `expected 11 gates, got ${buildGenerated.gates}`)
   })
+  ok("build engine: generated shadow reactions count matches ground truth", () => {
+    assert.strictEqual(
+      buildGenerated.shadowReactions,
+      144,
+      `expected 144 shadow reactions, got ${buildGenerated.shadowReactions}`
+    )
+  })
 
-  const readmeBuild = extractDocumentedCounts(readme, "setup-build-engine.js")
+  const readmeBuild = extractDocumentedCounts(readme, "setup-build-engine.js", ["deps", "gates"])
   assertDocMatchesGenerated("README.md build engine line", "README.md", readmeBuild.line, readmeBuild.counts, buildGenerated)
 
-  const claudeMdBuild = extractDocumentedCounts(claudeMd, "setup-build-engine.js")
+  const claudeMdBuild = extractDocumentedCounts(claudeMd, "setup-build-engine.js", ["deps", "tasks", "gates"])
   assertDocMatchesGenerated("CLAUDE.md build engine line", "CLAUDE.md", claudeMdBuild.line, claudeMdBuild.counts, buildGenerated)
+
+  const readmeContingencySummary = extractContingencyEngineSummaryCounts(readme)
+  assertDocMatchesGenerated(
+    "README.md ContingencyEngine summary line",
+    "README.md",
+    readmeContingencySummary.line,
+    readmeContingencySummary.counts,
+    buildGenerated
+  )
 
   // --- ship engine ---
   const shipTmpDir = makeTmpDir()
@@ -179,10 +278,10 @@ function main() {
     assert.strictEqual(shipGenerated.gates, 7, `expected 7 gates, got ${shipGenerated.gates}`)
   })
 
-  const readmeShip = extractDocumentedCounts(readme, "setup-ship-engine.js")
+  const readmeShip = extractDocumentedCounts(readme, "setup-ship-engine.js", ["deps", "gates"])
   assertDocMatchesGenerated("README.md ship engine line", "README.md", readmeShip.line, readmeShip.counts, shipGenerated)
 
-  const claudeMdShip = extractDocumentedCounts(claudeMd, "setup-ship-engine.js")
+  const claudeMdShip = extractDocumentedCounts(claudeMd, "setup-ship-engine.js", ["deps", "tasks", "gates"])
   assertDocMatchesGenerated("CLAUDE.md ship engine line", "CLAUDE.md", claudeMdShip.line, claudeMdShip.counts, shipGenerated)
 
   console.log(`\n${passed} passed, ${failed} failed`)
