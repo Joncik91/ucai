@@ -278,7 +278,7 @@ ucai/
 │   ├── engine-factory.js       ← ContingencyEngine create/load/save
 │   ├── engine-gates.js         ← evaluate logic gates per phase
 │   ├── update-engine.js        ← update dependency/task state
-│   ├── setup-build-engine.js   ← init build engine (16 deps, 10 gates)
+│   ├── setup-build-engine.js   ← init build engine (18 deps, 11 gates)
 │   ├── setup-ship-engine.js    ← init ship engine (13 deps, 7 gates)
 │   └── lib/never-forget/       ← vendored enforcement engine (zero deps)
 ├── skills/
